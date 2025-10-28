@@ -1,0 +1,10 @@
+echo "[husky] Running lint-staged (ESLint & Prettier on staged files)"
+pnpm lint-staged || exit 1
+
+echo "[husky] Typechecking"
+pnpm typecheck || exit 1
+
+echo "[husky] Building project"
+pnpm build || exit 1
+
+echo "[husky] All checks passed. Proceeding with commit."

@@ -1,0 +1,18 @@
+{
+  "app": {
+    "title": "Mi Aplicación"
+  },
+  "unauthorized": {
+    "title": "Página pública",
+    "description": "Esta sección es accesible sin autenticación."
+  },
+  "authorized": {
+    "title": "Panel",
+    "description": "Esta es un área protegida."
+  },
+  "actions": {
+    "goHome": "Volver al inicio",
+    "enterDashboard": "Entrar al Panel",
+    "logout": "Cerrar sesión"
+  }
+}

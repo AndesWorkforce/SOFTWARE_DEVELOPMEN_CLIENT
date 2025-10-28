@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+echo "[husky] Validating commit message with commitlint"
+pnpm commitlint --edit "$1" || exit 1

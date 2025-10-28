@@ -1,0 +1,18 @@
+{
+  "app": {
+    "title": "My App"
+  },
+  "unauthorized": {
+    "title": "Public page",
+    "description": "This section is accessible without authentication."
+  },
+  "authorized": {
+    "title": "Dashboard",
+    "description": "This is a protected area."
+  },
+  "actions": {
+    "goHome": "Go Home",
+    "enterDashboard": "Enter Dashboard",
+    "logout": "Log out"
+  }
+}
