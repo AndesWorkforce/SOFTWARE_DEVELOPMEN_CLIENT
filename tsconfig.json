@@ -13,24 +13,28 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@andes/api/*": ["packages/api/*"],
+      "@andes/store/*": ["packages/store/*"],
+      "@andes/design-system/*": ["packages/design-system/*"],
+      "@andes/internationalization/*": ["packages/internationalization/*"],
+      "@andes/setup/*": ["packages/setup/*"]
     }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
     "**/*.mts",
-    ".next\\dev/types/**/*.ts",
-    ".next\\dev/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
