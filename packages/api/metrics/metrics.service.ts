@@ -94,10 +94,22 @@ export class MetricsService {
     // Calculate total sessions
     const totalSessions = sessionMap.size + agentSessionMap.size;
 
-    // Calculate active sessions (sessions from last 24 hours)
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const activeSessions =
-      events.filter((e) => new Date(e.timestamp) > oneDayAgo).length > 0 ? 1 : 0;
+    // Calculate active sessions (sessions with events in last 30 minutes)
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    const recentSessionIds = new Set<string>();
+
+    events.forEach((event) => {
+      if (new Date(event.timestamp) > thirtyMinutesAgo) {
+        if (event.session_id) {
+          recentSessionIds.add(event.session_id);
+        }
+        if (event.agent_session_id) {
+          recentSessionIds.add(event.agent_session_id);
+        }
+      }
+    });
+
+    const activeSessions = recentSessionIds.size;
 
     // Calculate total events
     const totalEvents = events.length;
@@ -108,16 +120,11 @@ export class MetricsService {
 
     events.forEach((event) => {
       const idleTime = event.payload.IdleTime || 0;
-      const keyboardInactive = event.payload.Keyboard?.InactiveTime || 0;
-      const mouseInactive = event.payload.Mouse?.InactiveTime || 0;
+      const intervalTime = 15; // segundos del intervalo del agente
+      const activeTime = Math.max(0, intervalTime - idleTime);
 
-      // If there's idle time, count it
       totalIdleTime += idleTime;
-
-      // Active time is when there's no idle time
-      if (idleTime === 0 && (keyboardInactive === 0 || mouseInactive === 0)) {
-        totalActiveTime += 1; // Each event represents a time unit
-      }
+      totalActiveTime += activeTime;
     });
 
     const totalTime = totalActiveTime + totalIdleTime;
@@ -159,11 +166,12 @@ export class MetricsService {
         const current = productivityByDay.get(date) || { active: 0, idle: 0 };
         const idleTime = event.payload.IdleTime || 0;
 
-        if (idleTime > 0) {
-          current.idle += idleTime;
-        } else {
-          current.active += 1;
-        }
+        // Calcular tiempo activo basado en el intervalo del agente (15 segundos)
+        const intervalTime = 15; // segundos del intervalo del agente
+        const activeTime = Math.max(0, intervalTime - idleTime);
+
+        current.active += activeTime;
+        current.idle += idleTime;
 
         productivityByDay.set(date, current);
       }
@@ -174,11 +182,12 @@ export class MetricsService {
       const total = data.active + data.idle;
       const productivity = total > 0 ? Math.round((data.active / total) * 100) : 0;
 
+      // Convertir segundos a minutos para mostrar
       return {
         date,
         productivity,
-        activeTime: data.active,
-        idleTime: data.idle,
+        activeTime: Math.round(data.active / 60), // convertir a minutos
+        idleTime: Math.round(data.idle / 60), // convertir a minutos
       };
     });
 
@@ -203,11 +212,11 @@ export class MetricsService {
 
       sessionEvents.forEach((event) => {
         const idleTime = event.payload.IdleTime || 0;
-        if (idleTime > 0) {
-          sessionIdleTime += idleTime;
-        } else {
-          sessionActiveTime += 1;
-        }
+        const intervalTime = 15; // segundos del intervalo del agente
+        const activeTime = Math.max(0, intervalTime - idleTime);
+
+        sessionActiveTime += activeTime;
+        sessionIdleTime += idleTime;
       });
 
       const sessionTotal = sessionActiveTime + sessionIdleTime;

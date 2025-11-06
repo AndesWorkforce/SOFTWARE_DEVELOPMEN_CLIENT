@@ -8,13 +8,11 @@ import {
   type HeartbeatMetrics,
   type EventData,
 } from "@/packages/api/metrics/metrics.service";
-import { useAuthStore } from "@/packages/store";
 
 export default function ClientPage() {
   const t = useTranslations();
   const router = useRouter();
   const locale = useLocale();
-  const { token } = useAuthStore();
   const [metrics, setMetrics] = useState<HeartbeatMetrics | null>(null);
   const [recentHeartbeats, setRecentHeartbeats] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,18 +20,14 @@ export default function ClientPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check authentication
-    if (!token) {
-      router.push(`/${locale}/login`);
-      return;
-    }
-    loadMetrics(true); // Initial load with loading state
+    // Initial load
+    loadMetrics(true);
 
     // Auto-refresh every 10 seconds (without loading state)
     const interval = setInterval(() => loadMetrics(false), 10000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, locale, router]);
+  }, []);
 
   const loadMetrics = async (showLoading: boolean = false) => {
     try {
