@@ -14,5 +14,96 @@
     "goHome": "Volver al inicio",
     "enterDashboard": "Entrar al Panel",
     "logout": "Cerrar sesión"
+  },
+  "register": {
+    "title": "Crear Cuenta",
+    "subtitle": "Registra tu información para comenzar",
+    "fullName": "Nombre Completo",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "role": "Rol",
+    "submit": "Registrarse",
+    "submitting": "Registrando...",
+    "alreadyHaveAccount": "¿Ya tienes cuenta?",
+    "login": "Inicia sesión",
+    "namePlaceholder": "Juan Pérez",
+    "emailPlaceholder": "usuario@ejemplo.com",
+    "passwordPlaceholder": "Contraseña123!",
+    "roles": {
+      "visualizer": "Visualizador",
+      "teamAdmin": "Administrador de Equipo",
+      "superadmin": "Super Administrador"
+    }
+  },
+  "login": {
+    "title": "Iniciar Sesión",
+    "subtitle": "¡Bienvenido de nuevo! Ingresa tus credenciales",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "submit": "Iniciar Sesión",
+    "submitting": "Iniciando sesión...",
+    "noAccount": "¿No tienes cuenta?",
+    "register": "Regístrate",
+    "emailPlaceholder": "usuario@ejemplo.com",
+    "passwordPlaceholder": "Contraseña123!",
+    "forgotPassword": "¿Olvidaste tu contraseña?"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "subtitle": "Monitorea tu productividad y métricas de actividad",
+    "metrics": {
+      "totalSessions": "Sesiones Totales",
+      "activeSessions": "Sesiones Activas",
+      "totalEvents": "Eventos Totales",
+      "avgProductivity": "Productividad Prom."
+    },
+    "subtitles": {
+      "allTime": "Todo el tiempo",
+      "currentlyRunning": "En ejecución",
+      "heartbeatsCaptured": "Latidos capturados",
+      "last7Days": "Últimos 7 días"
+    },
+    "charts": {
+      "topApplications": "Aplicaciones Principales",
+      "topApplicationsSubtitle": "Aplicaciones más usadas esta semana",
+      "recentHeartbeats": "Heartbeats Recientes",
+      "recentHeartbeatsSubtitle": "Última actividad de los agentes",
+      "productivityTrend": "Tendencia de Productividad",
+      "productivityTrendSubtitle": "Últimos 7 días",
+      "recentSessions": "Sesiones Recientes",
+      "recentSessionsSubtitle": "Tus últimas sesiones de actividad"
+    },
+    "table": {
+      "sessionId": "ID de Sesión",
+      "startTime": "Hora de Inicio",
+      "duration": "Duración",
+      "events": "Eventos",
+      "productivity": "Productividad",
+      "status": "Estado"
+    },
+    "status": {
+      "active": "Activa",
+      "completed": "Completada"
+    },
+    "empty": {
+      "noApplicationData": "Sin Datos de Aplicaciones",
+      "noApplicationDataDesc": "Los datos de uso de aplicaciones aparecerán aquí una vez que los agentes comiencen a rastrear la actividad.",
+      "noHeartbeats": "Sin Heartbeats",
+      "noHeartbeatsDesc": "Los datos de heartbeat aparecerán aquí una vez que los agentes comiencen a enviar eventos.",
+      "noProductivityData": "No hay datos de productividad disponibles",
+      "noSessionData": "No hay datos de sesiones disponibles"
+    },
+    "errors": {
+      "connectionIssue": "Problema de Conexión",
+      "noDataAvailable": "Sin Datos Disponibles",
+      "cannotConnect": "No se puede conectar al servidor. Por favor asegúrate de que la API esté ejecutándose.",
+      "noDataYet": "Aún no hay datos disponibles. Las métricas aparecerán una vez que los agentes comiencen a enviar latidos.",
+      "loadError": "Error al cargar las métricas. Por favor intenta de nuevo más tarde.",
+      "authError": "Autenticación requerida. Redirigiendo al inicio de sesión..."
+    },
+    "time": {
+      "active": "Activo",
+      "idle": "Inactivo"
+    }
   }
 }

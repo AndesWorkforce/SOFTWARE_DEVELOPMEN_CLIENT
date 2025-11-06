@@ -14,5 +14,96 @@
     "goHome": "Go Home",
     "enterDashboard": "Enter Dashboard",
     "logout": "Log out"
+  },
+  "register": {
+    "title": "Create Account",
+    "subtitle": "Register your information to get started",
+    "fullName": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "submit": "Register",
+    "submitting": "Registering...",
+    "alreadyHaveAccount": "Already have an account?",
+    "login": "Sign in",
+    "namePlaceholder": "John Doe",
+    "emailPlaceholder": "user@example.com",
+    "passwordPlaceholder": "Password123!",
+    "roles": {
+      "visualizer": "Visualizer",
+      "teamAdmin": "Team Admin",
+      "superadmin": "Super Admin"
+    }
+  },
+  "login": {
+    "title": "Sign In",
+    "subtitle": "Welcome back! Please enter your credentials",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign In",
+    "submitting": "Signing in...",
+    "noAccount": "Don't have an account?",
+    "register": "Sign up",
+    "emailPlaceholder": "user@example.com",
+    "passwordPlaceholder": "Password123!",
+    "forgotPassword": "Forgot your password?"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Monitor your productivity and activity metrics",
+    "metrics": {
+      "totalSessions": "Total Sessions",
+      "activeSessions": "Active Sessions",
+      "totalEvents": "Total Events",
+      "avgProductivity": "Avg. Productivity"
+    },
+    "subtitles": {
+      "allTime": "All time",
+      "currentlyRunning": "Currently running",
+      "heartbeatsCaptured": "Heartbeats captured",
+      "last7Days": "Last 7 days"
+    },
+    "charts": {
+      "topApplications": "Top Applications",
+      "topApplicationsSubtitle": "Most used applications this week",
+      "recentHeartbeats": "Recent Heartbeats",
+      "recentHeartbeatsSubtitle": "Latest activity from agents",
+      "productivityTrend": "Productivity Trend",
+      "productivityTrendSubtitle": "Last 7 days",
+      "recentSessions": "Recent Sessions",
+      "recentSessionsSubtitle": "Your latest activity sessions"
+    },
+    "table": {
+      "sessionId": "Session ID",
+      "startTime": "Start Time",
+      "duration": "Duration",
+      "events": "Events",
+      "productivity": "Productivity",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "completed": "Completed"
+    },
+    "empty": {
+      "noApplicationData": "No Application Data",
+      "noApplicationDataDesc": "Application usage data will appear here once agents start tracking activity.",
+      "noHeartbeats": "No Heartbeats",
+      "noHeartbeatsDesc": "Heartbeat data will appear here once agents start sending events.",
+      "noProductivityData": "No productivity data available",
+      "noSessionData": "No session data available"
+    },
+    "errors": {
+      "connectionIssue": "Connection Issue",
+      "noDataAvailable": "No Data Available",
+      "cannotConnect": "Cannot connect to the server. Please make sure the API is running.",
+      "noDataYet": "No data available yet. Metrics will appear once agents start sending heartbeats.",
+      "loadError": "Error loading metrics. Please try again later.",
+      "authError": "Authentication required. Redirecting to login..."
+    },
+    "time": {
+      "active": "Active",
+      "idle": "Idle"
+    }
   }
 }
