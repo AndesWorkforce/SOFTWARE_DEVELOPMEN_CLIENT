@@ -8,6 +8,8 @@ import { setAuthToken } from "../setup/axios.config";
 export type AuthState = {
   token: string | null;
   user: { id: string; email: string; role?: string } | null;
+  _hasHydrated: boolean;
+  setHasHydrated: (state: boolean) => void;
   setToken: (token: string | null) => void;
   setUser: (user: AuthState["user"]) => void;
   logout: () => void;
@@ -21,6 +23,8 @@ const authCreator: StateCreator<AuthState> = (
 ) => ({
   token: null,
   user: null,
+  _hasHydrated: false,
+  setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
   setToken: (token: string | null) => {
     setAuthToken(token); // Sync with axios
     set({ token });
@@ -40,6 +44,8 @@ export const useAuthStore = create<AuthState>()(
       if (state?.token) {
         setAuthToken(state.token);
       }
+      // Mark as hydrated
+      state?.setHasHydrated(true);
     },
   }),
 );
