@@ -1,27 +1,120 @@
 "use client";
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { CustomLink } from "@/packages/design-system/components/CustomLink";
+import { authService } from "@/packages/api/auth/auth.service";
+import { useAuthStore } from "@/packages/store";
+import { Button, Input } from "@/packages/design-system";
 
 export default function LoginPage() {
-  const t = useTranslations();
+  const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations();
+  const { setToken, setUser } = useAuthStore();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await authService.login(formData.email, formData.password);
+
+      // Store token and user data
+      setToken(response.accessToken);
+      setUser(response.user);
+
+      // Store session cookie
+      document.cookie = `session=${response.accessToken}; path=/; max-age=3600`;
+
+      // Redirect to dashboard based on user role
+      const dashboardRoute =
+        response.user.role === "Superadmin"
+          ? "super-admin"
+          : response.user.role === "TeamAdmin"
+            ? "admin"
+            : "client";
+
+      router.push(`/${locale}/app/${dashboardRoute}`);
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || "Invalid email or password");
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   return (
-    <main className="flex min-h-screen items-center justify-center p-8">
-      <div className="max-w-md w-full space-y-6 text-center">
-        <h1 className="text-2xl font-semibold">{t("unauthorized.title")}</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">{t("unauthorized.description")}</p>
-        <div className="flex items-center justify-center gap-4">
-          <Link className="underline" href={`/${locale}`}>
-            {t("actions.goHome")}
-          </Link>
-          <CustomLink
-            className="rounded bg-black text-white px-4 py-2"
-            href={`/${locale}/dashboard`}
-          >
-            {t("actions.enterDashboard")}
-          </CustomLink>
+    <main className="flex min-h-screen items-center justify-center p-8 bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("login.title")}</h1>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{t("login.subtitle")}</p>
         </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md"
+        >
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              label={t("login.email")}
+              placeholder={t("login.emailPlaceholder")}
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              label={t("login.password")}
+              placeholder={t("login.passwordPlaceholder")}
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="flex items-center justify-end">
+            <button
+              type="button"
+              className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
+            >
+              {t("login.forgotPassword")}
+            </button>
+          </div>
+
+          <Button type="submit" loading={loading} fullWidth variant="primary">
+            {t("login.submit")}
+          </Button>
+        </form>
       </div>
     </main>
   );

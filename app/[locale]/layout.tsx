@@ -1,22 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import "../globals.css";
+import { LanguageSwitcher } from "@/packages/design-system";
 
 export const metadata: Metadata = {
   title: "Andes Client",
   description: "Internationalized app with authorized/unauthorized routes",
 };
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export function generateStaticParams() {
   // Pre-render locale roots for SSG
@@ -36,12 +25,14 @@ export default async function LocaleLayout({
     .default;
 
   return (
-    <html lang={locale}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <div className="relative min-h-screen">
+        {/* Language Switcher - Fixed in top-right corner */}
+        <div className="fixed top-4 right-4 z-50">
+          <LanguageSwitcher />
+        </div>
+        {children}
+      </div>
+    </NextIntlClientProvider>
   );
 }
