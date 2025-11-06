@@ -52,8 +52,8 @@
     "title": "Panel de Control",
     "subtitle": "Monitorea tu productividad y métricas de actividad",
     "metrics": {
-      "totalSessions": "Sesiones Totales",
-      "activeSessions": "Sesiones Activas",
+      "totalSessions": "Agentes totales",
+      "activeSessions": "Sesiones de agente",
       "totalEvents": "Eventos Totales",
       "avgProductivity": "Productividad Prom."
     },

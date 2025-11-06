@@ -41,3 +41,7 @@ package-lock.json
 *.tsbuildinfo
 next-env.d.ts
 pnpm-lock.yaml/
+
+# documentation 
+PR_AUTH_PERSISTENCE.md
+README_BACKUP.md
