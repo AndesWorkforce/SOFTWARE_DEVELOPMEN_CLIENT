@@ -52,8 +52,8 @@
     "title": "Dashboard",
     "subtitle": "Monitor your productivity and activity metrics",
     "metrics": {
-      "totalSessions": "Total Sessions",
-      "activeSessions": "Active Sessions",
+      "totalSessions": "Total agents",
+      "activeSessions": "Sessions of agent",
       "totalEvents": "Total Events",
       "avgProductivity": "Avg. Productivity"
     },
