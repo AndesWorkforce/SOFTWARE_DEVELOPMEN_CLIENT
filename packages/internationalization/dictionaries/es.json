@@ -105,5 +105,39 @@
       "active": "Activo",
       "idle": "Inactivo"
     }
+  },
+  "reports": {
+    "title": "Reportes",
+    "exportPdf": "Exportar PDF",
+    "applyFilters": "Aplicar Filtros",
+    "cleanFilters": "Limpiar Filtros",
+    "date": "Fecha",
+    "user": "Usuario",
+    "country": "País",
+    "client": "Cliente",
+    "team": "Equipo",
+    "jobPosition": "Cargo",
+    "activityToday": "Actividad de Hoy",
+    "loading": "Cargando...",
+    "noActivities": "No se encontraron actividades",
+    "table": {
+      "user": "Usuario",
+      "jobPosition": "Cargo",
+      "client": "Cliente",
+      "team": "Equipo",
+      "country": "País",
+      "time": "Tiempo",
+      "activity": "Actividad",
+      "activityDetail": "Detalle de Actividad"
+    },
+    "viewDetail": "Ver"
+  },
+  "sidebar": {
+    "dashboard": "Panel de Control",
+    "reports": "Reportes",
+    "contractors": "Contratistas",
+    "clients": "Clientes",
+    "roles": "Roles",
+    "logout": "Cerrar Sesión"
   }
 }

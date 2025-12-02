@@ -1,10 +1,12 @@
 export default function SuperAdminPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center p-8">
-      <div className="max-w-md w-full space-y-6 text-center">
-        <h1 className="text-2xl font-semibold">Super Admin Dashboard</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">Welcome to the Super Admin Dashboard.</p>
+    <div className="p-8">
+      <div className="max-w-full">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Welcome to the Super Admin Dashboard. Select an option from the sidebar to get started.
+        </p>
       </div>
-    </main>
+    </div>
   );
 }

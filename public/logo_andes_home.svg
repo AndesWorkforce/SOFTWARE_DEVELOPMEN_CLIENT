@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <!-- ANDES text -->
+  <text x="10" y="35" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#00A3E0">ANDES</text>
+  
+  <!-- WORKFORCE text -->
+  <text x="10" y="52" font-family="Arial, sans-serif" font-size="12" font-weight="600" fill="#333333" letter-spacing="2">WORKFORCE</text>
+  
+  <!-- Mountain/Triangle icon element -->
+  <path d="M 5 15 L 12 5 L 19 15 Z" fill="#00A3E0"/>
+</svg>

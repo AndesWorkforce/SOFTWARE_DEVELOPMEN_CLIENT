@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { LanguageSwitcher } from "@/packages/design-system";
 
 export const metadata: Metadata = {
   title: "Andes Client",
@@ -26,13 +25,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <div className="relative min-h-screen">
-        {/* Language Switcher - Fixed in top-right corner */}
-        <div className="fixed top-4 right-4 z-50">
-          <LanguageSwitcher />
-        </div>
-        {children}
-      </div>
+      {children}
     </NextIntlClientProvider>
   );
 }
