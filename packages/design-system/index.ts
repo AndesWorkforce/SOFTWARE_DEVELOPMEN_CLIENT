@@ -6,3 +6,8 @@ export * from "./components/Select";
 export * from "./components/MetricCard";
 export * from "./components/ChartCard";
 export * from "./components/EmptyState";
+export * from "./components/DateRangePicker";
+export * from "./components/Accordion";
+export * from "./components/ActivityCard";
+export * from "./components/Sidebar";
+export * from "./components/Header";

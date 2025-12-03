@@ -16,13 +16,11 @@ export function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-1">
+    <div className="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 p-1">
       <button
         onClick={() => switchLocale("en")}
         className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-          currentLocale === "en"
-            ? "bg-blue-600 text-white"
-            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          currentLocale === "en" ? "bg-blue-600 text-white" : "text-gray-700 hover:bg-gray-100"
         }`}
         aria-label="Switch to English"
       >
@@ -31,9 +29,7 @@ export function LanguageSwitcher() {
       <button
         onClick={() => switchLocale("es")}
         className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-          currentLocale === "es"
-            ? "bg-blue-600 text-white"
-            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          currentLocale === "es" ? "bg-blue-600 text-white" : "text-gray-700 hover:bg-gray-100"
         }`}
         aria-label="Cambiar a Español"
       >

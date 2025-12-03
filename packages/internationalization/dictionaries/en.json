@@ -105,5 +105,39 @@
       "active": "Active",
       "idle": "Idle"
     }
+  },
+  "reports": {
+    "title": "Reports",
+    "exportPdf": "Export PDF",
+    "applyFilters": "Apply Filters",
+    "cleanFilters": "Clean Filters",
+    "date": "Date",
+    "user": "User",
+    "country": "Country",
+    "client": "Client",
+    "team": "Team",
+    "jobPosition": "Job Position",
+    "activityToday": "Activity Today",
+    "loading": "Loading...",
+    "noActivities": "No activities found",
+    "table": {
+      "user": "User",
+      "jobPosition": "Job Position",
+      "client": "Client",
+      "team": "Team",
+      "country": "Country",
+      "time": "Time",
+      "activity": "Activity",
+      "activityDetail": "Activity Detail"
+    },
+    "viewDetail": "View"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "reports": "Reports",
+    "contractors": "Contractors",
+    "clients": "Clients",
+    "roles": "Roles",
+    "logout": "Logout"
   }
 }
