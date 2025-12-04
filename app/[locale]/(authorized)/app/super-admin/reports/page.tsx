@@ -9,6 +9,7 @@ import {
   type UserActivity,
   type FilterOptions,
 } from "@/packages/api/reports/reports.service";
+import { adtService, type RealtimeMetrics } from "@/packages/api/adt/adt.service";
 
 export default function ReportsPage() {
   const t = useTranslations("reports");
@@ -29,26 +30,70 @@ export default function ReportsPage() {
     loadData();
   }, []);
 
+  /**
+   * Convierte segundos a formato HH:MM:SS
+   */
+  const formatSecondsToTime = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  /**
+   * Transforma RealtimeMetrics a UserActivity
+   * Usa los campos enriquecidos que vienen del backend (contractor_name, client_name, team_name, etc.)
+   */
+  const transformRealtimeMetricsToUserActivity = (metrics: RealtimeMetrics[]): UserActivity[] => {
+    return metrics.map((metric) => ({
+      id: metric.contractor_id,
+      user: {
+        id: metric.contractor_id,
+        name: metric.contractor_name || `Contractor ${metric.contractor_id.slice(-6)}`,
+        email: metric.contractor_email || `${metric.contractor_id}@example.com`,
+      },
+      jobPosition: metric.job_position || "N/A",
+      client: {
+        id: metric.client_id || "unknown",
+        name: metric.client_name || "N/A",
+      },
+      team: {
+        id: metric.team_id || "unknown",
+        name: metric.team_name || "N/A",
+      },
+      country: metric.country || "N/A",
+      timeWorked: formatSecondsToTime(metric.total_session_time_seconds),
+      activityPercentage: Math.round(metric.active_percentage),
+      date: metric.workday,
+      details: [], // Puede obtenerse de app_usage y browser_usage si es necesario en el futuro
+    }));
+  };
+
   const loadData = async () => {
     try {
       setLoading(true);
 
-      // Using mock data for now - replace with real API calls when backend is ready
-      const mockActivities = reportsService.getMockActivityData();
+      // Obtener la fecha del filtro o usar hoy
+      const workday = filters.dateRange?.start || new Date().toISOString().split("T")[0];
+
+      // Obtener métricas en tiempo real desde ADT
+      const realtimeMetrics = await adtService.getAllRealtimeMetrics(workday);
+
+      // Transformar a formato UserActivity
+      const transformedActivities = transformRealtimeMetricsToUserActivity(realtimeMetrics);
+
+      // Obtener opciones de filtros (mantener mock por ahora hasta que el backend las provea)
       const mockOptions = reportsService.getMockFilterOptions();
 
-      setActivities(mockActivities);
+      setActivities(transformedActivities);
       setFilterOptions(mockOptions);
-
-      // TODO: Replace with real API calls
-      // const [activitiesData, optionsData] = await Promise.all([
-      //   reportsService.getActivityToday(filters),
-      //   reportsService.getFilterOptions(),
-      // ]);
-      // setActivities(activitiesData);
-      // setFilterOptions(optionsData);
     } catch (error) {
       console.error("Error loading reports data:", error);
+      // En caso de error, usar datos mock como fallback
+      const mockActivities = reportsService.getMockActivityData();
+      const mockOptions = reportsService.getMockFilterOptions();
+      setActivities(mockActivities);
+      setFilterOptions(mockOptions);
     } finally {
       setLoading(false);
     }
@@ -66,7 +111,17 @@ export default function ReportsPage() {
       ...prev,
       dateRange: { start, end },
     }));
+    // Recargar datos cuando cambia la fecha
+    // Nota: Se recargará automáticamente cuando se actualice el filtro
   };
+
+  // Recargar datos cuando cambian los filtros de fecha
+  useEffect(() => {
+    if (filters.dateRange?.start) {
+      loadData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.dateRange?.start, filters.dateRange?.end]);
 
   const handleClearFilters = () => {
     setFilters({

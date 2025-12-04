@@ -2,15 +2,17 @@
 
 import { create, type StateCreator } from "zustand";
 import { persist } from "zustand/middleware";
-import { setAuthToken } from "../setup/axios.config";
+import { setAuthToken, setRefreshToken } from "../setup/axios.config";
 
 // Example: minimal auth store. Extend with slices as needed.
 export type AuthState = {
   token: string | null;
+  refreshToken: string | null;
   user: { id: string; email: string; role?: string } | null;
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
   setToken: (token: string | null) => void;
+  setRefreshToken: (refreshToken: string | null) => void;
   setUser: (user: AuthState["user"]) => void;
   logout: () => void;
 };
@@ -22,6 +24,7 @@ const authCreator: StateCreator<AuthState> = (
   ) => void,
 ) => ({
   token: null,
+  refreshToken: null,
   user: null,
   _hasHydrated: false,
   setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
@@ -29,10 +32,15 @@ const authCreator: StateCreator<AuthState> = (
     setAuthToken(token); // Sync with axios
     set({ token });
   },
+  setRefreshToken: (refreshTokenValue: string | null) => {
+    setRefreshToken(refreshTokenValue); // Sync with axios config
+    set({ refreshToken: refreshTokenValue });
+  },
   setUser: (user: AuthState["user"]) => set({ user }),
   logout: () => {
     setAuthToken(null); // Clear axios token
-    set({ token: null, user: null });
+    setRefreshToken(null); // Clear refresh token
+    set({ token: null, refreshToken: null, user: null });
   },
 });
 
@@ -43,6 +51,9 @@ export const useAuthStore = create<AuthState>()(
       // Sync token with axios when rehydrating from storage
       if (state?.token) {
         setAuthToken(state.token);
+      }
+      if (state?.refreshToken) {
+        setRefreshToken(state.refreshToken);
       }
       // Mark as hydrated
       state?.setHasHydrated(true);
