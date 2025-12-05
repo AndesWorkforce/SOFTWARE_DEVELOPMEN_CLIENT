@@ -119,7 +119,7 @@
     "jobPosition": "Cargo",
     "activityToday": "Lista de Actividades",
     "loading": "Cargando...",
-    "noActividades": "No se encontraron actividades",
+    "noActivities": "No se encontraron actividades",
     "table": {
       "user": "Usuario",
       "jobPosition": "Cargo",
