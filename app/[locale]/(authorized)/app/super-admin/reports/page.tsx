@@ -4,12 +4,12 @@ import { useTranslations } from "next-intl";
 import { Button, Select, DateRangePicker, Header } from "@/packages/design-system";
 import { Download, ListFilter, List, ChevronDown, ChevronRight } from "lucide-react";
 import {
-  reportsService,
   type ReportFilters,
   type UserActivity,
   type FilterOptions,
 } from "@/packages/api/reports/reports.service";
 import { adtService, type RealtimeMetrics } from "@/packages/api/adt/adt.service";
+import type { AxiosError } from "axios";
 
 export default function ReportsPage() {
   const t = useTranslations("reports");
@@ -25,10 +25,6 @@ export default function ReportsPage() {
     },
   });
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   /**
    * Convierte segundos a formato HH:MM:SS
@@ -69,31 +65,287 @@ export default function ReportsPage() {
     }));
   };
 
+  /**
+   * Extrae las opciones de filtros de los datos de métricas
+   */
+  const extractFilterOptionsFromMetrics = (metrics: RealtimeMetrics[]): FilterOptions => {
+    const usersMap = new Map<string, string>();
+    const countriesSet = new Set<string>();
+    const clientsMap = new Map<string, string>();
+    const teamsMap = new Map<string, string>();
+    const jobPositionsSet = new Set<string>();
+
+    metrics.forEach((metric) => {
+      // Users
+      if (metric.contractor_name && metric.contractor_id) {
+        usersMap.set(metric.contractor_id, metric.contractor_name);
+      }
+
+      // Countries
+      if (metric.country) {
+        countriesSet.add(metric.country);
+      }
+
+      // Clients
+      if (metric.client_id && metric.client_name) {
+        clientsMap.set(metric.client_id, metric.client_name);
+      }
+
+      // Teams
+      if (metric.team_id && metric.team_name) {
+        teamsMap.set(metric.team_id, metric.team_name);
+      }
+
+      // Job Positions
+      if (metric.job_position) {
+        jobPositionsSet.add(metric.job_position);
+      }
+    });
+
+    return {
+      users: Array.from(usersMap.entries()).map(([value, label]) => ({ value, label })),
+      countries: Array.from(countriesSet)
+        .sort()
+        .map((country) => ({ value: country, label: country })),
+      clients: Array.from(clientsMap.entries())
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([value, label]) => ({ value, label })),
+      teams: Array.from(teamsMap.entries())
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([value, label]) => ({ value, label })),
+      jobPositions: Array.from(jobPositionsSet)
+        .sort()
+        .map((position) => ({ value: position, label: position })),
+    };
+  };
+
+  // Cargar opciones de filtros una vez al inicio (sin filtros para obtener todas las opciones)
+  useEffect(() => {
+    loadFilterOptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Recargar datos cuando cambian los filtros
+  useEffect(() => {
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    filters.dateRange?.start,
+    filters.dateRange?.end,
+    filters.userId,
+    filters.country,
+    filters.clientId,
+    filters.teamId,
+    filters.jobPosition,
+  ]);
+
+  /**
+   * Carga las opciones de filtros obteniendo todos los datos sin filtros
+   * Intenta obtener datos de un rango amplio para tener más opciones disponibles
+   */
+  const loadFilterOptions = async () => {
+    try {
+      console.log("🔄 Cargando opciones de filtros...");
+
+      // Intentar obtener datos de un rango amplio (últimos 30 días) para tener más opciones
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+
+      const fromDate = thirtyDaysAgo.toISOString().split("T")[0];
+      const toDate = today.toISOString().split("T")[0];
+
+      console.log(`📅 Buscando datos desde ${fromDate} hasta ${toDate}`);
+
+      const allMetrics = await adtService.getAllRealtimeMetrics({
+        from: fromDate,
+        to: toDate,
+        useCache: true,
+      });
+
+      console.log(`📊 Métricas obtenidas para filtros: ${allMetrics?.length || 0} registros`);
+
+      // Extraer opciones de filtros
+      const extractedOptions = extractFilterOptionsFromMetrics(allMetrics || []);
+
+      console.log("📋 Opciones extraídas:", {
+        users: extractedOptions.users.length,
+        countries: extractedOptions.countries.length,
+        clients: extractedOptions.clients.length,
+        teams: extractedOptions.teams.length,
+        jobPositions: extractedOptions.jobPositions.length,
+      });
+
+      // Establecer las opciones extraídas
+      setFilterOptions(extractedOptions);
+    } catch (error) {
+      console.error("❌ Error loading filter options:", error);
+      // En caso de error, establecer opciones vacías
+      setFilterOptions({
+        users: [],
+        countries: [],
+        clients: [],
+        teams: [],
+        jobPositions: [],
+      });
+    }
+  };
+
   const loadData = async () => {
     try {
       setLoading(true);
 
-      // Obtener la fecha del filtro o usar hoy
-      const workday = filters.dateRange?.start || new Date().toISOString().split("T")[0];
+      // Construir filtros para la API ADT
+      const adtFilters: {
+        from?: string;
+        to?: string;
+        name?: string;
+        country?: string;
+        client_id?: string;
+        team_id?: string;
+        job_position?: string;
+        useCache?: boolean;
+      } = {
+        useCache: true,
+      };
 
-      // Obtener métricas en tiempo real desde ADT
-      const realtimeMetrics = await adtService.getAllRealtimeMetrics(workday);
+      // Si hay rango de fechas, usar from/to
+      if (filters.dateRange?.start && filters.dateRange?.end) {
+        adtFilters.from = filters.dateRange.start;
+        adtFilters.to = filters.dateRange.end;
+      } else if (filters.dateRange?.start) {
+        // Si solo hay fecha de inicio, usar como rango de un día
+        adtFilters.from = filters.dateRange.start;
+        adtFilters.to = filters.dateRange.start;
+      } else {
+        // Si no hay fecha establecida, usar la fecha de hoy como rango de un día
+        const today = new Date().toISOString().split("T")[0];
+        adtFilters.from = today;
+        adtFilters.to = today;
+      }
+
+      // Aplicar filtros adicionales (solo si tienen valor)
+      if (filters.userId && filters.userId.trim() !== "") {
+        // Buscar el nombre del usuario por ID desde las opciones de filtros
+        const selectedUser = filterOptions?.users.find((u) => u.value === filters.userId);
+        if (selectedUser && selectedUser.label) {
+          adtFilters.name = selectedUser.label.trim();
+        }
+      }
+
+      if (filters.country && filters.country.trim() !== "") {
+        adtFilters.country = filters.country.trim();
+      }
+
+      if (filters.clientId && filters.clientId.trim() !== "") {
+        adtFilters.client_id = filters.clientId.trim();
+      }
+
+      if (filters.teamId && filters.teamId.trim() !== "") {
+        adtFilters.team_id = filters.teamId.trim();
+      }
+
+      if (filters.jobPosition && filters.jobPosition.trim() !== "") {
+        adtFilters.job_position = filters.jobPosition.trim();
+      }
+
+      // Log para depuración
+      console.log("🔍 ADT Filters:", adtFilters);
+
+      // Obtener métricas en tiempo real desde ADT con filtros
+      let realtimeMetrics: RealtimeMetrics[];
+      try {
+        realtimeMetrics = await adtService.getAllRealtimeMetrics(adtFilters);
+      } catch (error) {
+        const apiError = error as AxiosError;
+        console.error("❌ Error en la llamada a la API:", apiError);
+        console.error("❌ Detalles del error:", {
+          message: apiError?.message,
+          response: apiError?.response?.data,
+          status: apiError?.response?.status,
+          statusText: apiError?.response?.statusText,
+        });
+        throw apiError;
+      }
+
+      // Log para depuración
+      console.log("📊 Realtime Metrics recibidos:", realtimeMetrics?.length || 0, "registros");
+      console.log("📊 Tipo de datos:", typeof realtimeMetrics, Array.isArray(realtimeMetrics));
+      if (realtimeMetrics && realtimeMetrics.length > 0) {
+        console.log("📋 Primer registro de ejemplo:", realtimeMetrics[0]);
+      } else {
+        console.warn("⚠️ No se recibieron métricas o el array está vacío");
+      }
+
+      // Verificar que realtimeMetrics sea un array válido
+      if (!Array.isArray(realtimeMetrics)) {
+        console.error("⚠️ La respuesta no es un array:", realtimeMetrics);
+        setActivities([]);
+        return;
+      }
 
       // Transformar a formato UserActivity
       const transformedActivities = transformRealtimeMetricsToUserActivity(realtimeMetrics);
 
-      // Obtener opciones de filtros (mantener mock por ahora hasta que el backend las provea)
-      const mockOptions = reportsService.getMockFilterOptions();
+      console.log("✅ Actividades transformadas:", transformedActivities?.length || 0, "registros");
+      if (transformedActivities && transformedActivities.length > 0) {
+        console.log("📋 Primera actividad transformada:", transformedActivities[0]);
+      }
+
+      // Actualizar las opciones de filtros con los datos actuales
+      // Esto asegura que siempre tengamos opciones disponibles basadas en los datos mostrados
+      if (realtimeMetrics && realtimeMetrics.length > 0) {
+        const currentOptions = extractFilterOptionsFromMetrics(realtimeMetrics);
+
+        // Combinar con las opciones existentes para no perder opciones de otros rangos de fechas
+        setFilterOptions((prevOptions) => {
+          if (!prevOptions) {
+            return currentOptions;
+          }
+
+          // Combinar usuarios (evitar duplicados)
+          const usersMap = new Map(prevOptions.users.map((u) => [u.value, u]));
+          currentOptions.users.forEach((u) => usersMap.set(u.value, u));
+
+          // Combinar países
+          const countriesSet = new Set([
+            ...prevOptions.countries.map((c) => c.value),
+            ...currentOptions.countries.map((c) => c.value),
+          ]);
+
+          // Combinar clientes
+          const clientsMap = new Map(prevOptions.clients.map((c) => [c.value, c]));
+          currentOptions.clients.forEach((c) => clientsMap.set(c.value, c));
+
+          // Combinar equipos
+          const teamsMap = new Map(prevOptions.teams.map((t) => [t.value, t]));
+          currentOptions.teams.forEach((t) => teamsMap.set(t.value, t));
+
+          // Combinar cargos
+          const jobPositionsSet = new Set([
+            ...prevOptions.jobPositions.map((j) => j.value),
+            ...currentOptions.jobPositions.map((j) => j.value),
+          ]);
+
+          return {
+            users: Array.from(usersMap.values()).sort((a, b) => a.label.localeCompare(b.label)),
+            countries: Array.from(countriesSet)
+              .sort()
+              .map((c) => ({ value: c, label: c })),
+            clients: Array.from(clientsMap.values()).sort((a, b) => a.label.localeCompare(b.label)),
+            teams: Array.from(teamsMap.values()).sort((a, b) => a.label.localeCompare(b.label)),
+            jobPositions: Array.from(jobPositionsSet)
+              .sort()
+              .map((j) => ({ value: j, label: j })),
+          };
+        });
+      }
 
       setActivities(transformedActivities);
-      setFilterOptions(mockOptions);
     } catch (error) {
-      console.error("Error loading reports data:", error);
-      // En caso de error, usar datos mock como fallback
-      const mockActivities = reportsService.getMockActivityData();
-      const mockOptions = reportsService.getMockFilterOptions();
-      setActivities(mockActivities);
-      setFilterOptions(mockOptions);
+      console.error("❌ Error loading reports data:", error);
+      // En caso de error, establecer actividades vacías
+      setActivities([]);
     } finally {
       setLoading(false);
     }
@@ -104,6 +356,7 @@ export default function ReportsPage() {
       ...prev,
       [key]: value,
     }));
+    // Los datos se recargarán automáticamente por el useEffect que observa los filtros
   };
 
   const handleDateRangeChange = (start: string, end: string) => {
@@ -111,17 +364,8 @@ export default function ReportsPage() {
       ...prev,
       dateRange: { start, end },
     }));
-    // Recargar datos cuando cambia la fecha
-    // Nota: Se recargará automáticamente cuando se actualice el filtro
+    // Los datos se recargarán automáticamente por el useEffect que observa los filtros
   };
-
-  // Recargar datos cuando cambian los filtros de fecha
-  useEffect(() => {
-    if (filters.dateRange?.start) {
-      loadData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.dateRange?.start, filters.dateRange?.end]);
 
   const handleClearFilters = () => {
     setFilters({
