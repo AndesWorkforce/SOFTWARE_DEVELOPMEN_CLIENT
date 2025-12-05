@@ -11,3 +11,5 @@ export * from "./components/Accordion";
 export * from "./components/ActivityCard";
 export * from "./components/Sidebar";
 export * from "./components/Header";
+export * from "./components/Modal";
+export * from "./components/ActivityDetailModal";

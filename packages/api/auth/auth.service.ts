@@ -32,8 +32,17 @@ export class AuthService {
     return response.data;
   }
 
-  async logout() {
-    await http.post("/auth/logout");
+  async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
+    const response = await http.post<{ accessToken: string }>("/auth/refresh-token", {
+      refreshToken,
+    });
+    return response.data;
+  }
+
+  async logout(refreshToken?: string) {
+    if (refreshToken) {
+      await http.post("/auth/logout", { refreshToken });
+    }
   }
 
   async getSession() {

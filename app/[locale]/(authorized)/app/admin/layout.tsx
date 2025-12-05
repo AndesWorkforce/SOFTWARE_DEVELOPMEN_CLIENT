@@ -7,7 +7,7 @@ export default function AdminLayout({
 }>) {
   return (
     <div className="flex min-h-screen" style={{ background: "#FFFFFF", color: "#000000" }}>
-      <Sidebar role="admin" />
+      <Sidebar role="super-admin" />
       <main className="flex-1 md:ml-60 pb-16 md:pb-0">{children}</main>
     </div>
   );

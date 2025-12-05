@@ -1,14 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Select, DateRangePicker, Header } from "@/packages/design-system";
+import { Button, Select, DateRangePicker, ActivityDetailModal } from "@/packages/design-system";
 import { Download, ListFilter, List, ChevronDown, ChevronRight } from "lucide-react";
 import {
-  reportsService,
   type ReportFilters,
   type UserActivity,
   type FilterOptions,
 } from "@/packages/api/reports/reports.service";
+import { adtService, type RealtimeMetrics } from "@/packages/api/adt/adt.service";
+import type { AxiosError } from "axios";
 
 export default function ReportsPage() {
   const t = useTranslations("reports");
@@ -24,31 +25,325 @@ export default function ReportsPage() {
     },
   });
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<UserActivity | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const handleViewDetail = (activity: UserActivity) => {
+    setSelectedActivity(activity);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedActivity(null);
+  };
+
+  /**
+   * Convierte segundos a formato HH:MM:SS
+   */
+  const formatSecondsToTime = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  /**
+   * Transforma RealtimeMetrics a UserActivity
+   * Usa los campos enriquecidos que vienen del backend (contractor_name, client_name, team_name, etc.)
+   */
+  const transformRealtimeMetricsToUserActivity = (metrics: RealtimeMetrics[]): UserActivity[] => {
+    return metrics.map((metric) => ({
+      id: metric.contractor_id,
+      user: {
+        id: metric.contractor_id,
+        name: metric.contractor_name || `Contractor ${metric.contractor_id.slice(-6)}`,
+        email: metric.contractor_email || `${metric.contractor_id}@example.com`,
+      },
+      jobPosition: metric.job_position || "N/A",
+      client: {
+        id: metric.client_id || "unknown",
+        name: metric.client_name || "N/A",
+      },
+      team: {
+        id: metric.team_id || "unknown",
+        name: metric.team_name || "N/A",
+      },
+      country: metric.country || "N/A",
+      timeWorked: formatSecondsToTime(metric.total_session_time_seconds),
+      activityPercentage: Math.round(metric.active_percentage),
+      date: metric.workday,
+      details: [],
+      metrics: {
+        totalBeats: metric.total_beats,
+        activeBeats: metric.active_beats,
+        idleBeats: metric.idle_beats,
+        totalKeyboardInputs: metric.total_keyboard_inputs,
+        totalMouseClicks: metric.total_mouse_clicks,
+        avgKeyboardPerMin: metric.avg_keyboard_per_min,
+        avgMousePerMin: metric.avg_mouse_per_min,
+        effectiveWorkSeconds: metric.effective_work_seconds,
+        productivityScore: metric.productivity_score,
+        appUsage: metric.app_usage,
+        browserUsage: metric.browser_usage,
+      },
+    }));
+  };
+
+  /**
+   * Extrae las opciones de filtros de los datos de métricas
+   */
+  const extractFilterOptionsFromMetrics = (metrics: RealtimeMetrics[]): FilterOptions => {
+    const usersMap = new Map<string, string>();
+    const countriesSet = new Set<string>();
+    const clientsMap = new Map<string, string>();
+    const teamsMap = new Map<string, string>();
+    const jobPositionsSet = new Set<string>();
+
+    metrics.forEach((metric) => {
+      // Users
+      if (metric.contractor_name && metric.contractor_id) {
+        usersMap.set(metric.contractor_id, metric.contractor_name);
+      }
+
+      // Countries
+      if (metric.country) {
+        countriesSet.add(metric.country);
+      }
+
+      // Clients
+      if (metric.client_id && metric.client_name) {
+        clientsMap.set(metric.client_id, metric.client_name);
+      }
+
+      // Teams
+      if (metric.team_id && metric.team_name) {
+        teamsMap.set(metric.team_id, metric.team_name);
+      }
+
+      // Job Positions
+      if (metric.job_position) {
+        jobPositionsSet.add(metric.job_position);
+      }
+    });
+
+    return {
+      users: Array.from(usersMap.entries()).map(([value, label]) => ({ value, label })),
+      countries: Array.from(countriesSet)
+        .sort()
+        .map((country) => ({ value: country, label: country })),
+      clients: Array.from(clientsMap.entries())
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([value, label]) => ({ value, label })),
+      teams: Array.from(teamsMap.entries())
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([value, label]) => ({ value, label })),
+      jobPositions: Array.from(jobPositionsSet)
+        .sort()
+        .map((position) => ({ value: position, label: position })),
+    };
+  };
+
+  // Cargar opciones de filtros una vez al inicio (sin filtros para obtener todas las opciones)
+  useEffect(() => {
+    loadFilterOptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Recargar datos cuando cambian los filtros
   useEffect(() => {
     loadData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    filters.dateRange?.start,
+    filters.dateRange?.end,
+    filters.userId,
+    filters.country,
+    filters.clientId,
+    filters.teamId,
+    filters.jobPosition,
+  ]);
+
+  /**
+   * Carga las opciones de filtros obteniendo todos los datos sin filtros
+   * Intenta obtener datos de un rango amplio para tener más opciones disponibles
+   */
+  const loadFilterOptions = async () => {
+    try {
+      // Intentar obtener datos de un rango amplio (últimos 30 días) para tener más opciones
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+
+      const fromDate = thirtyDaysAgo.toISOString().split("T")[0];
+      const toDate = today.toISOString().split("T")[0];
+
+      const allMetrics = await adtService.getAllRealtimeMetrics({
+        from: fromDate,
+        to: toDate,
+        useCache: true,
+      });
+
+      // Extraer opciones de filtros
+      const extractedOptions = extractFilterOptionsFromMetrics(allMetrics || []);
+
+      // Establecer las opciones extraídas
+      setFilterOptions(extractedOptions);
+    } catch (error) {
+      console.error("❌ Error loading filter options:", error);
+      // En caso de error, establecer opciones vacías
+      setFilterOptions({
+        users: [],
+        countries: [],
+        clients: [],
+        teams: [],
+        jobPositions: [],
+      });
+    }
+  };
 
   const loadData = async () => {
     try {
       setLoading(true);
 
-      // Using mock data for now - replace with real API calls when backend is ready
-      const mockActivities = reportsService.getMockActivityData();
-      const mockOptions = reportsService.getMockFilterOptions();
+      // Construir filtros para la API ADT
+      const adtFilters: {
+        from?: string;
+        to?: string;
+        name?: string;
+        country?: string;
+        client_id?: string;
+        team_id?: string;
+        job_position?: string;
+        useCache?: boolean;
+      } = {
+        useCache: true,
+      };
 
-      setActivities(mockActivities);
-      setFilterOptions(mockOptions);
+      // Si hay rango de fechas, usar from/to
+      if (filters.dateRange?.start && filters.dateRange?.end) {
+        adtFilters.from = filters.dateRange.start;
+        adtFilters.to = filters.dateRange.end;
+      } else if (filters.dateRange?.start) {
+        // Si solo hay fecha de inicio, usar como rango de un día
+        adtFilters.from = filters.dateRange.start;
+        adtFilters.to = filters.dateRange.start;
+      } else {
+        // Si no hay fecha establecida, usar la fecha de hoy como rango de un día
+        const today = new Date().toISOString().split("T")[0];
+        adtFilters.from = today;
+        adtFilters.to = today;
+      }
 
-      // TODO: Replace with real API calls
-      // const [activitiesData, optionsData] = await Promise.all([
-      //   reportsService.getActivityToday(filters),
-      //   reportsService.getFilterOptions(),
-      // ]);
-      // setActivities(activitiesData);
-      // setFilterOptions(optionsData);
+      // Aplicar filtros adicionales (solo si tienen valor)
+      if (filters.userId && filters.userId.trim() !== "") {
+        // Buscar el nombre del usuario por ID desde las opciones de filtros
+        const selectedUser = filterOptions?.users.find((u) => u.value === filters.userId);
+        if (selectedUser && selectedUser.label) {
+          adtFilters.name = selectedUser.label.trim();
+        }
+      }
+
+      if (filters.country && filters.country.trim() !== "") {
+        adtFilters.country = filters.country.trim();
+      }
+
+      if (filters.clientId && filters.clientId.trim() !== "") {
+        adtFilters.client_id = filters.clientId.trim();
+      }
+
+      if (filters.teamId && filters.teamId.trim() !== "") {
+        adtFilters.team_id = filters.teamId.trim();
+      }
+
+      if (filters.jobPosition && filters.jobPosition.trim() !== "") {
+        adtFilters.job_position = filters.jobPosition.trim();
+      }
+
+      // Obtener métricas en tiempo real desde ADT con filtros
+      let realtimeMetrics: RealtimeMetrics[];
+      try {
+        realtimeMetrics = await adtService.getAllRealtimeMetrics(adtFilters);
+      } catch (error) {
+        const apiError = error as AxiosError;
+        console.error("❌ Error en la llamada a la API:", apiError);
+        console.error("❌ Detalles del error:", {
+          message: apiError?.message,
+          response: apiError?.response?.data,
+          status: apiError?.response?.status,
+          statusText: apiError?.response?.statusText,
+        });
+        throw apiError;
+      }
+
+      if (!realtimeMetrics || realtimeMetrics.length === 0) {
+        console.warn("⚠️ No se recibieron métricas o el array está vacío");
+      }
+
+      // Verificar que realtimeMetrics sea un array válido
+      if (!Array.isArray(realtimeMetrics)) {
+        console.error("⚠️ La respuesta no es un array:", realtimeMetrics);
+        setActivities([]);
+        return;
+      }
+
+      // Transformar a formato UserActivity
+      const transformedActivities = transformRealtimeMetricsToUserActivity(realtimeMetrics);
+
+      // Actualizar las opciones de filtros con los datos actuales
+      // Esto asegura que siempre tengamos opciones disponibles basadas en los datos mostrados
+      if (realtimeMetrics && realtimeMetrics.length > 0) {
+        const currentOptions = extractFilterOptionsFromMetrics(realtimeMetrics);
+
+        // Combinar con las opciones existentes para no perder opciones de otros rangos de fechas
+        setFilterOptions((prevOptions) => {
+          if (!prevOptions) {
+            return currentOptions;
+          }
+
+          // Combinar usuarios (evitar duplicados)
+          const usersMap = new Map(prevOptions.users.map((u) => [u.value, u]));
+          currentOptions.users.forEach((u) => usersMap.set(u.value, u));
+
+          // Combinar países
+          const countriesSet = new Set([
+            ...prevOptions.countries.map((c) => c.value),
+            ...currentOptions.countries.map((c) => c.value),
+          ]);
+
+          // Combinar clientes
+          const clientsMap = new Map(prevOptions.clients.map((c) => [c.value, c]));
+          currentOptions.clients.forEach((c) => clientsMap.set(c.value, c));
+
+          // Combinar equipos
+          const teamsMap = new Map(prevOptions.teams.map((t) => [t.value, t]));
+          currentOptions.teams.forEach((t) => teamsMap.set(t.value, t));
+
+          // Combinar cargos
+          const jobPositionsSet = new Set([
+            ...prevOptions.jobPositions.map((j) => j.value),
+            ...currentOptions.jobPositions.map((j) => j.value),
+          ]);
+
+          return {
+            users: Array.from(usersMap.values()).sort((a, b) => a.label.localeCompare(b.label)),
+            countries: Array.from(countriesSet)
+              .sort()
+              .map((c) => ({ value: c, label: c })),
+            clients: Array.from(clientsMap.values()).sort((a, b) => a.label.localeCompare(b.label)),
+            teams: Array.from(teamsMap.values()).sort((a, b) => a.label.localeCompare(b.label)),
+            jobPositions: Array.from(jobPositionsSet)
+              .sort()
+              .map((j) => ({ value: j, label: j })),
+          };
+        });
+      }
+
+      setActivities(transformedActivities);
     } catch (error) {
-      console.error("Error loading reports data:", error);
+      console.error("❌ Error loading reports data:", error);
+      // En caso de error, establecer actividades vacías
+      setActivities([]);
     } finally {
       setLoading(false);
     }
@@ -59,6 +354,7 @@ export default function ReportsPage() {
       ...prev,
       [key]: value,
     }));
+    // Los datos se recargarán automáticamente por el useEffect que observa los filtros
   };
 
   const handleDateRangeChange = (start: string, end: string) => {
@@ -66,6 +362,7 @@ export default function ReportsPage() {
       ...prev,
       dateRange: { start, end },
     }));
+    // Los datos se recargarán automáticamente por el useEffect que observa los filtros
   };
 
   const handleClearFilters = () => {
@@ -79,11 +376,7 @@ export default function ReportsPage() {
 
   return (
     <>
-      <Header userName="User" />
-      <div
-        className="p-4 md:p-8 min-h-screen"
-        style={{ background: "#FFFFFF", paddingTop: "75px" }}
-      >
+      <div className="p-4 md:p-8 min-h-screen" style={{ background: "#FFFFFF" }}>
         <div className="max-w-full">
           {/* Page Title and Export Button */}
           <div className="mb-6 md:mb-8 flex items-center justify-between">
@@ -376,7 +669,10 @@ export default function ReportsPage() {
                                 className="px-6 py-4 whitespace-nowrap text-base text-center"
                                 style={{ color: "#000000", width: "100px" }}
                               >
-                                <button className="mx-auto inline-flex items-center gap-1 hover:text-blue-600 transition-colors">
+                                <button
+                                  onClick={() => handleViewDetail(activity)}
+                                  className="mx-auto inline-flex items-center gap-1 hover:text-blue-600 transition-colors"
+                                >
                                   <List className="w-3.5 h-3.5" />
                                   <span className="underline text-sm">{t("viewDetail")}</span>
                                 </button>
@@ -494,7 +790,10 @@ export default function ReportsPage() {
                                     Activity Detail:{" "}
                                   </span>
                                 </div>
-                                <button className="flex items-center gap-1 mt-2 ml-16">
+                                <button
+                                  onClick={() => handleViewDetail(activity)}
+                                  className="flex items-center gap-1 mt-2 ml-16"
+                                >
                                   <List className="w-3.5 h-3.5" />
                                   <span className="underline text-sm" style={{ color: "#000000" }}>
                                     View
@@ -523,6 +822,14 @@ export default function ReportsPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de detalle de actividad */}
+      <ActivityDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        activity={selectedActivity}
+        t={t}
+      />
     </>
   );
 }

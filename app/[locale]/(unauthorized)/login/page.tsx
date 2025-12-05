@@ -10,7 +10,7 @@ export default function LoginPage() {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations();
-  const { setToken, setUser } = useAuthStore();
+  const { setToken, setRefreshToken, setUser } = useAuthStore();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -28,22 +28,16 @@ export default function LoginPage() {
     try {
       const response = await authService.login(formData.email, formData.password);
 
-      // Store token and user data
+      // Store token, refreshToken and user data
       setToken(response.accessToken);
+      setRefreshToken(response.refreshToken);
       setUser(response.user);
 
       // Store session cookie
       document.cookie = `session=${response.accessToken}; path=/; max-age=3600`;
 
-      // Redirect to dashboard based on user role
-      const dashboardRoute =
-        response.user.role === "Superadmin"
-          ? "super-admin"
-          : response.user.role === "TeamAdmin"
-            ? "admin"
-            : "client";
-
-      router.push(`/${locale}/app/${dashboardRoute}`);
+      // Redirect all users to super-admin
+      router.push(`/${locale}/app/super-admin`);
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || "Invalid email or password");

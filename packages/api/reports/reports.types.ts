@@ -31,6 +31,20 @@ export interface UserActivity {
   activityPercentage: number; // 0-100
   date: string; // ISO date
   details: ActivityDetail[];
+  // Métricas detalladas
+  metrics?: {
+    totalBeats: number;
+    activeBeats: number;
+    idleBeats: number;
+    totalKeyboardInputs: number;
+    totalMouseClicks: number;
+    avgKeyboardPerMin: number;
+    avgMousePerMin: number;
+    effectiveWorkSeconds: number;
+    productivityScore: number;
+    appUsage?: Array<{ appName: string; seconds: number }>;
+    browserUsage?: Array<{ domain: string; seconds: number }>;
+  };
 }
 
 export interface ActivityDetail {

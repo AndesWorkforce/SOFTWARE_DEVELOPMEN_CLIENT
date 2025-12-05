@@ -12,7 +12,7 @@ interface NavItem {
 }
 
 export interface SidebarProps {
-  role: "admin" | "super-admin";
+  role: "super-admin" | "client";
 }
 
 export const Sidebar = ({ role }: SidebarProps) => {
