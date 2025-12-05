@@ -10,9 +10,6 @@ importers:
       axios:
         specifier: ^1.7.7
         version: 1.13.0
-      client:
-        specifier: "link:"
-        version: "link:"
       lucide-react:
         specifier: ^0.555.0
         version: 0.555.0(react@19.2.0)
