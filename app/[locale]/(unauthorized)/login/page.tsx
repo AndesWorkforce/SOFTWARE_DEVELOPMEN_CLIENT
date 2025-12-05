@@ -36,15 +36,8 @@ export default function LoginPage() {
       // Store session cookie
       document.cookie = `session=${response.accessToken}; path=/; max-age=3600`;
 
-      // Redirect to dashboard based on user role
-      const dashboardRoute =
-        response.user.role === "Superadmin"
-          ? "super-admin"
-          : response.user.role === "TeamAdmin"
-            ? "admin"
-            : "client";
-
-      router.push(`/${locale}/app/${dashboardRoute}`);
+      // Redirect all users to super-admin
+      router.push(`/${locale}/app/super-admin`);
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || "Invalid email or password");

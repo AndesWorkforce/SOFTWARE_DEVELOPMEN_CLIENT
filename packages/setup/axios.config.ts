@@ -18,13 +18,15 @@ export function setAuthToken(token: string | null) {
   authToken = token;
 }
 
+import { getApiBaseUrl } from "./env.config";
+
 export function setRefreshToken(token: string | null) {
   refreshToken = token;
 }
 
 function getBaseURL() {
   // Public base URL for browser requests
-  return process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
+  return getApiBaseUrl();
 }
 
 function processQueue(error: unknown, token: string | null = null) {

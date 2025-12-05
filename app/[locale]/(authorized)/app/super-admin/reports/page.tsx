@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Select, DateRangePicker, Header } from "@/packages/design-system";
+import { Button, Select, DateRangePicker, ActivityDetailModal } from "@/packages/design-system";
 import { Download, ListFilter, List, ChevronDown, ChevronRight } from "lucide-react";
 import {
   type ReportFilters,
@@ -25,6 +25,18 @@ export default function ReportsPage() {
     },
   });
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<UserActivity | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleViewDetail = (activity: UserActivity) => {
+    setSelectedActivity(activity);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedActivity(null);
+  };
 
   /**
    * Convierte segundos a formato HH:MM:SS
@@ -61,7 +73,20 @@ export default function ReportsPage() {
       timeWorked: formatSecondsToTime(metric.total_session_time_seconds),
       activityPercentage: Math.round(metric.active_percentage),
       date: metric.workday,
-      details: [], // Puede obtenerse de app_usage y browser_usage si es necesario en el futuro
+      details: [],
+      metrics: {
+        totalBeats: metric.total_beats,
+        activeBeats: metric.active_beats,
+        idleBeats: metric.idle_beats,
+        totalKeyboardInputs: metric.total_keyboard_inputs,
+        totalMouseClicks: metric.total_mouse_clicks,
+        avgKeyboardPerMin: metric.avg_keyboard_per_min,
+        avgMousePerMin: metric.avg_mouse_per_min,
+        effectiveWorkSeconds: metric.effective_work_seconds,
+        productivityScore: metric.productivity_score,
+        appUsage: metric.app_usage,
+        browserUsage: metric.browser_usage,
+      },
     }));
   };
 
@@ -378,11 +403,7 @@ export default function ReportsPage() {
 
   return (
     <>
-      <Header userName="User" />
-      <div
-        className="p-4 md:p-8 min-h-screen"
-        style={{ background: "#FFFFFF", paddingTop: "75px" }}
-      >
+      <div className="p-4 md:p-8 min-h-screen" style={{ background: "#FFFFFF" }}>
         <div className="max-w-full">
           {/* Page Title and Export Button */}
           <div className="mb-6 md:mb-8 flex items-center justify-between">
@@ -675,7 +696,10 @@ export default function ReportsPage() {
                                 className="px-6 py-4 whitespace-nowrap text-base text-center"
                                 style={{ color: "#000000", width: "100px" }}
                               >
-                                <button className="mx-auto inline-flex items-center gap-1 hover:text-blue-600 transition-colors">
+                                <button
+                                  onClick={() => handleViewDetail(activity)}
+                                  className="mx-auto inline-flex items-center gap-1 hover:text-blue-600 transition-colors"
+                                >
                                   <List className="w-3.5 h-3.5" />
                                   <span className="underline text-sm">{t("viewDetail")}</span>
                                 </button>
@@ -793,7 +817,10 @@ export default function ReportsPage() {
                                     Activity Detail:{" "}
                                   </span>
                                 </div>
-                                <button className="flex items-center gap-1 mt-2 ml-16">
+                                <button
+                                  onClick={() => handleViewDetail(activity)}
+                                  className="flex items-center gap-1 mt-2 ml-16"
+                                >
                                   <List className="w-3.5 h-3.5" />
                                   <span className="underline text-sm" style={{ color: "#000000" }}>
                                     View
@@ -822,6 +849,14 @@ export default function ReportsPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de detalle de actividad */}
+      <ActivityDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        activity={selectedActivity}
+        t={t}
+      />
     </>
   );
 }
