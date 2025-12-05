@@ -170,8 +170,6 @@ export default function ReportsPage() {
    */
   const loadFilterOptions = async () => {
     try {
-      console.log("🔄 Cargando opciones de filtros...");
-
       // Intentar obtener datos de un rango amplio (últimos 30 días) para tener más opciones
       const today = new Date();
       const thirtyDaysAgo = new Date(today);
@@ -180,26 +178,14 @@ export default function ReportsPage() {
       const fromDate = thirtyDaysAgo.toISOString().split("T")[0];
       const toDate = today.toISOString().split("T")[0];
 
-      console.log(`📅 Buscando datos desde ${fromDate} hasta ${toDate}`);
-
       const allMetrics = await adtService.getAllRealtimeMetrics({
         from: fromDate,
         to: toDate,
         useCache: true,
       });
 
-      console.log(`📊 Métricas obtenidas para filtros: ${allMetrics?.length || 0} registros`);
-
       // Extraer opciones de filtros
       const extractedOptions = extractFilterOptionsFromMetrics(allMetrics || []);
-
-      console.log("📋 Opciones extraídas:", {
-        users: extractedOptions.users.length,
-        countries: extractedOptions.countries.length,
-        clients: extractedOptions.clients.length,
-        teams: extractedOptions.teams.length,
-        jobPositions: extractedOptions.jobPositions.length,
-      });
 
       // Establecer las opciones extraídas
       setFilterOptions(extractedOptions);
@@ -274,9 +260,6 @@ export default function ReportsPage() {
         adtFilters.job_position = filters.jobPosition.trim();
       }
 
-      // Log para depuración
-      console.log("🔍 ADT Filters:", adtFilters);
-
       // Obtener métricas en tiempo real desde ADT con filtros
       let realtimeMetrics: RealtimeMetrics[];
       try {
@@ -293,12 +276,7 @@ export default function ReportsPage() {
         throw apiError;
       }
 
-      // Log para depuración
-      console.log("📊 Realtime Metrics recibidos:", realtimeMetrics?.length || 0, "registros");
-      console.log("📊 Tipo de datos:", typeof realtimeMetrics, Array.isArray(realtimeMetrics));
-      if (realtimeMetrics && realtimeMetrics.length > 0) {
-        console.log("📋 Primer registro de ejemplo:", realtimeMetrics[0]);
-      } else {
+      if (!realtimeMetrics || realtimeMetrics.length === 0) {
         console.warn("⚠️ No se recibieron métricas o el array está vacío");
       }
 
@@ -311,11 +289,6 @@ export default function ReportsPage() {
 
       // Transformar a formato UserActivity
       const transformedActivities = transformRealtimeMetricsToUserActivity(realtimeMetrics);
-
-      console.log("✅ Actividades transformadas:", transformedActivities?.length || 0, "registros");
-      if (transformedActivities && transformedActivities.length > 0) {
-        console.log("📋 Primera actividad transformada:", transformedActivities[0]);
-      }
 
       // Actualizar las opciones de filtros con los datos actuales
       // Esto asegura que siempre tengamos opciones disponibles basadas en los datos mostrados
