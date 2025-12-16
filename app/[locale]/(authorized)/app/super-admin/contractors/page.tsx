@@ -488,7 +488,6 @@ export default function ContractorsPage() {
   // Cargar contractors cuando cambien los filtros
   useEffect(() => {
     loadContractors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.name, filters.country, filters.clientId, filters.teamId, filters.jobPosition]);
 
   // Recargar contractors cuando volvemos a la página de contractors
@@ -499,7 +498,6 @@ export default function ContractorsPage() {
     if (pathname === basePath && filterOptions !== null) {
       loadContractors();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, locale]);
 
   return (
@@ -517,14 +515,13 @@ export default function ContractorsPage() {
                 color: "#FFFFFF",
                 fontSize: "14px",
                 padding: "7px 21px",
-                height: "auto",
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
                 borderRadius: "8px",
                 boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
               }}
-              className="md:text-[16px] md:h-[40px]"
+              className="md:text-[16px] h-[35px] md:h-[40px]"
             >
               <Plus className="w-[14px] h-[14px] md:w-5 md:h-5" />
               <span className="font-semibold">{t("contractors.addContractor")}</span>
