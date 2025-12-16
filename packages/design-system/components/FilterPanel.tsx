@@ -186,7 +186,7 @@ export function FilterPanel({
               <p className="text-[14px] md:text-[16px] font-medium md:font-semibold text-black">
                 {label}
               </p>
-              <div className="flex h-[35px] md:h-[40px] items-center justify-end rounded-[5px] border border-[rgba(166,166,166,0.5)] bg-white shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-px gap-[10px]">
+              <div className="flex h-[35px] md:h-[45px] items-center justify-end rounded-[5px] border border-[rgba(166,166,166,0.5)] bg-white shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-px gap-[10px]">
                 <input
                   type="text"
                   value={nameDraft}
