@@ -48,8 +48,15 @@ export function createHttp(config?: AxiosRequestConfig): AxiosInstance {
   // Enable credentials for staging/production where the domains are configured.
   const isCredentialsEnv = env === "staging" || env === "production";
 
+  const baseURL = getBaseURL();
+
+  // Log base URL in development for debugging
+  if (env === "development" && typeof window !== "undefined") {
+    console.log("🌐 API Base URL:", baseURL || "⚠️ NOT CONFIGURED");
+  }
+
   const instance = axios.create({
-    baseURL: getBaseURL(),
+    baseURL: baseURL || undefined,
     withCredentials: isCredentialsEnv,
     ...config,
   });
@@ -59,6 +66,19 @@ export function createHttp(config?: AxiosRequestConfig): AxiosInstance {
       req.headers = req.headers || {};
       req.headers["Authorization"] = `Bearer ${authToken}`;
     }
+
+    // Log request details in development
+    if (env === "development" && typeof window !== "undefined") {
+      const fullUrl = req.baseURL ? `${req.baseURL}${req.url}` : req.url;
+      console.log("📤 Request:", {
+        method: req.method?.toUpperCase(),
+        url: fullUrl,
+        params: req.params,
+        hasAuth: !!authToken,
+        baseURL: req.baseURL,
+      });
+    }
+
     return req;
   });
 

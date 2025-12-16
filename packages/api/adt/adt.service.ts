@@ -1,9 +1,9 @@
 import { http } from "../../setup/axios.config";
 import type { AxiosError } from "axios";
-import type { RealtimeMetrics } from "./adt.types";
+import type { RealtimeMetrics } from "../../types/adt.types";
 
 // Re-export types for convenience
-export type { RealtimeMetrics, AppUsage, BrowserUsage } from "./adt.types";
+export type { RealtimeMetrics, AppUsage, BrowserUsage } from "../../types/adt.types";
 
 export interface RealtimeMetricsFilters {
   workday?: string;

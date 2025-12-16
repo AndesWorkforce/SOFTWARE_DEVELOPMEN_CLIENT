@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import type { UserActivity } from "@/packages/api/reports/reports.types";
+import type { UserActivity } from "@/packages/types/reports.types";
 
 export interface ActivityCardProps {
   activity: UserActivity;
