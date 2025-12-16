@@ -30,8 +30,3 @@ body {
   opacity: 0;
   display: none;
 }
-
-.time-input-with-icon {
-  /* Asegurar mismo alto y borde que el diseño */
-  height: 45px;
-}

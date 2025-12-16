@@ -25,7 +25,6 @@ export function AddContractorModal({ onClose }: AddContractorModalProps) {
       title: t("title") || "Add Contractor",
       titleTranslationKey: "contractors.modal.title",
       layout: "two-column",
-      // Copiar diseño del modal de Edit
       contentPadding: "30px 40px",
       styles: {
         modal: {
@@ -135,21 +134,21 @@ export function AddContractorModal({ onClose }: AddContractorModalProps) {
           type: "time",
           label: t("startTime") || "Start Time",
           translationKey: "contractors.modal.startTime",
-          icon: <Clock className="w-6 h-6" />,
+          icon: <Clock className="md:w-6 md:h-6 w-5 h-5" />,
         },
         {
           key: "work_schedule_end",
           type: "time",
           label: t("finishTime") || "Finish Time",
           translationKey: "contractors.modal.finishTime",
-          icon: <Clock className="w-6 h-6" />,
+          icon: <Clock className="md:w-6 md:h-6 w-5 h-5" />,
         },
         {
           key: "lunch_start",
           type: "time",
           label: t("startLunchTime") || "Start Lunch Time",
           translationKey: "contractors.modal.startLunchTime",
-          icon: <Clock className="w-6 h-6" />,
+          icon: <Clock className="md:w-6 md:h-6 w-5 h-5" />,
           width: "282px",
         },
       ],
@@ -241,26 +240,26 @@ export function AddContractorModal({ onClose }: AddContractorModalProps) {
 
       {showConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-[12px] px-8 py-6 shadow-lg max-w-sm w-full">
+          <div className="bg-white rounded-[12px] px-8 py-6 shadow-lg w-[80%] max-w-[400px] md:w-full">
             <h2 className="text-xl font-semibold text-center mb-3" style={{ color: "#000000" }}>
               {t("confirmTitle")}
             </h2>
             <p className="text-[15px] text-center mb-6" style={{ color: "#4B5563" }}>
               {t("confirmSubtitle")}
             </p>
-            <div className="flex w-full gap-[10px]">
+            <div className="flex flex-col md:flex-row w-full gap-[10px]">
               <Button
                 type="button"
                 onClick={handleConfirmAdd}
                 disabled={loading}
+                className="w-full md:w-auto"
                 style={{
                   background: "#0097B2",
                   color: "#FFFFFF",
-                  padding: "8px 20px",
+                  padding: "8px md:20px",
                   borderRadius: "10px",
                   fontSize: "15px",
                   fontWeight: 500,
-                  width: "80%",
                 }}
               >
                 {t("confirmYes")}
@@ -269,6 +268,7 @@ export function AddContractorModal({ onClose }: AddContractorModalProps) {
                 type="button"
                 onClick={handleCancelConfirm}
                 disabled={loading}
+                className="w-full md:w-auto"
                 style={{
                   background: "#A6A6A6",
                   color: "#FFFFFF",
@@ -276,7 +276,6 @@ export function AddContractorModal({ onClose }: AddContractorModalProps) {
                   borderRadius: "10px",
                   fontSize: "15px",
                   fontWeight: 500,
-                  width: "80%",
                 }}
               >
                 {t("confirmNo")}
@@ -288,10 +287,7 @@ export function AddContractorModal({ onClose }: AddContractorModalProps) {
 
       {showSuccess && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50">
-          <div
-            className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-[40px] py-[30px] flex items-center justify-center"
-            style={{ maxWidth: "440px", width: "100%" }}
-          >
+          <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-[40px] py-[30px] flex items-center justify-center w-[80%] max-w-[400px] md:w-full">
             <div className="flex flex-col items-center justify-between h-[184px] w-[360px] gap-[15px]">
               <div className="flex flex-col items-center gap-[15px] w-full">
                 <CircleCheck className="w-[75px] h-[75px] text-[#0097B2]" />

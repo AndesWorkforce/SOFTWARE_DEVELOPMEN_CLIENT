@@ -296,18 +296,19 @@ export function EditContractorModal({
 
       {showConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-[12px] px-8 py-6 shadow-lg max-w-[440px] w-full">
+          <div className="bg-white rounded-[12px] px-8 py-6 shadow-lg w-[80%] max-w-[400px] md:w-full">
             <h2 className="text-xl font-semibold text-center mb-3" style={{ color: "#000000" }}>
               {t("editConfirmTitle")}
             </h2>
             <p className="text-[15px] text-center mb-6" style={{ color: "#4B5563" }}>
               {t("editConfirmSubtitle")}
             </p>
-            <div className="flex w-full gap-[10px]">
+            <div className="flex flex-col md:flex-row w-full gap-[10px]">
               <Button
                 type="button"
                 onClick={handleConfirmSave}
                 disabled={loading}
+                className="w-full md:w-auto"
                 style={{
                   background: "#0097B2",
                   color: "#FFFFFF",
@@ -315,7 +316,6 @@ export function EditContractorModal({
                   borderRadius: "10px",
                   fontSize: "15px",
                   fontWeight: 500,
-                  width: "80%",
                 }}
               >
                 {t("editConfirmSave")}
@@ -324,6 +324,7 @@ export function EditContractorModal({
                 type="button"
                 onClick={handleCancelConfirm}
                 disabled={loading}
+                className="w-full md:w-auto"
                 style={{
                   background: "#A6A6A6",
                   color: "#FFFFFF",
@@ -331,7 +332,6 @@ export function EditContractorModal({
                   borderRadius: "10px",
                   fontSize: "15px",
                   fontWeight: 500,
-                  width: "80%",
                 }}
               >
                 {t("editConfirmCancel")}
@@ -343,10 +343,7 @@ export function EditContractorModal({
 
       {showSuccess && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50">
-          <div
-            className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-[40px] py-[30px] flex items-center justify-center"
-            style={{ maxWidth: "440px", width: "100%" }}
-          >
+          <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-[40px] py-[30px] flex items-center justify-center w-[80%] max-w-[400px] md:w-full">
             <div className="flex flex-col items-center justify-between h-[184px] w-[360px] gap-[15px]">
               <div className="flex flex-col items-center gap-[15px] w-full">
                 <CircleCheck className="w-[75px] h-[75px] text-[#0097B2]" />

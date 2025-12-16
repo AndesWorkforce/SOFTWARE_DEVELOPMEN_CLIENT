@@ -306,23 +306,32 @@ export function FormModal({
               {label}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
-            <Select
-              value={String(value ?? "")}
-              onChange={(e) => {
-                if (field.type === "multiselect") {
-                  const selected = Array.from(e.target.selectedOptions).map((opt) => opt.value);
-                  handleFieldChange(field.key, selected);
-                } else {
-                  handleFieldChange(field.key, e.target.value);
-                }
-              }}
-              options={allOptions}
-              required={field.required}
-              disabled={isDisabled || fieldLoading || loading}
-              error={fieldError}
-              className={field.className || ""}
-              multiple={field.type === "multiselect"}
-            />
+            <div className="w-full">
+              <Select
+                value={String(value ?? "")}
+                onChange={(e) => {
+                  if (field.type === "multiselect") {
+                    const selected = Array.from(e.target.selectedOptions).map((opt) => opt.value);
+                    handleFieldChange(field.key, selected);
+                  } else {
+                    handleFieldChange(field.key, e.target.value);
+                  }
+                }}
+                options={allOptions}
+                required={field.required}
+                disabled={isDisabled || fieldLoading || loading}
+                error={fieldError}
+                className={`w-full h-[40px] md:h-[45px] px-[15px] pr-[40px] rounded-[10px] border border-[#b6b4b4] shadow-none ${
+                  field.className || ""
+                }`}
+                style={{
+                  borderColor: "#b6b4b4",
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                }}
+                multiple={field.type === "multiselect"}
+              />
+            </div>
             {field.helpText && <p className="mt-1 text-sm text-gray-500">{field.helpText}</p>}
           </div>
         );
@@ -353,12 +362,14 @@ export function FormModal({
                 required={field.required}
                 disabled={isDisabled || loading}
                 error={fieldError}
-                className={`time-input-with-icon w-full h-[35px] md:h-[45px] px-[15px] pr-[40px] rounded-[10px] border border-[#b6b4b4] ${
+                className={`time-input-with-icon w-full h-[40px] md:h-[45px] px-[15px] pr-[40px] rounded-[10px] border border-[#b6b4b4] ${
                   field.className || ""
                 }`}
                 style={{
                   borderColor: "#b6b4b4",
                   color: value ? "#000000" : "#b6b4b4",
+                  paddingTop: 0,
+                  paddingBottom: 0,
                   ...field.style,
                 }}
               />
@@ -435,12 +446,14 @@ export function FormModal({
               required={field.required}
               disabled={isDisabled || loading}
               error={fieldError}
-              className={`w-full h-[35px] md:h-[45px] px-[15px] py-[12px] rounded-[10px] border border-[#b6b4b4] ${
+              className={`w-full h-[40px] md:h-[45px] px-[15px] rounded-[10px] border border-[#b6b4b4] ${
                 field.className || ""
               }`}
               style={{
                 borderColor: "#b6b4b4",
                 color: value ? "#000000" : "#b6b4b4",
+                paddingTop: 0,
+                paddingBottom: 0,
                 ...field.style,
               }}
             />
