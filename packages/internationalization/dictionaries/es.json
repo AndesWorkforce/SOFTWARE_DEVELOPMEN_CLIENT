@@ -249,9 +249,81 @@
       "deleteSuccessContinue": "Continuar"
     }
   },
+  "clients": {
+    "title": "Clientes",
+    "addClient": "Agregar Cliente",
+    "noClients": "No se encontraron clientes",
+    "filters": {
+      "name": "Usuario",
+      "team": "Equipo",
+      "clientPlaceholder": "Buscar usuario aquí...",
+      "teamPlaceholder": "Selecciona un equipo aquí...",
+      "cleanFilters": "Limpiar filtros"
+    },
+    "table": {
+      "name": "Nombre Cliente",
+      "description": "Descripción",
+      "email": "Correo Electrónico",
+      "teams": "Equipos",
+      "action": "Acción"
+    },
+    "modal": {
+      "addTitle": "Agregar Cliente",
+      "editTitle": "Editar Cliente",
+      "name": "Nombre",
+      "email": "Correo Electrónico",
+      "teams": "Equipos",
+      "password": "Contraseña",
+      "description": "Descripción",
+      "namePlaceholder": "Escribe el nombre del cliente aquí...",
+      "emailPlaceholder": "correo@outlook.com",
+      "teamsPlaceholder": "Selecciona un equipo aquí...",
+      "descriptionPlaceholder": "Escribe la descripción del cliente aquí...",
+      "passwordPlaceholder": "Escribe la contraseña aquí...",
+      "addButton": "Agregar Cliente",
+      "saveButton": "Guardar cambios",
+      "cancel": "Cancelar",
+      "errorUpdating": "Error al actualizar el cliente. Por favor, intenta de nuevo.",
+      "confirmTitle": "¿Agregar cliente?",
+      "confirmSubtitle": "¿Estás seguro de que quieres agregar este cliente?",
+      "confirmYes": "Sí",
+      "confirmNo": "No",
+      "successTitle": "Cliente agregado correctamente",
+      "successContinue": "Continuar",
+      "errorCreating": "Error al crear el cliente. Por favor, intenta de nuevo.",
+      "editConfirmTitle": "¿Guardar cambios?",
+      "editConfirmSubtitle": "¿Estás seguro de que quieres guardar los cambios?",
+      "editConfirmSave": "Guardar cambios",
+      "editConfirmCancel": "Cancelar",
+      "editSuccessTitle": "Cambios guardados correctamente",
+      "editSuccessContinue": "Continuar"
+    },
+    "deleteConfirmTitle": "¿Eliminar cliente?",
+    "deleteConfirmSubtitle": "¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer.",
+    "deleteConfirmDelete": "Eliminar",
+    "deleteConfirmCancel": "Cancelar"
+  },
+  "teams": {
+    "createTeam": "Crear equipo",
+    "modal": {
+      "createTitle": "Crear equipo",
+      "name": "Nombre",
+      "namePlaceholder": "Escribe el nombre del equipo aquí...",
+      "createButton": "Crear equipo",
+      "cancel": "Cancelar",
+      "confirmTitle": "¿Crear equipo?",
+      "confirmSubtitle": "¿Estás seguro de que quieres crear este equipo?",
+      "confirmYes": "Sí",
+      "confirmNo": "No",
+      "successTitle": "Equipo creado correctamente",
+      "successContinue": "Continuar",
+      "errorCreating": "Error al crear el equipo. Por favor, intenta de nuevo."
+    }
+  },
   "formModal": {
     "selectPlaceholder": "Seleccionar...",
     "fieldRequired": "{field} es requerido",
+    "invalidEmail": "Correo electrónico inválido",
     "submitError": "Error al enviar el formulario",
     "submit": "Guardar",
     "cancel": "Cancelar",

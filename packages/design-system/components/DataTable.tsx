@@ -324,7 +324,10 @@ export function DataTable<T = Record<string, unknown>>({
     const mobileConfig: MobileCardConfig<T> = config.mobileConfig;
 
     return (
-      <div className="md:hidden rounded-[10px] overflow-hidden" style={config.styles?.mobileCard}>
+      <div
+        className="md:hidden w-full max-w-full overflow-x-hidden rounded-[10px] overflow-hidden"
+        style={config.styles?.mobileCard}
+      >
         {paginatedData.map((row, index) => {
           const rowKey =
             typeof config.rowKey === "function"
@@ -430,20 +433,20 @@ export function DataTable<T = Record<string, unknown>>({
           {renderMobileView()}
 
           {config.pagination?.enabled && (
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-4">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-4 w-full max-w-full overflow-x-hidden">
+              <div className="flex flex-wrap items-center gap-2 w-full max-w-full min-w-0">
                 <button
-                  className="px-3 py-1 border rounded disabled:opacity-50"
+                  className="px-3 py-1 border rounded disabled:opacity-50 shrink-0"
                   disabled={page === 1}
                   onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                 >
                   {t("pagination.previous", { defaultMessage: "Prev" })}
                 </button>
-                <span className="text-sm" style={{ color: "#000000" }}>
+                <span className="text-sm min-w-0 break-words" style={{ color: "#000000" }}>
                   {t("pagination.page", { defaultMessage: "Página" })} {page} / {totalPages}
                 </span>
                 <button
-                  className="px-3 py-1 border rounded disabled:opacity-50"
+                  className="px-3 py-1 border rounded disabled:opacity-50 shrink-0"
                   disabled={page === totalPages}
                   onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                 >
@@ -452,12 +455,12 @@ export function DataTable<T = Record<string, unknown>>({
               </div>
 
               {config.pagination.showPageSizeSelector && (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 w-full max-w-full min-w-0">
                   <span className="text-sm" style={{ color: "#000000" }}>
                     {t("pagination.pageSize", { defaultMessage: "Items por página" })}
                   </span>
                   <select
-                    className="border rounded px-2 py-1"
+                    className="border rounded px-2 py-1 max-w-full"
                     value={pageSize}
                     onChange={(e) => {
                       const newSize = Number(e.target.value);

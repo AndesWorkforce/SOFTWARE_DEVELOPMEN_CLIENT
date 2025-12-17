@@ -249,9 +249,81 @@
       "deleteSuccessContinue": "Continue"
     }
   },
+  "clients": {
+    "title": "Clients",
+    "addClient": "Add Client",
+    "noClients": "No clients found",
+    "filters": {
+      "name": "User",
+      "team": "Team",
+      "clientPlaceholder": "Search user here...",
+      "teamPlaceholder": "Select team here...",
+      "cleanFilters": "Clean filters"
+    },
+    "table": {
+      "name": "Name Client",
+      "description": "Description",
+      "email": "Email",
+      "teams": "Teams",
+      "action": "Action"
+    },
+    "modal": {
+      "addTitle": "Add Client",
+      "editTitle": "Edit Client",
+      "name": "Name",
+      "email": "Email",
+      "teams": "Teams",
+      "password": "Password",
+      "description": "Description",
+      "namePlaceholder": "Type client name here...",
+      "emailPlaceholder": "mail@outlook.com",
+      "teamsPlaceholder": "Select team here...",
+      "descriptionPlaceholder": "Type client description here...",
+      "passwordPlaceholder": "Type password here...",
+      "addButton": "Add Client",
+      "saveButton": "Save Changes",
+      "cancel": "Cancel",
+      "errorUpdating": "Error updating client. Please try again.",
+      "confirmTitle": "Add Client?",
+      "confirmSubtitle": "Are you sure you want to add this client?",
+      "confirmYes": "Yes",
+      "confirmNo": "No",
+      "successTitle": "Successfully added client",
+      "successContinue": "Continue",
+      "errorCreating": "Error creating client. Please try again.",
+      "editConfirmTitle": "Save changes?",
+      "editConfirmSubtitle": "Are you sure you want to save your changes?",
+      "editConfirmSave": "Save Changes",
+      "editConfirmCancel": "Cancel",
+      "editSuccessTitle": "Changes saved successfully",
+      "editSuccessContinue": "Continue"
+    },
+    "deleteConfirmTitle": "Delete client?",
+    "deleteConfirmSubtitle": "Are you sure you want to delete this client? This action cannot be undone.",
+    "deleteConfirmDelete": "Delete",
+    "deleteConfirmCancel": "Cancel"
+  },
+  "teams": {
+    "createTeam": "Create Team",
+    "modal": {
+      "createTitle": "Create Team",
+      "name": "Name",
+      "namePlaceholder": "Type team name here...",
+      "createButton": "Create Team",
+      "cancel": "Cancel",
+      "confirmTitle": "Create Team?",
+      "confirmSubtitle": "Are you sure you want to create this team?",
+      "confirmYes": "Yes",
+      "confirmNo": "No",
+      "successTitle": "Team created successfully",
+      "successContinue": "Continue",
+      "errorCreating": "Error creating team. Please try again."
+    }
+  },
   "formModal": {
     "selectPlaceholder": "Select...",
     "fieldRequired": "{field} is required",
+    "invalidEmail": "Invalid email address",
     "submitError": "Error submitting form",
     "submit": "Save",
     "cancel": "Cancel",

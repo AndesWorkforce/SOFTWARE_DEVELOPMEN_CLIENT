@@ -50,6 +50,25 @@ export class TeamsService {
       throw error;
     }
   }
+
+  /**
+   * Crea un equipo
+   * @param payload Datos del equipo
+   */
+  async create(payload: { name: string; client_id: string }): Promise<Team> {
+    try {
+      const response = await http.post<Team>("/teams", payload);
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en create team:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      throw error;
+    }
+  }
 }
 
 export const teamsService = new TeamsService();

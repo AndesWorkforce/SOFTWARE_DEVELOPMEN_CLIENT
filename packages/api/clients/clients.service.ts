@@ -5,8 +5,15 @@ export interface Client {
   id: string;
   name: string;
   email?: string;
+  description?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface UpdateClientPayload {
+  name?: string;
+  email?: string | null;
+  description?: string | null;
 }
 
 export class ClientsService {
@@ -47,6 +54,41 @@ export class ClientsService {
         status: axiosError?.response?.status || null,
       });
 
+      throw error;
+    }
+  }
+
+  /**
+   * Actualiza un cliente por ID
+   */
+  async update(id: string, payload: UpdateClientPayload): Promise<Client> {
+    try {
+      const response = await http.patch<Client>(`/clients/${id}`, payload);
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en update client:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Elimina un cliente por ID
+   */
+  async remove(id: string): Promise<void> {
+    try {
+      await http.delete(`/clients/${id}`);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en remove client:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
       throw error;
     }
   }

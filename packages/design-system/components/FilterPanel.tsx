@@ -203,7 +203,7 @@ export function FilterPanel({
                     }
                   }}
                   placeholder={filterConfig.placeholder}
-                  className="flex-1 h-[33px] md:h-[38px] border-0 bg-transparent px-[12px] text-[12px] md:text-[16px] text-[#08252A] placeholder:text-[#B6B4B4] outline-none"
+                  className="flex-1 min-w-0 h-[33px] md:h-[38px] border-0 bg-transparent px-[12px] text-[12px] md:text-[16px] text-[#08252A] placeholder:text-[#B6B4B4] outline-none"
                   disabled={filterConfig.disabled || loading}
                 />
                 <div className="bg-white flex h-[33px] w-[40px] items-center justify-center px-[8px] py-[4px] rounded-tr-[5px] rounded-br-[5px]">
@@ -293,16 +293,16 @@ export function FilterPanel({
             {nameFilter && <div className="w-full">{renderFilter(nameFilter)}</div>}
 
             {/* Row 2: Country y Client */}
-            <div className="flex gap-[12px] w-full">
-              {countryFilter && <div className="flex-1">{renderFilter(countryFilter)}</div>}
-              {clientFilter && <div className="flex-1">{renderFilter(clientFilter)}</div>}
+            <div className="flex gap-[12px] w-full min-w-0">
+              {countryFilter && <div className="flex-1 min-w-0">{renderFilter(countryFilter)}</div>}
+              {clientFilter && <div className="flex-1 min-w-0">{renderFilter(clientFilter)}</div>}
             </div>
 
             {/* Row 3: Team y Clean Filters */}
-            <div className="flex gap-[12px] items-end w-full">
-              {teamFilter && <div className="flex-1">{renderFilter(teamFilter)}</div>}
+            <div className="flex gap-[12px] items-end w-full min-w-0">
+              {teamFilter && <div className="flex-1 min-w-0">{renderFilter(teamFilter)}</div>}
               {config.showClearButton && config.clearButtonPosition === "end" && (
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <Button
                     variant="danger"
                     onClick={handleClear}
@@ -337,6 +337,76 @@ export function FilterPanel({
           </div>
 
           {/* Layout desktop (visible solo en pantallas grandes) */}
+          <div
+            className="hidden md:flex flex-row items-end gap-3 flex-wrap"
+            style={config.styles?.filterRow}
+          >
+            {filtersContent}
+            {config.showClearButton && config.clearButtonPosition === "end" && (
+              <div className="flex md:flex-1 md:justify-end">
+                <div className="h-full flex items-end w-full md:w-auto">
+                  <Button
+                    variant="danger"
+                    onClick={handleClear}
+                    disabled={loading}
+                    style={{
+                      background: "#FF0004",
+                      color: "#FFFFFF",
+                      fontSize: "16px",
+                      padding: "8px 24px",
+                      height: "40px",
+                      borderRadius: "5px",
+                    }}
+                  >
+                    {config.clearButtonLabel || t("reports.cleanFilters")}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      );
+    }
+
+    // Layout mobile específico para clients (según Figma 723-13666)
+    // Row 1: User (ancho completo)
+    // Row 2: Team + Clean filters (dos columnas, gap 12px)
+    const isClientsLayout = nameFilter && teamFilter && !countryFilter && !clientFilter;
+
+    if (isClientsLayout) {
+      return (
+        <>
+          {/* Layout mobile */}
+          <div className="flex flex-col gap-[12px] md:hidden">
+            {nameFilter && <div className="w-full">{renderFilter(nameFilter)}</div>}
+
+            <div className="flex gap-[12px] items-end w-full min-w-0">
+              {teamFilter && <div className="flex-1 min-w-0">{renderFilter(teamFilter)}</div>}
+              {config.showClearButton && config.clearButtonPosition === "end" && (
+                <div className="flex-1 min-w-0">
+                  <Button
+                    variant="danger"
+                    onClick={handleClear}
+                    disabled={loading}
+                    style={{
+                      background: "#FF0004",
+                      color: "#FFFFFF",
+                      fontSize: "12px",
+                      padding: "9px 16px",
+                      height: "35px",
+                      borderRadius: "5px",
+                      width: "100%",
+                      boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
+                    }}
+                  >
+                    {config.clearButtonLabel || t("reports.cleanFilters")}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Layout desktop */}
           <div
             className="hidden md:flex flex-row items-end gap-3 flex-wrap"
             style={config.styles?.filterRow}
@@ -408,7 +478,7 @@ export function FilterPanel({
       <div className="flex items-center gap-2 mb-4 md:mb-4">
         <ListFilter className="w-4 h-4 md:w-5 md:h-5" />
         <span
-          className="text-[16px] font-semibold"
+          className="text-[14px] md:text-[16px] font-semibold"
           style={{ color: "#000000", ...config.styles?.title }}
         >
           {t("reports.applyFilters")}
