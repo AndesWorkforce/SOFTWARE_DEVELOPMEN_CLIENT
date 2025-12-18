@@ -1,6 +1,6 @@
 "use client";
 import { Modal } from "./Modal";
-import type { UserActivity } from "@/packages/api/reports/reports.types";
+import type { UserActivity } from "@/packages/types/reports.types";
 
 export interface ActivityDetailModalProps {
   isOpen: boolean;

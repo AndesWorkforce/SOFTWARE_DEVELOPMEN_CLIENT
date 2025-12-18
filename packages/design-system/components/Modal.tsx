@@ -9,6 +9,12 @@ export interface ModalProps {
   children: ReactNode;
   size?: "sm" | "md" | "lg" | "xl" | "full";
   showHeader?: boolean;
+  overlayClassName?: string;
+  overlayStyle?: React.CSSProperties;
+  containerClassName?: string;
+  containerStyle?: React.CSSProperties;
+  contentClassName?: string;
+  contentStyle?: React.CSSProperties;
 }
 
 export const Modal = ({
@@ -18,6 +24,12 @@ export const Modal = ({
   children,
   size = "md",
   showHeader = true,
+  overlayClassName = "",
+  overlayStyle,
+  containerClassName = "",
+  containerStyle,
+  contentClassName = "",
+  contentStyle,
 }: ModalProps) => {
   // Cerrar modal con tecla ESC
   useEffect(() => {
@@ -56,12 +68,12 @@ export const Modal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0, 0, 0, 0.5)" }}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${overlayClassName}`}
+      style={{ background: "rgba(0, 0, 0, 0.5)", ...overlayStyle }}
       onClick={onClose}
     >
       <div
-        className={`relative w-full ${sizeClasses[size]} rounded-[10px] shadow-xl`}
+        className={`relative w-full ${sizeClasses[size]} rounded-[10px] shadow-xl ${containerClassName}`}
         style={{
           background: "#FFFFFF",
           maxHeight: "90vh",
@@ -69,6 +81,7 @@ export const Modal = ({
           flexDirection: "column",
           border: "1px solid rgba(166, 166, 166, 0.5)",
           boxShadow: "0px 4px 4px rgba(166, 166, 166, 0.25)",
+          ...containerStyle,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -92,7 +105,10 @@ export const Modal = ({
         )}
 
         {/* Content */}
-        <div className="px-6 py-4 overflow-y-auto flex-1" style={{ overflowX: "hidden" }}>
+        <div
+          className={`px-6 py-4 overflow-y-auto flex-1 ${contentClassName}`}
+          style={{ overflowX: "hidden", ...contentStyle }}
+        >
           {children}
         </div>
       </div>

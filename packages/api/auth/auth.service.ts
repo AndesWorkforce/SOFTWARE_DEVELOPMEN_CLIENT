@@ -18,9 +18,34 @@ export interface AuthResponse {
   };
 }
 
+export interface RegisterClientPayload {
+  name: string;
+  email: string;
+  password: string;
+  description?: string;
+}
+
 export class AuthService {
   async register(payload: RegisterPayload): Promise<AuthResponse> {
     const response = await http.post<AuthResponse>("/auth/register/user", payload);
+    return response.data;
+  }
+
+  async registerClient(payload: RegisterClientPayload): Promise<AuthResponse> {
+    // Si el baseURL no está configurado, axios intentará pegarle al frontend (Next)
+    // y "no llega nada" al backend.
+    if (!http.defaults.baseURL) {
+      throw new Error(
+        "API Base URL is not configured. Set NEXT_PUBLIC_API_BASE_URL_DEV (and restart Next dev server).",
+      );
+    }
+
+    const response = await http.post<AuthResponse>("/auth/register/client", payload, {
+      headers: {
+        // El API Gateway lo usa en Postman para bypass de auth en entornos con guards/interceptors
+        "X-No-Auth": "1",
+      },
+    });
     return response.data;
   }
 

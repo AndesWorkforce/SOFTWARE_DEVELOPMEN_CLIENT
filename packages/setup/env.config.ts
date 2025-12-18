@@ -1,5 +1,11 @@
 /**
  * Get the API base URL based on the current environment
+ *
+ * The environment is determined by NEXT_PUBLIC_ENV (or NODE_ENV as fallback):
+ * - If NEXT_PUBLIC_ENV=development → uses NEXT_PUBLIC_API_BASE_URL_DEV
+ * - If NEXT_PUBLIC_ENV=production → uses NEXT_PUBLIC_API_BASE_URL_PROD
+ * - If NEXT_PUBLIC_ENV=staging → uses NEXT_PUBLIC_API_BASE_URL_STAGING
+ *
  * @returns The appropriate API base URL for the environment
  */
 export function getApiBaseUrl(): string {
@@ -15,7 +21,7 @@ export function getApiBaseUrl(): string {
     return process.env.NEXT_PUBLIC_API_BASE_URL_STAGING || "";
   }
 
-  // In development, use localhost
+  // In development, use the development API URL (default)
   return process.env.NEXT_PUBLIC_API_BASE_URL_DEV || "";
 }
 

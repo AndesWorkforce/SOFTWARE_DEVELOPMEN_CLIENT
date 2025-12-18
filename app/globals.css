@@ -24,3 +24,9 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Inputs de tiempo con icono custom (ocultar indicador nativo) */
+.time-input-with-icon::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  display: none;
+}
