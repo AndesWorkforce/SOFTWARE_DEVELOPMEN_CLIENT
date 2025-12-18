@@ -373,8 +373,13 @@ export default function ClientsPage() {
   const loadClients = async () => {
     try {
       setLoading(true);
-      // Por ahora no pasamos filtros ya que el backend no los acepta
-      const data = await clientsService.getAll();
+      const name = typeof filters?.name === "string" ? filters.name : undefined;
+      const teamId = typeof filters?.teamId === "string" ? filters.teamId : undefined;
+
+      const data = await clientsService.getAll({
+        name: name?.trim() ? name.trim() : undefined,
+        teamId: teamId?.trim() ? teamId.trim() : undefined,
+      });
       setClients(data);
     } catch (error) {
       console.error("Error loading clients:", error);
