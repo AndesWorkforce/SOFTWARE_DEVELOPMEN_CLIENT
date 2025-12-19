@@ -16,14 +16,19 @@ export interface UpdateClientPayload {
   description?: string | null;
 }
 
+export interface GetAllClientsParams {
+  name?: string;
+  teamId?: string;
+}
+
 export class ClientsService {
   /**
    * Obtiene todos los clientes
    * @returns Array de clientes
    */
-  async getAll(): Promise<Client[]> {
+  async getAll(params?: GetAllClientsParams): Promise<Client[]> {
     try {
-      const response = await http.get<Client[]>("/clients");
+      const response = await http.get<Client[]>("/clients", { params });
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError;
