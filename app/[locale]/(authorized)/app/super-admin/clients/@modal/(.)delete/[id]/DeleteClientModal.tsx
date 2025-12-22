@@ -6,6 +6,7 @@ import { Button } from "@/packages/design-system";
 import { clientsService } from "@/packages/api/clients/clients.service";
 import { Trash2 } from "lucide-react";
 
+
 interface DeleteClientModalProps {
   clientId: string;
   onClose: () => void;
@@ -16,6 +17,7 @@ export function DeleteClientModal({ clientId, onClose, onDeleted }: DeleteClient
   const t = useTranslations();
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
 
   const handleConfirmDelete = async () => {
     setLoading(true);

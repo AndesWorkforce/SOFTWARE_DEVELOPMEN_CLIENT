@@ -570,6 +570,7 @@ export default function ClientContractorsPage() {
                 className="md:text-[16px] h-[35px] md:h-[40px]"
               >
                 <Plus className="w-[14px] h-[14px] md:w-5 md:h-5" />
+
                 <span className="font-semibold">{t("contractors.addContractor")}</span>
               </Button>
             </Link>

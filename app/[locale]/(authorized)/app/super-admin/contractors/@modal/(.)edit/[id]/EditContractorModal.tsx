@@ -249,7 +249,6 @@ export function EditContractorModal({
   // Enviar formulario -> mostrar modal de confirmación antes de guardar
   const handleSubmit = async (values: Record<string, unknown>) => {
     setPendingValues(values);
-    setSubmitError(null);
     setShowConfirm(true);
   };
 
@@ -281,7 +280,6 @@ export function EditContractorModal({
   const handleCancelConfirm = () => {
     setShowConfirm(false);
     setPendingValues(null);
-    setSubmitError(null);
   };
 
   const handleSuccessContinue = () => {
