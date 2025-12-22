@@ -265,7 +265,7 @@ export default function ContractorsPage() {
   }, [t, handleEdit, handleDelete]);
 
   const filtersConfig = useMemo(() => {
-    // Configuración base de filtros (diseño alineado con Figma)
+    // Configuración base de filtros
     const baseFiltersConfig: FilterPanelConfig = {
       filters: [
         {
