@@ -132,27 +132,29 @@ export default function ContractorsPage() {
           width: "100px",
           align: "left",
           render: (_value: unknown, row: Contractor) => (
-            <div className="flex flex-col gap-1 items-start">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit(row);
-                }}
-                className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-                <span className="text-sm font-semibold">Edit</span>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(row);
-                }}
-                className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span className="text-sm font-semibold">Delete</span>
-              </button>
+            <div className="w-full flex justify-center">
+              <div className="flex flex-col gap-1 items-start">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit(row);
+                  }}
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span className="text-sm font-semibold">Edit</span>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(row);
+                  }}
+                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="text-sm font-semibold">Delete</span>
+                </button>
+              </div>
             </div>
           ),
         },
