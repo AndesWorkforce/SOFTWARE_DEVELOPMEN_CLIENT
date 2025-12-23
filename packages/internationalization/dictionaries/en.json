@@ -49,7 +49,7 @@
     "forgotPassword": "Forgot your password?"
   },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "{month} Summary",
     "subtitle": "Monitor your productivity and activity metrics",
     "metrics": {
       "totalSessions": "Total agents",
@@ -110,7 +110,7 @@
     "title": "Reports",
     "exportPdf": "Export PDF",
     "applyFilters": "Apply Filters",
-    "cleanFilters": "Clean Filters",
+    "cleanFilters": "Clean filters",
     "date": "Date",
     "user": "User",
     "country": "Country",
@@ -301,7 +301,9 @@
     "deleteConfirmTitle": "Delete client?",
     "deleteConfirmSubtitle": "Are you sure you want to delete this client? This action cannot be undone.",
     "deleteConfirmDelete": "Delete",
-    "deleteConfirmCancel": "Cancel"
+    "deleteConfirmCancel": "Cancel",
+    "deleteSuccessTitle": "Client deleted successfully",
+    "deleteSuccessContinue": "Continue"
   },
   "teams": {
     "createTeam": "Create Team",
@@ -309,6 +311,8 @@
       "createTitle": "Create Team",
       "name": "Name",
       "namePlaceholder": "Type team name here...",
+      "description": "Description",
+      "descriptionPlaceholder": "Type the description here...",
       "createButton": "Create Team",
       "cancel": "Cancel",
       "confirmTitle": "Create Team?",

@@ -116,27 +116,29 @@ export default function ClientsPage() {
           width: "100px",
           align: "left",
           render: (_value: unknown, row: Client) => (
-            <div className="flex flex-col gap-1 items-start">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit(row);
-                }}
-                className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-                <span className="text-sm font-semibold">Edit</span>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(row);
-                }}
-                className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span className="text-sm font-semibold">Delete</span>
-              </button>
+            <div className="w-full flex justify-center">
+              <div className="flex flex-col gap-1 items-start">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit(row);
+                  }}
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span className="text-sm font-semibold">Edit</span>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(row);
+                  }}
+                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="text-sm font-semibold">Delete</span>
+                </button>
+              </div>
             </div>
           ),
         },
@@ -437,7 +439,7 @@ export default function ClientsPage() {
                 borderRadius: "8px",
                 boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
               }}
-              className="md:text-[16px] h-[35px] md:h-[45px]"
+              className="md:text-[16px] h-[35px] md:h-[40px]"
             >
               <Plus className="w-[14px] h-[14px] md:w-5 md:h-5" />
               <span className="font-semibold">{t("clients.addClient") || "Add Client"}</span>

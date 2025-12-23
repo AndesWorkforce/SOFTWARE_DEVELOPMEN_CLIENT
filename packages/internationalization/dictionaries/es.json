@@ -49,7 +49,7 @@
     "forgotPassword": "¿Olvidaste tu contraseña?"
   },
   "dashboard": {
-    "title": "Panel de Control",
+    "title": "Resumen de {month}",
     "subtitle": "Monitorea tu productividad y métricas de actividad",
     "metrics": {
       "totalSessions": "Agentes Totales",
@@ -110,7 +110,7 @@
     "title": "Reportes",
     "exportPdf": "Exportar PDF",
     "applyFilters": "Aplicar Filtros",
-    "cleanFilters": "Limpiar Filtros",
+    "cleanFilters": "Limpiar filtros",
     "date": "Fecha",
     "user": "Usuario",
     "country": "País",
@@ -301,7 +301,9 @@
     "deleteConfirmTitle": "¿Eliminar cliente?",
     "deleteConfirmSubtitle": "¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer.",
     "deleteConfirmDelete": "Eliminar",
-    "deleteConfirmCancel": "Cancelar"
+    "deleteConfirmCancel": "Cancelar",
+    "deleteSuccessTitle": "Cliente eliminado correctamente",
+    "deleteSuccessContinue": "Continuar"
   },
   "teams": {
     "createTeam": "Crear equipo",
@@ -309,6 +311,8 @@
       "createTitle": "Crear equipo",
       "name": "Nombre",
       "namePlaceholder": "Escribe el nombre del equipo aquí...",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Escribe la descripción aquí...",
       "createButton": "Crear equipo",
       "cancel": "Cancelar",
       "confirmTitle": "¿Crear equipo?",
