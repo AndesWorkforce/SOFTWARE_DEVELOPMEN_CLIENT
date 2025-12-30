@@ -319,6 +319,7 @@
     },
     "modal": {
       "title": "Add User",
+      "addTitle": "Add User",
       "firstName": "First Name",
       "lastName": "Last Name",
       "email": "Email",
@@ -388,5 +389,10 @@
     "submit": "Save",
     "cancel": "Cancel",
     "saving": "Saving..."
+  },
+  "formValidation": {
+    "minLength": "Must be at least {min} characters",
+    "required": "{field} is required",
+    "invalidEmail": "Invalid email address"
   }
 }

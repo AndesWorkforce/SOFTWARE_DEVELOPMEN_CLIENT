@@ -319,6 +319,7 @@
     },
     "modal": {
       "title": "Agregar Usuario",
+      "addTitle": "Agregar Usuario",
       "firstName": "Nombre",
       "lastName": "Apellido",
       "email": "Correo Electrónico",
@@ -328,7 +329,10 @@
       "lastNamePlaceholder": "Escribe el apellido aquí...",
       "emailPlaceholder": "correo@outlook.com",
       "passwordPlaceholder": "Escribe la contraseña aquí...",
+      "rolePlaceholder": "Seleccionar rol",
       "selectPlaceholder": "Seleccionar...",
+      "loading": "Cargando...",
+      "save": "Guardar",
       "addButton": "Agregar Usuario",
       "cancel": "Cancelar",
       "adding": "Agregando...",
@@ -385,5 +389,10 @@
     "submit": "Guardar",
     "cancel": "Cancelar",
     "saving": "Guardando..."
+  },
+  "formValidation": {
+    "minLength": "Debe tener al menos {min} caracteres",
+    "required": "{field} es requerido",
+    "invalidEmail": "Correo electrónico inválido"
   }
 }
