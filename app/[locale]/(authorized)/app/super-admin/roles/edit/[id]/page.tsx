@@ -1,18 +1,21 @@
 "use client";
 
-import { EditUserModal } from "../../@modal/(.)edit/[id]/EditUserModal";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import { useLocale } from "next-intl";
+import { EditUserModal } from "@/app/[locale]/(authorized)/app/super-admin/roles/@modal/(.)edit/[id]/EditUserModal";
 
-export default function EditUserPage({ params }: { params: { id: string } }) {
+export default function EditUserPage() {
   const router = useRouter();
+  const locale = useLocale();
+  const params = useParams();
+  const userId = params?.id as string;
 
   const handleClose = () => {
-    router.push("../..");
+    const basePath = `/${locale}/app/super-admin/roles`;
+    router.push(basePath);
   };
 
-  const handleUpdated = () => {
-    // Se podría agregar lógica adicional aquí si es necesario
-  };
+  if (!userId) return null;
 
-  return <EditUserModal userId={params.id} onClose={handleClose} onUpdated={handleUpdated} />;
+  return <EditUserModal userId={userId} onClose={handleClose} />;
 }
