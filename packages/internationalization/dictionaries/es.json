@@ -73,6 +73,17 @@
       "recentSessions": "Sesiones Recientes",
       "recentSessionsSubtitle": "Tus últimas sesiones de actividad"
     },
+    "topEfficiency": "Máxima Eficiencia",
+    "lowPerformers": "Bajo Rendimiento",
+    "activeTalent": "Talento Activo",
+    "inactiveTalent": "Talento Inactivo",
+    "periods": {
+      "today": "Hoy",
+      "week": "Semana",
+      "month": "Mes"
+    },
+    "loading": "Cargando...",
+    "noDataAvailable": "No hay datos disponibles",
     "table": {
       "sessionId": "ID de Sesión",
       "startTime": "Hora de Inicio",

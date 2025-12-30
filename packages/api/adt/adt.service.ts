@@ -134,6 +134,100 @@ export class AdtService {
 
     return response.data;
   }
+
+  /**
+   * Obtiene el porcentaje de talento activo vs inactivo en un período.
+   * @param period 'day' (día actual), 'week' (última semana), 'month' (mes actual)
+   * @param useCache Si usar caché (default: true)
+   * @returns Porcentajes y conteos de contractors activos/inactivos
+   */
+  async getActiveTalentPercentage(
+    period: "day" | "week" | "month" = "day",
+    useCache: boolean = true,
+  ): Promise<{
+    active_percentage: number;
+    inactive_percentage: number;
+    total_contractors: number;
+    active_contractors: number;
+    inactive_contractors: number;
+    period: string;
+  }> {
+    try {
+      const response = await http.get("/adt/active-talent", {
+        params: {
+          period,
+          useCache: useCache ? "true" : "false",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getActiveTalentPercentage:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene top 5 mejores rankings de productividad.
+   * @param period 'day' (día actual), 'week' (última semana), 'month' (mes actual)
+   * @param useCache Si usar caché (default: true)
+   * @returns Top 5 contractors con mejor productividad_score
+   */
+  async getTop5BestRanking(
+    period: "day" | "week" | "month" = "day",
+    useCache: boolean = true,
+  ): Promise<RealtimeMetrics[]> {
+    try {
+      const response = await http.get<RealtimeMetrics[]>("/adt/ranking/top5-best", {
+        params: {
+          period,
+          useCache: useCache ? "true" : "false",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getTop5BestRanking:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene top 5 peores rankings de productividad.
+   * @param period 'day' (día actual), 'week' (última semana), 'month' (mes actual)
+   * @param useCache Si usar caché (default: true)
+   * @returns Top 5 contractors con peor productividad_score
+   */
+  async getTop5WorstRanking(
+    period: "day" | "week" | "month" = "day",
+    useCache: boolean = true,
+  ): Promise<RealtimeMetrics[]> {
+    try {
+      const response = await http.get<RealtimeMetrics[]>("/adt/ranking/top5-worst", {
+        params: {
+          period,
+          useCache: useCache ? "true" : "false",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getTop5WorstRanking:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      throw error;
+    }
+  }
 }
 
 export const adtService = new AdtService();
