@@ -47,6 +47,14 @@ export default function ContractorsPage() {
     [locale, router],
   );
 
+  const handleViewCalendar = useCallback(
+    (contractor: Contractor) => {
+      const calendarPath = `/${locale}/app/super-admin/contractors/calendar/${contractor.id}`;
+      router.push(calendarPath);
+    },
+    [locale, router],
+  );
+
   const tableConfig = useMemo(() => {
     // Configuración base de tabla
     const baseTableConfig: DataTableConfig<Contractor> = {
@@ -62,8 +70,8 @@ export default function ContractorsPage() {
           config: {
             action: {
               label: "View",
-              onClick: () => {
-                // TODO: Implementar vista de calendario
+              onClick: (row: Contractor) => {
+                handleViewCalendar(row);
               },
               icon: <Calendar className="w-3.5 h-3.5" />,
             },
@@ -184,13 +192,13 @@ export default function ContractorsPage() {
             key: "calendar",
             label: t("contractors.table.calendar"),
             dataPath: "id",
-            render: () => (
+            render: (_value: unknown, row: Contractor) => (
               <button
                 type="button"
                 className="inline-flex items-center gap-1 underline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  // En el futuro se puede conectar con la vista de calendario específica
+                  handleViewCalendar(row);
                 }}
               >
                 <Calendar className="w-3.5 h-3.5" />
@@ -264,7 +272,7 @@ export default function ContractorsPage() {
       },
     };
     return baseTableConfig;
-  }, [t, handleEdit, handleDelete]);
+  }, [t, handleEdit, handleDelete, handleViewCalendar]);
 
   const filtersConfig = useMemo(() => {
     // Configuración base de filtros
@@ -490,6 +498,7 @@ export default function ContractorsPage() {
   // Cargar contractors cuando cambien los filtros
   useEffect(() => {
     loadContractors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.name, filters.country, filters.clientId, filters.teamId, filters.jobPosition]);
 
   // Recargar contractors cuando volvemos a la página de contractors
@@ -500,7 +509,8 @@ export default function ContractorsPage() {
     if (pathname === basePath && filterOptions !== null) {
       loadContractors();
     }
-  }, [pathname, locale]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, locale, filterOptions]);
 
   return (
     <div className="p-4 md:p-8 min-h-screen" style={{ background: "#FFFFFF" }}>
