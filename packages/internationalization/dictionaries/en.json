@@ -305,6 +305,63 @@
     "deleteSuccessTitle": "Client deleted successfully",
     "deleteSuccessContinue": "Continue"
   },
+  "roles": {
+    "title": "Roles",
+    "addUser": "Add User",
+    "noUsers": "No users found",
+    "table": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "user": "User",
+      "email": "Email",
+      "role": "Role",
+      "action": "Action"
+    },
+    "modal": {
+      "title": "Add User",
+      "addTitle": "Add User",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "password": "Password",
+      "role": "Role",
+      "firstNamePlaceholder": "Type first name here...",
+      "lastNamePlaceholder": "Type last name here...",
+      "emailPlaceholder": "mail@outlook.com",
+      "passwordPlaceholder": "Type password here...",
+      "rolePlaceholder": "Select role",
+      "selectPlaceholder": "Select...",
+      "loading": "Loading...",
+      "save": "Save",
+      "cancel": "Cancel",
+      "addButton": "Add User",
+      "adding": "Adding...",
+      "errorCreating": "Error creating user. Please try again.",
+      "confirmTitle": "Add User?",
+      "confirmSubtitle": "Are you sure you want to add this user?",
+      "confirmYes": "Yes",
+      "confirmNo": "No",
+      "successTitle": "Successfully added user",
+      "successContinue": "Continue",
+      "editTitle": "Edit User",
+      "saveButton": "Save Changes",
+      "saving": "Saving...",
+      "errorUpdating": "Error updating user. Please try again.",
+      "editConfirmTitle": "Save changes?",
+      "editConfirmSubtitle": "Are you sure you want to save your changes?",
+      "editConfirmSave": "Save Changes",
+      "editConfirmCancel": "Cancel",
+      "editSuccessTitle": "Changes saved successfully",
+      "editSuccessContinue": "Continue",
+      "deleteConfirmTitle": "Are you sure?",
+      "deleteConfirmSubtitle": "This action cannot be undone. All values associated with this user will be lost.",
+      "deleteConfirmDelete": "Delete",
+      "deleteConfirmCancel": "Cancel",
+      "errorDeleting": "Error deleting user. Please try again.",
+      "deleteSuccessTitle": "User deleted successfully",
+      "deleteSuccessContinue": "Continue"
+    }
+  },
   "teams": {
     "createTeam": "Create Team",
     "modal": {
@@ -332,5 +389,10 @@
     "submit": "Save",
     "cancel": "Cancel",
     "saving": "Saving..."
+  },
+  "formValidation": {
+    "minLength": "Must be at least {min} characters",
+    "required": "{field} is required",
+    "invalidEmail": "Invalid email address"
   }
 }
