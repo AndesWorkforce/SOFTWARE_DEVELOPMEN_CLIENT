@@ -3,28 +3,24 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/packages/design-system";
-import { contractorsService } from "@/packages/api/contractors/contractors.service";
+import { usersService } from "@/packages/api/users/users.service";
 import { Trash2 } from "lucide-react";
 
-interface DeleteContractorModalProps {
-  contractorId: string;
+interface DeleteUserModalProps {
+  userId: string;
   onClose: () => void;
   onDeleted?: () => void;
 }
 
-export function DeleteContractorModal({
-  contractorId,
-  onClose,
-  onDeleted,
-}: DeleteContractorModalProps) {
-  const t = useTranslations("contractors.modal");
+export function DeleteUserModal({ userId, onClose, onDeleted }: DeleteUserModalProps) {
+  const t = useTranslations("roles.modal");
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleConfirmDelete = async () => {
     setLoading(true);
     try {
-      await contractorsService.delete(contractorId);
+      await usersService.remove(userId);
       if (onDeleted) {
         onDeleted();
       }
@@ -114,7 +110,7 @@ export function DeleteContractorModal({
                   className="text-[16px] text-center text-[#1e1e1e] font-normal leading-normal"
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  {t("deleteSuccessTitle") || "Contractor deleted successfully"}
+                  {t("deleteSuccessTitle") || "User deleted successfully"}
                 </p>
               </div>
               <Button
