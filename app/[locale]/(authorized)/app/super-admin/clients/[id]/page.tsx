@@ -563,15 +563,14 @@ export default function ClientContractorsPage() {
                   padding: "7px 21px",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
                   gap: "10px",
                   borderRadius: "8px",
                   boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
-                  width: "175px",
                 }}
-                className="h-[35px] md:h-[40px]"
+                className="md:text-[16px] h-[35px] md:h-[40px]"
               >
-                <Plus className="w-4 h-4 text-white" />
+                <Plus className="w-[14px] h-[14px] md:w-5 md:h-5" />
+
                 <span className="font-semibold">{t("contractors.addContractor")}</span>
               </Button>
             </Link>

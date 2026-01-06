@@ -29,6 +29,7 @@ export function EditContractorModal({
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [pendingValues, setPendingValues] = useState<Record<string, unknown> | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [clients, setClients] = useState<SelectOption[]>([]);
   const [teams, setTeams] = useState<(SelectOption & { clientId: string })[]>([]);
@@ -253,6 +254,7 @@ export function EditContractorModal({
 
   const handleConfirmSave = async () => {
     if (!pendingValues) return;
+    setSubmitError(null);
     setLoading(true);
     try {
       await contractorsService.update(contractorId, pendingValues);
@@ -263,10 +265,13 @@ export function EditContractorModal({
       setPendingValues(null);
       setShowSuccess(true);
     } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : t("errorUpdating") ||
+            "Error al actualizar el contratista. Por favor, intenta de nuevo.";
       console.error("Error updating contractor:", error);
-      throw new Error(
-        t("errorUpdating") || "Error al actualizar el contratista. Por favor, intenta de nuevo.",
-      );
+      setSubmitError(message);
     } finally {
       setLoading(false);
     }
@@ -296,46 +301,53 @@ export function EditContractorModal({
 
       {showConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-[12px] px-8 py-6 shadow-lg w-[80%] max-w-[400px] md:w-full">
-            <h2 className="text-xl font-semibold text-center mb-3" style={{ color: "#000000" }}>
-              {t("editConfirmTitle")}
-            </h2>
-            <p className="text-[15px] text-center mb-6" style={{ color: "#4B5563" }}>
-              {t("editConfirmSubtitle")}
-            </p>
-            <div className="flex flex-col md:flex-row w-full gap-[10px]">
-              <Button
-                type="button"
-                onClick={handleConfirmSave}
-                disabled={loading}
-                className="w-full md:w-auto"
-                style={{
-                  background: "#0097B2",
-                  color: "#FFFFFF",
-                  padding: "8px 20px",
-                  borderRadius: "10px",
-                  fontSize: "15px",
-                  fontWeight: 500,
-                }}
-              >
-                {t("editConfirmSave")}
-              </Button>
-              <Button
-                type="button"
-                onClick={handleCancelConfirm}
-                disabled={loading}
-                className="w-full md:w-auto"
-                style={{
-                  background: "#A6A6A6",
-                  color: "#FFFFFF",
-                  padding: "8px 24px",
-                  borderRadius: "10px",
-                  fontSize: "15px",
-                  fontWeight: 500,
-                }}
-              >
-                {t("editConfirmCancel")}
-              </Button>
+          <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-[40px] py-[30px] md:py-[25px] w-[80%] max-w-[401px] md:max-w-[480px] md:w-full flex items-center justify-center">
+            <div className="flex flex-col gap-[30px] items-center w-full max-w-[321px] md:max-w-[400px]">
+              <div className="flex flex-col gap-[15px] text-center w-full">
+                <h2 className="text-[24px] font-bold text-black">{t("editConfirmTitle")}</h2>
+                <p className="text-[16px] font-normal text-[#1E1E1E]">{t("editConfirmSubtitle")}</p>
+                {submitError && (
+                  <p className="text-[14px] font-medium text-red-600">{submitError}</p>
+                )}
+              </div>
+              <div className="flex flex-col md:flex-row gap-[10px] w-full">
+                <Button
+                  type="button"
+                  onClick={handleConfirmSave}
+                  disabled={loading}
+                  className="w-full md:flex-1"
+                  style={{
+                    background: "#0097B2",
+                    color: "#FFFFFF",
+                    height: "45px",
+                    padding: "12px 15px",
+                    borderRadius: "10px",
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
+                  }}
+                >
+                  {t("editConfirmSave")}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleCancelConfirm}
+                  disabled={loading}
+                  className="w-full md:flex-1"
+                  style={{
+                    background: "#A6A6A6",
+                    color: "#FFFFFF",
+                    height: "45px",
+                    padding: "12px 15px",
+                    borderRadius: "10px",
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
+                  }}
+                >
+                  {t("editConfirmCancel")}
+                </Button>
+              </div>
             </div>
           </div>
         </div>

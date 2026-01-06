@@ -55,7 +55,7 @@ export class TeamsService {
    * Crea un equipo
    * @param payload Datos del equipo
    */
-  async create(payload: { name: string; client_id: string }): Promise<Team> {
+  async create(payload: { name: string; client_id: string; description?: string }): Promise<Team> {
     try {
       const response = await http.post<Team>("/teams", payload);
       return response.data;

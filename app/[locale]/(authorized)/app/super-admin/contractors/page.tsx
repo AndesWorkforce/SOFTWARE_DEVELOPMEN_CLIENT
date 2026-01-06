@@ -47,6 +47,14 @@ export default function ContractorsPage() {
     [locale, router],
   );
 
+  const handleViewCalendar = useCallback(
+    (contractor: Contractor) => {
+      const calendarPath = `/${locale}/app/super-admin/contractors/calendar/${contractor.id}`;
+      router.push(calendarPath);
+    },
+    [locale, router],
+  );
+
   const tableConfig = useMemo(() => {
     // Configuración base de tabla
     const baseTableConfig: DataTableConfig<Contractor> = {
@@ -62,8 +70,8 @@ export default function ContractorsPage() {
           config: {
             action: {
               label: "View",
-              onClick: () => {
-                // TODO: Implementar vista de calendario
+              onClick: (row: Contractor) => {
+                handleViewCalendar(row);
               },
               icon: <Calendar className="w-3.5 h-3.5" />,
             },
@@ -132,27 +140,29 @@ export default function ContractorsPage() {
           width: "100px",
           align: "left",
           render: (_value: unknown, row: Contractor) => (
-            <div className="flex flex-col gap-1 items-start">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit(row);
-                }}
-                className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-                <span className="text-sm font-semibold">Edit</span>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(row);
-                }}
-                className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span className="text-sm font-semibold">Delete</span>
-              </button>
+            <div className="w-full flex justify-center">
+              <div className="flex flex-col gap-1 items-start">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit(row);
+                  }}
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span className="text-sm font-semibold">Edit</span>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(row);
+                  }}
+                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="text-sm font-semibold">Delete</span>
+                </button>
+              </div>
             </div>
           ),
         },
@@ -182,13 +192,13 @@ export default function ContractorsPage() {
             key: "calendar",
             label: t("contractors.table.calendar"),
             dataPath: "id",
-            render: () => (
+            render: (_value: unknown, row: Contractor) => (
               <button
                 type="button"
                 className="inline-flex items-center gap-1 underline"
                 onClick={(e) => {
                   e.stopPropagation();
-                  // En el futuro se puede conectar con la vista de calendario específica
+                  handleViewCalendar(row);
                 }}
               >
                 <Calendar className="w-3.5 h-3.5" />
@@ -262,10 +272,10 @@ export default function ContractorsPage() {
       },
     };
     return baseTableConfig;
-  }, [t, handleEdit, handleDelete]);
+  }, [t, handleEdit, handleDelete, handleViewCalendar]);
 
   const filtersConfig = useMemo(() => {
-    // Configuración base de filtros (diseño alineado con Figma)
+    // Configuración base de filtros
     const baseFiltersConfig: FilterPanelConfig = {
       filters: [
         {
