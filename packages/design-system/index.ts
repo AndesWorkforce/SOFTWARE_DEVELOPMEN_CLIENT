@@ -21,5 +21,8 @@ export * from "./components/FilterPanel";
 export * from "./components/DataTable";
 export * from "./components/FormModalLayout";
 export * from "./components/FormField";
+export * from "./components/TalentPercentageChart";
+export * from "./components/TopEfficiency";
+export * from "./components/LowPerformers";
 export * from "../types/FilterPanel.types";
 export * from "../types/DataTable.types";

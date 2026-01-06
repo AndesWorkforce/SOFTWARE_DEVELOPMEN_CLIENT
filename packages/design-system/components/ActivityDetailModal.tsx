@@ -1,302 +1,314 @@
 "use client";
 import { Modal } from "./Modal";
 import type { UserActivity } from "@/packages/types/reports.types";
+import type { ContractorSession } from "@/packages/types/adt.types";
+import { X } from "lucide-react";
+import { ActivityUserHeader } from "./ActivityUserHeader";
+import { ActivityDetailHeader } from "./ActivityDetailHeader";
+import { AgentSelector } from "./AgentSelector";
+import { TimeBreakdown } from "./TimeBreakdown";
+import { InputTotals } from "./InputTotals";
+import { SessionConnectivity } from "./SessionConnectivity";
+import { TopApplications } from "./TopApplications";
 
 export interface ActivityDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   activity: UserActivity | null;
   t: (key: string) => string;
+  dateRange?: { from: string; to: string };
+  sessions?: ContractorSession[];
+  isLoading?: boolean;
 }
 
-export const ActivityDetailModal = ({ isOpen, onClose, activity, t }: ActivityDetailModalProps) => {
-  if (!activity) return null;
+// Skeleton component for loading state
+const SkeletonBox = ({
+  width,
+  height,
+  className = "",
+}: {
+  width?: string;
+  height?: string;
+  className?: string;
+}) => (
+  <div
+    className={`animate-pulse rounded ${className}`}
+    style={{
+      width: width || "100%",
+      height: height || "20px",
+      background: "#e5e5e5",
+    }}
+  />
+);
 
-  const formatSecondsToTime = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return `${hours.toString().padStart(2, "0")}h ${minutes.toString().padStart(2, "0")}m`;
-  };
+// Skeleton for the entire modal content
+const ActivityDetailSkeleton = ({
+  t,
+  onClose,
+}: {
+  t: (key: string) => string;
+  onClose: () => void;
+}) => (
+  <>
+    {/* Header with Close Button */}
+    <div
+      className="flex items-center justify-end shrink-0 mb-0"
+      style={{ width: "24px", height: "24px", marginLeft: "auto" }}
+    >
+      <button
+        onClick={onClose}
+        className="p-0 hover:opacity-70 transition-opacity cursor-pointer block"
+        aria-label="Close modal"
+        style={{ width: "24px", height: "24px" }}
+      >
+        <X className="w-6 h-6" style={{ color: "#000000" }} />
+      </button>
+    </div>
 
-  const getActiveTime = () => {
-    if (!activity.metrics) return "00h 00m";
-    const totalSeconds = activity.metrics.activeBeats * 60;
-    return formatSecondsToTime(totalSeconds);
-  };
-
-  const getInactiveTime = () => {
-    if (!activity.metrics) return "00h 00m";
-    const totalSeconds = activity.metrics.idleBeats * 60;
-    return formatSecondsToTime(totalSeconds);
-  };
-
-  const getSessionCount = () => {
-    return activity.metrics?.totalBeats ? Math.ceil(activity.metrics.totalBeats / 120) : 0;
-  };
-
-  const getAvgDuration = () => {
-    const sessionCount = getSessionCount();
-    if (sessionCount === 0 || !activity.metrics) return "0h 00m";
-    const avgSeconds = (activity.metrics.totalBeats * 60) / sessionCount;
-    return formatSecondsToTime(avgSeconds);
-  };
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" showHeader={false}>
-      <div className="space-y-6">
-        {/* Header with User Info */}
-        <div
-          className="flex items-center justify-between pb-4 border-b"
-          style={{ borderColor: "#E5E5E5" }}
-        >
-          <div className="flex items-center gap-4">
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold"
-              style={{ background: "#0097B2" }}
-            >
-              {activity.user.name.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h3 className="text-xl font-bold" style={{ color: "#000000" }}>
-                {activity.user.name}
-              </h3>
-              <p className="text-sm" style={{ color: "#6B7280" }}>
-                {activity.jobPosition} | {activity.team.name}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            aria-label="Close modal"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              style={{ color: "#000000" }}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+    <div className="flex flex-col gap-[25px] items-start" style={{ width: "100%" }}>
+      {/* User Info Section Skeleton */}
+      <div className="flex gap-[10px] items-center">
+        <SkeletonBox width="45px" height="45px" className="rounded-full" />
+        <div className="flex flex-col gap-[6px]">
+          <SkeletonBox width="180px" height="24px" />
+          <SkeletonBox width="220px" height="18px" />
         </div>
+      </div>
 
-        {/* Activity Detail Header */}
-        <div>
-          <h4 className="text-lg font-bold mb-2" style={{ color: "#000000" }}>
-            {t("modal.activityDetail")}
-          </h4>
-          <p className="text-sm" style={{ color: "#9CA3AF" }}>
-            {t("modal.today")}, {activity.date}
-          </p>
-        </div>
+      {/* Divider */}
+      <div className="h-px w-full" style={{ background: "#E5E5E5" }} />
 
-        {/* Agent Dropdown */}
-        <div>
-          <select
-            className="w-full px-4 py-2 rounded-lg border"
+      {/* Activity Detail Header Skeleton */}
+      <div className="flex flex-col gap-[6px]">
+        <SkeletonBox width="150px" height="24px" />
+        <SkeletonBox width="200px" height="16px" />
+      </div>
+
+      {/* Main Content Grid Skeleton */}
+      <div className="flex gap-[1.64%] items-start justify-between w-full" style={{ gap: "1.64%" }}>
+        {/* Left Column */}
+        <div className="flex flex-col gap-[10px]" style={{ width: "65.57%", minWidth: "400px" }}>
+          {/* Agent Dropdown Skeleton */}
+          <SkeletonBox height="45px" className="rounded-[5px]" />
+
+          {/* Time Breakdown Skeleton */}
+          <div
+            className="px-[20px] py-[28px] rounded-[5px]"
             style={{
-              borderColor: "#D1D5DB",
               background: "#FFFFFF",
-              color: "#000000",
+              border: "1px solid rgba(166, 166, 166, 0.5)",
+              height: "132px",
             }}
           >
-            <option>Agent VM-Dev-01</option>
-          </select>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Column */}
-          <div className="space-y-6">
-            {/* Time Breakdown */}
-            <div
-              className="p-6 rounded-lg"
-              style={{
-                background: "#FFFFFF",
-                border: "1px solid #E5E5E5",
-              }}
-            >
-              <h5 className="font-bold mb-4" style={{ color: "#000000" }}>
-                {t("modal.timeBreakdown")}
-              </h5>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm" style={{ color: "#6B7280" }}>
-                      {t("modal.totalTime")}
-                    </span>
-                    <span className="font-bold text-2xl" style={{ color: "#000000" }}>
-                      {activity.timeWorked}
-                    </span>
-                  </div>
+            <div className="flex flex-col gap-[15px]">
+              <SkeletonBox width="130px" height="20px" />
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col items-center gap-[5px]">
+                  <SkeletonBox width="80px" height="28px" />
+                  <SkeletonBox width="60px" height="14px" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-3 h-3 rounded-full" style={{ background: "#2EC36D" }} />
-                    <span className="text-sm" style={{ color: "#6B7280" }}>
-                      {t("modal.activeTime")}
-                    </span>
-                  </div>
-                  <span className="font-bold text-xl" style={{ color: "#2EC36D" }}>
-                    {getActiveTime()}
-                  </span>
+                <div className="flex flex-col items-center gap-[5px]">
+                  <SkeletonBox width="90px" height="28px" />
+                  <SkeletonBox width="70px" height="14px" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-3 h-3 rounded-full" style={{ background: "#FF0004" }} />
-                    <span className="text-sm" style={{ color: "#6B7280" }}>
-                      {t("modal.inactiveTime")}
-                    </span>
-                  </div>
-                  <span className="font-bold text-xl" style={{ color: "#FF0004" }}>
-                    {getInactiveTime()}
-                  </span>
+                <div className="flex flex-col items-center gap-[5px]">
+                  <SkeletonBox width="90px" height="28px" />
+                  <SkeletonBox width="80px" height="14px" />
                 </div>
-              </div>
-            </div>
-
-            {/* Session & Connectivity */}
-            <div
-              className="p-6 rounded-lg"
-              style={{
-                background: "#FFFFFF",
-                border: "1px solid #E5E5E5",
-              }}
-            >
-              <h5 className="font-bold mb-4" style={{ color: "#000000" }}>
-                {t("modal.sessionConnectivity")}
-              </h5>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <p className="text-sm mb-1" style={{ color: "#6B7280" }}>
-                    {t("modal.sessionCount")}
-                  </p>
-                  <p className="text-3xl font-bold" style={{ color: "#000000" }}>
-                    {getSessionCount()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm mb-1" style={{ color: "#6B7280" }}>
-                    {t("modal.avgDuration")}
-                  </p>
-                  <p className="text-3xl font-bold" style={{ color: "#000000" }}>
-                    {getAvgDuration()}
-                  </p>
-                </div>
-              </div>
-              {/* Simple bar chart placeholder */}
-              <div className="h-32 flex items-end justify-between gap-1">
-                {[20, 40, 30, 50, 35, 45, 25, 40].map((height, index) => (
-                  <div
-                    key={index}
-                    className="flex-1 rounded-t"
-                    style={{
-                      background: "#0097B2",
-                      height: `${height}%`,
-                    }}
-                  />
-                ))}
-              </div>
-              <div className="flex justify-between mt-2 text-xs" style={{ color: "#9CA3AF" }}>
-                <span>08:00</span>
-                <span>09:00</span>
-                <span>11:00</span>
-                <span>13:00</span>
-                <span>16:00</span>
               </div>
             </div>
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Input Totals */}
-            <div
-              className="p-6 rounded-lg"
-              style={{
-                background: "#FFFFFF",
-                border: "1px solid #E5E5E5",
-              }}
-            >
-              <h5 className="font-bold mb-4" style={{ color: "#000000" }}>
-                {t("modal.inputTotals")}
-              </h5>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm mb-1" style={{ color: "#6B7280" }}>
-                    {t("modal.totalKeyboardInputs")}
-                  </p>
-                  <p className="text-2xl font-bold" style={{ color: "#000000" }}>
-                    {activity.metrics?.totalKeyboardInputs?.toLocaleString() || "0"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm mb-1" style={{ color: "#6B7280" }}>
-                    {t("modal.totalMouseInputs")}
-                  </p>
-                  <p className="text-2xl font-bold" style={{ color: "#000000" }}>
-                    {activity.metrics?.totalMouseClicks?.toLocaleString() || "0"}
-                  </p>
+          {/* Session & Connectivity Skeleton */}
+          <div
+            className="px-[20px] py-[28px] rounded-[5px]"
+            style={{
+              background: "#FFFFFF",
+              border: "1px solid rgba(166, 166, 166, 0.5)",
+              height: "295px",
+            }}
+          >
+            <div className="flex flex-col gap-[25px]">
+              <div className="flex flex-col gap-[10px]">
+                <SkeletonBox width="180px" height="20px" />
+                <div className="flex gap-[10px]">
+                  <div
+                    className="flex-1 p-[10px] rounded-[5px]"
+                    style={{ border: "1px solid rgba(166, 166, 166, 0.25)", height: "63px" }}
+                  >
+                    <SkeletonBox width="100px" height="14px" className="mb-[5px]" />
+                    <SkeletonBox width="60px" height="24px" />
+                  </div>
+                  <div
+                    className="flex-1 p-[10px] rounded-[5px]"
+                    style={{ border: "1px solid rgba(166, 166, 166, 0.25)", height: "63px" }}
+                  >
+                    <SkeletonBox width="90px" height="14px" className="mb-[5px]" />
+                    <SkeletonBox width="70px" height="24px" />
+                  </div>
                 </div>
               </div>
+              <SkeletonBox height="122px" className="rounded-[5px]" />
             </div>
+          </div>
+        </div>
 
-            {/* Top Applications */}
-            <div
-              className="p-6 rounded-lg"
-              style={{
-                background: "#FFFFFF",
-                border: "1px solid #E5E5E5",
-              }}
-            >
-              <h5 className="font-bold mb-4" style={{ color: "#000000" }}>
-                {t("modal.topApplications")}
-              </h5>
-              <div className="space-y-3">
-                {activity.metrics?.appUsage && activity.metrics.appUsage.length > 0 ? (
-                  activity.metrics.appUsage.slice(0, 5).map((app, index) => {
-                    const icon = app.appName.toLowerCase().includes("code")
-                      ? "💻"
-                      : app.appName.toLowerCase().includes("chrome")
-                        ? "🌐"
-                        : app.appName.toLowerCase().includes("figma")
-                          ? "🎨"
-                          : app.appName.toLowerCase().includes("slack")
-                            ? "💬"
-                            : app.appName.toLowerCase().includes("teams")
-                              ? "📞"
-                              : "📱";
+        {/* Right Column */}
+        <div className="flex flex-col gap-[10px]" style={{ width: "32.79%", minWidth: "200px" }}>
+          {/* Input Totals Skeleton */}
+          <div
+            className="px-[17px] py-[28px] rounded-[5px]"
+            style={{
+              background: "#FFFFFF",
+              border: "1px solid rgba(166, 166, 166, 0.5)",
+              height: "221px",
+            }}
+          >
+            <div className="flex flex-col gap-[10px]">
+              <SkeletonBox width="100px" height="20px" />
+              <div
+                className="p-[10px] rounded-[5px]"
+                style={{ border: "1px solid rgba(166, 166, 166, 0.25)", height: "63px" }}
+              >
+                <SkeletonBox width="130px" height="14px" className="mb-[5px]" />
+                <SkeletonBox width="80px" height="24px" />
+              </div>
+              <div
+                className="p-[10px] rounded-[5px]"
+                style={{ border: "1px solid rgba(166, 166, 166, 0.25)", height: "63px" }}
+              >
+                <SkeletonBox width="120px" height="14px" className="mb-[5px]" />
+                <SkeletonBox width="70px" height="24px" />
+              </div>
+            </div>
+          </div>
 
-                    return (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{icon}</span>
-                          <span className="text-sm font-medium" style={{ color: "#000000" }}>
-                            {app.appName}
-                          </span>
-                        </div>
-                        <span className="text-sm font-semibold" style={{ color: "#6B7280" }}>
-                          {formatSecondsToTime(app.seconds)}
-                        </span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-sm text-center py-4" style={{ color: "#9CA3AF" }}>
-                    {t("modal.noApplicationData")}
-                  </p>
-                )}
+          {/* Top Applications Skeleton */}
+          <div
+            className="px-[17px] py-[28px] rounded-[5px]"
+            style={{ background: "#FFFFFF", border: "1px solid rgba(166, 166, 166, 0.5)" }}
+          >
+            <div className="flex flex-col gap-[15px]">
+              <SkeletonBox width="130px" height="20px" />
+              <div className="flex flex-col gap-[10px]">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex gap-[10px] items-center">
+                      <SkeletonBox width="15px" height="15px" className="rounded" />
+                      <SkeletonBox width="60px" height="14px" />
+                    </div>
+                    <SkeletonBox width="50px" height="14px" />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </>
+);
+
+export const ActivityDetailModal = ({
+  isOpen,
+  onClose,
+  activity,
+  t,
+  dateRange,
+  sessions = [],
+  isLoading = false,
+}: ActivityDetailModalProps) => {
+  // Show skeleton when loading or when no activity data yet
+  const showSkeleton = isLoading || !activity;
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="xl"
+      showHeader={false}
+      containerStyle={{
+        background: "#F7F7F7",
+        padding: "0",
+        maxWidth: "42.36%", // 610px / 1440px = 42.36%
+        width: "42.36%",
+        minWidth: "610px", // Mantener mínimo para evitar que se haga muy pequeño
+      }}
+      contentStyle={{
+        padding: "20px 25px",
+        background: "#F7F7F7",
+        borderRadius: "10px",
+      }}
+    >
+      {showSkeleton ? (
+        <ActivityDetailSkeleton t={t} onClose={onClose} />
+      ) : activity ? (
+        <>
+          {/* Header with Close Button */}
+          <div
+            className="flex items-center justify-end shrink-0 mb-0"
+            style={{ width: "24px", height: "24px", marginLeft: "auto" }}
+          >
+            <button
+              onClick={onClose}
+              className="p-0 hover:opacity-70 transition-opacity cursor-pointer block"
+              aria-label="Close modal"
+              style={{ width: "24px", height: "24px" }}
+            >
+              <X className="w-6 h-6" style={{ color: "#000000" }} />
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-[25px] items-start" style={{ width: "100%" }}>
+            {/* User Info Section */}
+            <ActivityUserHeader activity={activity} />
+
+            {/* Divider */}
+            <div
+              className="h-px w-full"
+              style={{
+                background: "#E5E5E5",
+              }}
+            />
+
+            {/* Activity Detail Header */}
+            <ActivityDetailHeader activity={activity} dateRange={dateRange} t={t} />
+
+            {/* Main Content Grid */}
+            <div
+              className="flex gap-[1.64%] items-start justify-between w-full"
+              style={{ gap: "1.64%" }}
+            >
+              {/* Left Column */}
+              <div
+                className="flex flex-col gap-[10px]"
+                style={{ width: "65.57%", minWidth: "400px" }}
+              >
+                {/* Agent Dropdown */}
+                <AgentSelector />
+
+                {/* Time Breakdown */}
+                <TimeBreakdown activity={activity} t={t} />
+
+                {/* Session & Connectivity */}
+                <SessionConnectivity sessions={sessions} t={t} />
+              </div>
+
+              {/* Right Column */}
+              <div
+                className="flex flex-col gap-[10px]"
+                style={{ width: "32.79%", minWidth: "200px" }}
+              >
+                {/* Input Totals */}
+                <InputTotals activity={activity} t={t} />
+
+                {/* Top Applications */}
+                <TopApplications activity={activity} t={t} />
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
     </Modal>
   );
 };

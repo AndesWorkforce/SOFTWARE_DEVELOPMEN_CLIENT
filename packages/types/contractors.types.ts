@@ -80,4 +80,5 @@ export interface ContractorFilters {
   client_id?: string;
   team_id?: string;
   job_position?: string;
+  isActive?: boolean;
 }

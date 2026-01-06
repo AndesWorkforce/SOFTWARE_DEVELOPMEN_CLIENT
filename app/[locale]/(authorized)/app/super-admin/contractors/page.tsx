@@ -432,7 +432,11 @@ export default function ContractorsPage() {
         client_id?: string;
         team_id?: string;
         job_position?: string;
-      } = {};
+        isActive?: boolean;
+      } = {
+        // Por defecto, solo mostrar contratistas activos
+        isActive: true,
+      };
 
       const name = typeof filters.name === "string" ? filters.name : "";
       const country = typeof filters.country === "string" ? filters.country : "";
@@ -456,28 +460,10 @@ export default function ContractorsPage() {
         apiFilters.job_position = jobPosition.trim();
       }
 
-      const data = await contractorsService.getAll(
-        Object.keys(apiFilters).length > 0 ? apiFilters : undefined,
-      );
+      const data = await contractorsService.getAll(apiFilters);
 
-      // Enriquecer con información de clientes y equipos si no viene del backend
-      const allClients = await clientsService.getAll();
-      const allTeams = await teamsService.getAll();
-
-      const enrichedData = data.map((contractor) => {
-        const client = allClients.find((c) => c.id === contractor.client_id);
-        const team = contractor.team_id ? allTeams.find((t) => t.id === contractor.team_id) : null;
-
-        return {
-          ...contractor,
-          client_name: contractor.client_name || client?.name,
-          team_name: contractor.team_name || team?.name,
-        };
-      });
-
-      // Mostrar solo contratistas activos
-      const activeContractors = enrichedData.filter((contractor) => contractor.isActive);
-      setContractors(activeContractors);
+      // El backend ya filtra por isActive y devuelve client_name y team_name
+      setContractors(data);
     } catch (error) {
       console.error("Error loading contractors:", error);
       setContractors([]);
@@ -500,17 +486,6 @@ export default function ContractorsPage() {
     loadContractors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.name, filters.country, filters.clientId, filters.teamId, filters.jobPosition]);
-
-  // Recargar contractors cuando volvemos a la página de contractors
-  useEffect(() => {
-    const basePath = `/${locale}/app/super-admin/contractors`;
-
-    // Si estamos en la ruta base de contractors y ya se cargaron las opciones de filtros
-    if (pathname === basePath && filterOptions !== null) {
-      loadContractors();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, locale, filterOptions]);
 
   return (
     <div className="p-4 md:p-8 min-h-screen" style={{ background: "#FFFFFF" }}>

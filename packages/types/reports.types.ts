@@ -40,6 +40,7 @@ export interface UserActivity {
     totalMouseClicks: number;
     avgKeyboardPerMin: number;
     avgMousePerMin: number;
+    totalSessionTimeSeconds: number;
     effectiveWorkSeconds: number;
     productivityScore: number;
     appUsage?: Array<{ appName: string; seconds: number }>;

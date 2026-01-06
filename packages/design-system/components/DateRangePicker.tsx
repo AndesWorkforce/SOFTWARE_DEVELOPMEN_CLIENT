@@ -1,6 +1,5 @@
 "use client";
 import { forwardRef } from "react";
-import { Calendar } from "lucide-react";
 
 export interface DateRangePickerProps {
   label?: string;
@@ -17,50 +16,57 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
     { label, startDate, endDate, onStartDateChange, onEndDateChange, error, className = "" },
     ref,
   ) => {
-    const handleStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       onStartDateChange(e.target.value);
     };
 
-    const handleEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       onEndDateChange(e.target.value);
     };
 
     return (
       <div ref={ref} className={`w-full ${className}`}>
         {label && (
-          <label className="block text-sm font-medium mb-1" style={{ color: "#000000" }}>
+          <p className="text-[14px] md:text-[16px] font-medium md:font-semibold text-black mb-[5px]">
             {label}
-          </label>
+          </p>
         )}
         <div
-          className="relative flex items-center gap-2 border rounded-md px-3 py-2"
+          className="relative flex items-center rounded-[5px] h-[35px] md:h-[45px]"
           style={{
             background: "#FFFFFF",
-            borderColor: error ? "#EF4444" : "#D1D5DB",
+            border: error ? "1px solid #EF4444" : "1px solid rgba(166, 166, 166, 0.5)",
+            boxShadow: "0px 4px 4px rgba(166, 166, 166, 0.25)",
           }}
         >
           <input
-            type="text"
+            type="date"
             value={startDate}
-            onChange={handleStartChange}
-            onFocus={(e) => (e.target.type = "date")}
-            onBlur={(e) => (e.target.type = "text")}
-            placeholder="DD/MM/YYYY"
-            className="flex-1 outline-none bg-transparent"
-            style={{ color: "#000000" }}
+            onChange={handleStartDateChange}
+            className="flex-1 h-[33px] md:h-[38px] px-[12px] border-none outline-none bg-transparent text-[12px] md:text-[16px]"
+            style={{
+              color: startDate ? "#000000" : "#B6B4B4",
+              fontFamily: "Inter, sans-serif",
+            }}
+            aria-label="Fecha de inicio"
           />
-          <span className="text-gray-400">-</span>
+          <span
+            className="text-[12px] md:text-[16px]"
+            style={{ color: "#B6B4B4", fontFamily: "Inter, sans-serif", padding: "0 4px" }}
+          >
+            -
+          </span>
           <input
-            type="text"
+            type="date"
             value={endDate}
-            onChange={handleEndChange}
-            onFocus={(e) => (e.target.type = "date")}
-            onBlur={(e) => (e.target.type = "text")}
-            placeholder="DD/MM/YYYY"
-            className="flex-1 outline-none bg-transparent"
-            style={{ color: "#000000" }}
+            onChange={handleEndDateChange}
+            className="flex-1 h-[33px] md:h-[38px] px-[12px] border-none outline-none bg-transparent text-[12px] md:text-[16px]"
+            style={{
+              color: endDate ? "#000000" : "#B6B4B4",
+              fontFamily: "Inter, sans-serif",
+            }}
+            aria-label="Fecha de fin"
           />
-          <Calendar className="w-4 h-4 text-gray-400" />
         </div>
         {error && (
           <p className="mt-1 text-sm" style={{ color: "#EF4444" }}>
