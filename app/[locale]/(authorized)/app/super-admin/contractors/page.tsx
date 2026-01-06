@@ -487,6 +487,16 @@ export default function ContractorsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.name, filters.country, filters.clientId, filters.teamId, filters.jobPosition]);
 
+  useEffect(() => {
+    const basePath = `/${locale}/app/super-admin/contractors`;
+
+    if (pathname === basePath && filterOptions !== null) {
+      loadContractors();
+      loadFilterOptions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, locale]);
+
   return (
     <div className="p-4 md:p-8 min-h-screen" style={{ background: "#FFFFFF" }}>
       <div className="max-w-full">
