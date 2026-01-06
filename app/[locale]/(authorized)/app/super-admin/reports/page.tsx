@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button, DataTable, FilterPanel } from "@/packages/design-system";
-import { Download, List } from "lucide-react";
+import { Download } from "lucide-react";
 import { adtService, type RealtimeMetrics } from "@/packages/api/adt/adt.service";
 import type { FilterOptions, UserActivity } from "@/packages/api/reports/reports.service";
 import type { FilterPanelConfig, FilterValues } from "@/packages/types/FilterPanel.types";
@@ -489,20 +489,6 @@ export default function ReportsPage() {
           key: "activityPercentage",
           label: "Activity",
           dataPath: "activityPercentage",
-        },
-        {
-          key: "activityDetail",
-          label: t("table.activityDetail"),
-          dataPath: "id",
-          render: (_value, row) => (
-            <button
-              onClick={() => handleViewDetail(row as UserActivity)}
-              className="inline-flex items-center gap-1 underline"
-            >
-              <List className="w-3.5 h-3.5" />
-              <span>{t("viewDetail")}</span>
-            </button>
-          ),
         },
       ],
       expandable: true,
