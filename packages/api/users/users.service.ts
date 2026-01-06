@@ -41,7 +41,11 @@ export interface UpdateUserPayload {
 /**
  * Divide un nombre completo en firstName y lastName
  */
-function splitName(fullName: string): { firstName: string; lastName: string } {
+function splitName(fullName: string | undefined | null): { firstName: string; lastName: string } {
+  if (!fullName) {
+    return { firstName: "", lastName: "" };
+  }
+
   const trimmed = fullName.trim();
   const spaceIndex = trimmed.indexOf(" ");
 
@@ -151,7 +155,7 @@ export class UsersService {
   async create(payload: CreateUserPayload): Promise<User> {
     try {
       const backendPayload = transformToBackendPayload(payload);
-      const response = await http.post<BackendUser>("/users", backendPayload);
+      const response = await http.post<BackendUser>("/auth/register/user", backendPayload);
       return transformBackendUser(response.data);
     } catch (error) {
       const axiosError = error as AxiosError;
