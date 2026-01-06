@@ -1,10 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import type { RealtimeMetrics } from "@/packages/api/adt/adt.service";
 
-// URL de la imagen del banderín desde Figma
-const imgFlagFilled = "https://www.figma.com/api/mcp/asset/d3370e0c-c4a3-4730-8600-4e27f0b95651";
+// Importar el SVG local
+import FlagFilledIcon from "../icons/Flag Filled.svg";
 
 export interface LowPerformersProps {
   rankings: RealtimeMetrics[];
@@ -68,10 +69,12 @@ export function LowPerformers({ rankings, loading = false, className }: LowPerfo
       {/* Header */}
       <div className="flex gap-[10px] items-center w-full">
         <div className="relative shrink-0 w-[35px] h-[35px]">
-          <img
-            src={imgFlagFilled}
+          <Image
+            src={FlagFilledIcon}
             alt="Flag"
-            className="absolute inset-0 max-w-none object-contain pointer-events-none w-full h-full"
+            width={35}
+            height={35}
+            className="object-contain"
           />
         </div>
         <p className="font-bold text-[20px] text-black">{t("lowPerformers")}</p>

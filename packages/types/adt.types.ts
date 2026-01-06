@@ -12,6 +12,18 @@ export interface BrowserUsage {
   seconds: number;
 }
 
+export interface ContractorSession {
+  session_id: string;
+  contractor_id: string;
+  session_start: string; // "YYYY-MM-DD HH:mm:ss"
+  session_end: string; // "YYYY-MM-DD HH:mm:ss"
+  total_seconds: number;
+  active_seconds: number;
+  idle_seconds: number;
+  productivity_score: number;
+  created_at: string;
+}
+
 export interface RealtimeMetrics {
   contractor_id: string;
   workday: string; // YYYY-MM-DD

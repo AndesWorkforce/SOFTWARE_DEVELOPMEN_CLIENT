@@ -1,9 +1,14 @@
 import { http } from "../../setup/axios.config";
 import type { AxiosError } from "axios";
-import type { RealtimeMetrics } from "../../types/adt.types";
+import type { RealtimeMetrics, ContractorSession } from "../../types/adt.types";
 
 // Re-export types for convenience
-export type { RealtimeMetrics, AppUsage, BrowserUsage } from "../../types/adt.types";
+export type {
+  RealtimeMetrics,
+  AppUsage,
+  BrowserUsage,
+  ContractorSession,
+} from "../../types/adt.types";
 
 export interface RealtimeMetricsFilters {
   workday?: string;
@@ -109,18 +114,27 @@ export class AdtService {
    * Obtiene métricas en tiempo real de un contratista específico.
    *
    * @param contractorId ID del contratista
-   * @param workday Fecha del día en formato YYYY-MM-DD (por defecto: hoy)
+   * @param workday Fecha del día en formato YYYY-MM-DD (por defecto: hoy). Se ignora si se proporciona 'from' y 'to'
    * @param useCache Si usar caché (default: true)
+   * @param from Fecha de inicio del rango en formato YYYY-MM-DD (opcional, si se proporciona junto con 'to', devuelve métricas agregadas)
+   * @param to Fecha de fin del rango en formato YYYY-MM-DD (opcional, debe usarse junto con 'from')
    * @returns Métricas de productividad del contratista
    */
   async getRealtimeMetrics(
     contractorId: string,
     workday?: string,
     useCache: boolean = true,
+    from?: string,
+    to?: string,
   ): Promise<RealtimeMetrics> {
     const params: Record<string, string> = {};
 
-    if (workday) {
+    if (from && to) {
+      // Si se proporciona from y to, usar rango de fechas
+      params.from = from;
+      params.to = to;
+    } else if (workday) {
+      // Si solo se proporciona workday, usar día específico
       params.workday = workday;
     }
 
@@ -226,6 +240,43 @@ export class AdtService {
         status: axiosError?.response?.status || null,
       });
       throw error;
+    }
+  }
+
+  /**
+   * Obtiene las sesiones de un contratista.
+   * @param contractorId ID del contratista
+   * @param from Fecha de inicio del rango en formato YYYY-MM-DD (opcional)
+   * @param to Fecha de fin del rango en formato YYYY-MM-DD (opcional)
+   * @returns Array de sesiones del contratista
+   */
+  async getContractorSessions(
+    contractorId: string,
+    from?: string,
+    to?: string,
+  ): Promise<ContractorSession[]> {
+    try {
+      const params: Record<string, string> = {};
+
+      if (from) {
+        params.from = from;
+      }
+      if (to) {
+        params.to = to;
+      }
+
+      const response = await http.get<ContractorSession[]>(`/adt/sessions/${contractorId}`, {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getContractorSessions:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      return []; // Retornar array vacío en caso de error
     }
   }
 }

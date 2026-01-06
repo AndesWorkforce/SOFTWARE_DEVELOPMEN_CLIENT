@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
-import { ActivityDetailModal, Button, DataTable, FilterPanel } from "@/packages/design-system";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
+import { Button, DataTable, FilterPanel } from "@/packages/design-system";
 import { Download, List } from "lucide-react";
 import { adtService, type RealtimeMetrics } from "@/packages/api/adt/adt.service";
 import type { FilterOptions, UserActivity } from "@/packages/api/reports/reports.service";
@@ -11,6 +12,8 @@ import type { DataTableConfig } from "@/packages/types/DataTable.types";
 
 export default function ReportsPage() {
   const t = useTranslations("reports");
+  const locale = useLocale();
+  const router = useRouter();
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,23 +23,24 @@ export default function ReportsPage() {
       end: new Date().toISOString().split("T")[0],
     },
   });
-  const [selectedActivity, setSelectedActivity] = useState<UserActivity | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const dateRange =
     filters.dateRange && typeof filters.dateRange === "object" && !Array.isArray(filters.dateRange)
       ? filters.dateRange
       : undefined;
 
-  const handleViewDetail = (activity: UserActivity) => {
-    setSelectedActivity(activity);
-    setIsModalOpen(true);
-  };
+  const handleViewDetail = useCallback(
+    (activity: UserActivity) => {
+      // Usar las fechas del filtro directamente, sin modificar
+      // Las fechas ya vienen en formato YYYY-MM-DD desde el FilterPanel
+      const from = dateRange?.start || activity.date || new Date().toISOString().split("T")[0];
+      const to = dateRange?.end || activity.date || new Date().toISOString().split("T")[0];
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedActivity(null);
-  };
+      const detailPath = `/${locale}/app/super-admin/reports/detail/${activity.id}?from=${from}&to=${to}`;
+      router.push(detailPath);
+    },
+    [locale, router, dateRange?.start, dateRange?.end],
+  );
 
   const formatSecondsToTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
@@ -75,6 +79,7 @@ export default function ReportsPage() {
         totalMouseClicks: metric.total_mouse_clicks,
         avgKeyboardPerMin: metric.avg_keyboard_per_min,
         avgMousePerMin: metric.avg_mouse_per_min,
+        totalSessionTimeSeconds: metric.total_session_time_seconds,
         effectiveWorkSeconds: metric.effective_work_seconds,
         productivityScore: metric.productivity_score,
         appUsage: metric.app_usage,
@@ -572,13 +577,6 @@ export default function ReportsPage() {
           />
         </div>
       </div>
-
-      <ActivityDetailModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        activity={selectedActivity}
-        t={t}
-      />
     </>
   );
 }

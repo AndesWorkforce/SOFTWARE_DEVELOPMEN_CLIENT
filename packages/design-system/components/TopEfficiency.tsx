@@ -1,16 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import type { RealtimeMetrics } from "@/packages/api/adt/adt.service";
 
-// URLs de las imágenes desde Figma
-const imgTrophy = "https://www.figma.com/api/mcp/asset/d3cef671-e022-4eb9-b550-9aeba45670d0";
-const imgFirstPlaceRibbon =
-  "https://www.figma.com/api/mcp/asset/66ed8c8c-c39f-4998-b968-b1eeff26c73a";
-const imgSecondPlaceRibbon =
-  "https://www.figma.com/api/mcp/asset/b4a71376-bb90-4961-819e-4eb6b2d2285f";
-const imgThirdPlaceRibbon =
-  "https://www.figma.com/api/mcp/asset/5b281563-3467-4509-a350-e2e17e596dbb";
+// Importar los SVG locales
+import TrophyIcon from "../icons/Trophy.svg";
+import FirstPlaceRibbon from "../icons/First Place Ribbon.svg";
+import SecondPlaceRibbon from "../icons/Second Place Ribbon.svg";
+import ThirdPlaceRibbon from "../icons/Third Place Ribbon.svg";
 
 export interface TopEfficiencyProps {
   rankings: RealtimeMetrics[];
@@ -30,20 +28,22 @@ export function TopEfficiency({ rankings, loading = false, className }: TopEffic
     const rankNumber = index + 1;
 
     // Determinar qué ribbon usar para los primeros 3 lugares
-    let ribbonImage: string | null = null;
-    if (index === 0) ribbonImage = imgFirstPlaceRibbon;
-    else if (index === 1) ribbonImage = imgSecondPlaceRibbon;
-    else if (index === 2) ribbonImage = imgThirdPlaceRibbon;
+    let ribbonIcon: typeof FirstPlaceRibbon | null = null;
+    if (index === 0) ribbonIcon = FirstPlaceRibbon;
+    else if (index === 1) ribbonIcon = SecondPlaceRibbon;
+    else if (index === 2) ribbonIcon = ThirdPlaceRibbon;
 
     return (
       <div key={ranking.contractor_id} className="flex gap-[10px] items-center w-full">
         {/* Ribbon para los primeros 3 lugares, número para los demás */}
-        {isTopThree && ribbonImage ? (
+        {isTopThree && ribbonIcon ? (
           <div className="relative shrink-0 w-[35px] h-[35px]">
-            <img
-              src={ribbonImage}
+            <Image
+              src={ribbonIcon}
               alt={`${rankNumber} place ribbon`}
-              className="absolute inset-0 max-w-none object-contain pointer-events-none w-full h-full"
+              width={35}
+              height={35}
+              className="object-contain"
             />
           </div>
         ) : (
@@ -92,11 +92,7 @@ export function TopEfficiency({ rankings, loading = false, className }: TopEffic
       {/* Header */}
       <div className="flex gap-[10px] items-center w-full">
         <div className="relative shrink-0 w-[35px] h-[35px]">
-          <img
-            src={imgTrophy}
-            alt="Trophy"
-            className="absolute inset-0 max-w-none object-contain pointer-events-none w-full h-full"
-          />
+          <Image src={TrophyIcon} alt="Trophy" width={35} height={35} className="object-contain" />
         </div>
         <p className="font-bold text-[20px] text-black">{t("topEfficiency")}</p>
       </div>

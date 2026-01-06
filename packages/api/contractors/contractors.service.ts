@@ -50,6 +50,10 @@ export class ContractorsService {
       params.job_position = filters.job_position.trim();
     }
 
+    if (filters?.isActive !== undefined) {
+      params.isActive = filters.isActive.toString();
+    }
+
     try {
       const response = await http.get<Contractor[]>("/contractors", {
         params,
