@@ -254,10 +254,10 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
             <div className="flex flex-col gap-[30px] items-center w-full max-w-[321px] md:max-w-[400px]">
               <div className="flex flex-col gap-[15px] text-center w-full">
                 <h2 className="text-[24px] font-bold text-black">
-                  {t("confirmTitle") || "Confirm"}
+                  {t("editConfirmTitle") || "Confirm"}
                 </h2>
                 <p className="text-[16px] font-normal text-[#1E1E1E]">
-                  {t("confirmUpdateSubtitle") || "Are you sure you want to update this user?"}
+                  {t("editConfirmSubtitle") || "Are you sure you want to update this user?"}
                 </p>
               </div>
               <div className="flex flex-col md:flex-row gap-[10px] w-full">
@@ -277,7 +277,7 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
                     boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
                   }}
                 >
-                  {t("confirmUpdate") || "Update"}
+                  {t("editConfirmSave") || "Update"}
                 </Button>
                 <Button
                   type="button"
@@ -295,7 +295,7 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
                     boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
                   }}
                 >
-                  {t("confirmCancel") || "Cancel"}
+                  {t("editConfirmCancel") || "Cancel"}
                 </Button>
               </div>
             </div>
@@ -313,10 +313,10 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
               </div>
               <div className="flex flex-col gap-[15px] text-center w-full">
                 <h2 className="text-[24px] font-bold text-black">
-                  {t("successTitle") || "Success!"}
+                  {t("editSuccessTitle") || "Success!"}
                 </h2>
                 <p className="text-[16px] font-normal text-[#1E1E1E]">
-                  {t("successUpdateMessage") || "User has been updated successfully."}
+                  {t("editSuccessTitle") || "User has been updated successfully."}
                 </p>
               </div>
               <Button
@@ -333,7 +333,7 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
                   boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
                 }}
               >
-                {t("continue") || "Continue"}
+                {t("editSuccessContinue") || "Continue"}
               </Button>
             </div>
           </div>
