@@ -56,16 +56,24 @@ export default function ReportsPage() {
 
   const availableFields = useMemo(
     () => [
-      { value: "contractorName", label: "User (contractorName)", required: true },
-      { value: "jobPosition", label: "Job Position", required: false },
-      { value: "clientName", label: "Client", required: false },
-      { value: "teamName", label: "Team", required: false },
-      { value: "country", label: "Country", required: false },
-      { value: "timeWorked", label: "Time Worked", required: true },
-      { value: "activityPercentage", label: "Activity %", required: false },
-      { value: "productivityScore", label: "Productivity Score", required: false },
+      { value: "contractorName", label: t("exportModal.fields.contractorName"), required: true },
+      { value: "jobPosition", label: t("exportModal.fields.jobPosition"), required: false },
+      { value: "clientName", label: t("exportModal.fields.clientName"), required: false },
+      { value: "teamName", label: t("exportModal.fields.teamName"), required: false },
+      { value: "country", label: t("exportModal.fields.country"), required: false },
+      { value: "timeWorked", label: t("exportModal.fields.timeWorked"), required: true },
+      {
+        value: "activityPercentage",
+        label: t("exportModal.fields.activityPercentage"),
+        required: false,
+      },
+      {
+        value: "productivityScore",
+        label: t("exportModal.fields.productivityScore"),
+        required: false,
+      },
     ],
-    [],
+    [t],
   );
 
   const requiredFields = useMemo(
@@ -434,11 +442,11 @@ export default function ReportsPage() {
         window.open(response.pdfUrl, "_blank", "noopener,noreferrer");
         setIsExportModalOpen(false);
       } else {
-        setExportError(response?.message || "No se pudo generar el PDF. Intenta nuevamente.");
+        setExportError(response?.message || t("exportModal.errorDefault"));
       }
     } catch (error) {
       console.error("❌ Error generating PDF report:", error);
-      setExportError("Error al generar el PDF. Intenta nuevamente.");
+      setExportError(t("exportModal.error"));
     } finally {
       setExportLoading(false);
     }
@@ -623,7 +631,7 @@ export default function ReportsPage() {
             >
               <Download className="w-3.5 h-3.5 md:w-5 md:h-5 mr-2" />
               <span className="hidden md:inline">{t("exportPdf")}</span>
-              <span className="md:hidden">Export PDF</span>
+              <span className="md:hidden">{t("exportPdf")}</span>
             </Button>
           </div>
 
@@ -653,40 +661,51 @@ export default function ReportsPage() {
         <div className="flex flex-col gap-6">
           <div>
             <h3 className="text-lg font-semibold mb-2" style={{ color: "#000000" }}>
-              Filtros seleccionados
+              {t("exportModal.selectedFilters")}
             </h3>
             <div
               className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm"
               style={{ color: "#1f1f1f" }}
             >
               <div>
-                <p className="font-medium">Fecha inicio:</p>
-                <p>{dateRange?.start || "N/A"}</p>
+                <p className="font-medium">{t("exportModal.startDate")}:</p>
+                <p>{dateRange?.start || t("exportModal.notAvailable")}</p>
               </div>
               <div>
-                <p className="font-medium">Fecha fin:</p>
-                <p>{dateRange?.end || dateRange?.start || "N/A"}</p>
+                <p className="font-medium">{t("exportModal.endDate")}:</p>
+                <p>{dateRange?.end || dateRange?.start || t("exportModal.notAvailable")}</p>
               </div>
               <div>
-                <p className="font-medium">Usuario:</p>
-                <p>{getLabel(filterOptions?.users, filters.userId as string) || "Todos"}</p>
-              </div>
-              <div>
-                <p className="font-medium">País:</p>
-                <p>{getLabel(filterOptions?.countries, filters.country as string) || "Todos"}</p>
-              </div>
-              <div>
-                <p className="font-medium">Cliente:</p>
-                <p>{getLabel(filterOptions?.clients, filters.clientId as string) || "Todos"}</p>
-              </div>
-              <div>
-                <p className="font-medium">Equipo:</p>
-                <p>{getLabel(filterOptions?.teams, filters.teamId as string) || "Todos"}</p>
-              </div>
-              <div>
-                <p className="font-medium">Posición:</p>
+                <p className="font-medium">{t("exportModal.user")}:</p>
                 <p>
-                  {getLabel(filterOptions?.jobPositions, filters.jobPosition as string) || "Todas"}
+                  {getLabel(filterOptions?.users, filters.userId as string) || t("exportModal.all")}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">{t("exportModal.country")}:</p>
+                <p>
+                  {getLabel(filterOptions?.countries, filters.country as string) ||
+                    t("exportModal.all")}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">{t("exportModal.client")}:</p>
+                <p>
+                  {getLabel(filterOptions?.clients, filters.clientId as string) ||
+                    t("exportModal.all")}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">{t("exportModal.team")}:</p>
+                <p>
+                  {getLabel(filterOptions?.teams, filters.teamId as string) || t("exportModal.all")}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">{t("exportModal.jobPosition")}:</p>
+                <p>
+                  {getLabel(filterOptions?.jobPositions, filters.jobPosition as string) ||
+                    t("exportModal.all")}
                 </p>
               </div>
             </div>
@@ -694,7 +713,7 @@ export default function ReportsPage() {
 
           <div>
             <h3 className="text-lg font-semibold mb-2" style={{ color: "#000000" }}>
-              Selecciona los campos del reporte
+              {t("exportModal.selectFields")}
             </h3>
             <div
               className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm"
@@ -715,7 +734,7 @@ export default function ReportsPage() {
                   />
                   <span className="flex-1">
                     {field.label}
-                    {field.required && " (requerido)"}
+                    {field.required && ` ${t("exportModal.required")}`}
                   </span>
                 </label>
               ))}
@@ -737,7 +756,7 @@ export default function ReportsPage() {
               onClick={() => setIsExportModalOpen(false)}
               style={{ minWidth: "120px" }}
             >
-              Cancelar
+              {t("exportModal.cancel")}
             </Button>
             <Button
               variant="primary"
@@ -749,7 +768,7 @@ export default function ReportsPage() {
                 minWidth: "140px",
               }}
             >
-              {exportLoading ? "Generando..." : "Generar PDF"}
+              {exportLoading ? t("exportModal.generating") : t("exportModal.generate")}
             </Button>
           </div>
         </div>
