@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, DataTable, FilterPanel } from "@/packages/design-system";
+import { Button, DataTable, FilterPanel, Modal } from "@/packages/design-system";
 import { Download } from "lucide-react";
 import { adtService, type RealtimeMetrics } from "@/packages/api/adt/adt.service";
+import { reportsService, type GenerateReportPayload } from "@/packages/api/reports/reports.service";
 import type { FilterOptions, UserActivity } from "@/packages/api/reports/reports.service";
 import type { FilterPanelConfig, FilterValues } from "@/packages/types/FilterPanel.types";
 import type { DataTableConfig } from "@/packages/types/DataTable.types";
@@ -17,6 +18,10 @@ export default function ReportsPage() {
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [selectedFields, setSelectedFields] = useState<string[]>([]);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterValues>({
     dateRange: {
       start: new Date().toISOString().split("T")[0],
@@ -48,6 +53,25 @@ export default function ReportsPage() {
     const secs = Math.floor(seconds % 60);
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
+
+  const availableFields = useMemo(
+    () => [
+      { value: "contractorName", label: "User (contractorName)", required: true },
+      { value: "jobPosition", label: "Job Position", required: false },
+      { value: "clientName", label: "Client", required: false },
+      { value: "teamName", label: "Team", required: false },
+      { value: "country", label: "Country", required: false },
+      { value: "timeWorked", label: "Time Worked", required: true },
+      { value: "activityPercentage", label: "Activity %", required: false },
+      { value: "productivityScore", label: "Productivity Score", required: false },
+    ],
+    [],
+  );
+
+  const requiredFields = useMemo(
+    () => new Set(availableFields.filter((f) => f.required).map((f) => f.value)),
+    [availableFields],
+  );
 
   const transformRealtimeMetricsToUserActivity = (metrics: RealtimeMetrics[]): UserActivity[] => {
     return metrics.map((metric) => ({
@@ -230,7 +254,7 @@ export default function ReportsPage() {
         return filter;
       }),
     };
-  }, [filterOptions, t, baseFiltersConfig]);
+  }, [filterOptions, baseFiltersConfig]);
 
   const loadFilterOptions = async () => {
     try {
@@ -368,139 +392,194 @@ export default function ReportsPage() {
     });
   };
 
+  const handleOpenExportModal = () => {
+    setSelectedFields(availableFields.map((f) => f.value));
+    setExportError(null);
+    setIsExportModalOpen(true);
+  };
+
+  const handleToggleField = (field: string) => {
+    if (requiredFields.has(field)) return;
+    setSelectedFields((prev) =>
+      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field],
+    );
+  };
+
+  const getLabel = (options: { value: string; label: string }[] | undefined, value?: string) => {
+    if (!value || !options) return "";
+    return options.find((opt) => opt.value === value)?.label || "";
+  };
+
+  const handleGenerateReport = async () => {
+    try {
+      setExportLoading(true);
+      setExportError(null);
+
+      const from = dateRange?.start || new Date().toISOString().split("T")[0];
+      const to = dateRange?.end || from;
+
+      const payload: GenerateReportPayload = {
+        from,
+        to,
+        team_id: typeof filters.teamId === "string" && filters.teamId ? filters.teamId : undefined,
+        client_id:
+          typeof filters.clientId === "string" && filters.clientId ? filters.clientId : undefined,
+        contractor_id:
+          typeof filters.userId === "string" && filters.userId ? filters.userId : undefined,
+        selectedFields,
+      };
+
+      const response = await reportsService.generateReport(payload);
+      if (response?.pdfUrl) {
+        window.open(response.pdfUrl, "_blank", "noopener,noreferrer");
+        setIsExportModalOpen(false);
+      } else {
+        setExportError(response?.message || "No se pudo generar el PDF. Intenta nuevamente.");
+      }
+    } catch (error) {
+      console.error("❌ Error generating PDF report:", error);
+      setExportError("Error al generar el PDF. Intenta nuevamente.");
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   // Configuración base de tabla
-  const baseTableConfig: DataTableConfig<UserActivity> = {
-    columns: [
-      {
-        key: "user",
-        title: "User",
-        translationKey: "reports.table.user",
-        dataPath: (row) => row.user.name,
-        type: "text",
-        width: "200px",
-        align: "center",
-      },
-      {
-        key: "jobPosition",
-        title: "Job Position",
-        translationKey: "reports.table.jobPosition",
-        dataPath: "jobPosition",
-        type: "text",
-        width: "200px",
-        align: "center",
-      },
-      {
-        key: "client",
-        title: "Client",
-        translationKey: "reports.table.client",
-        dataPath: (row) => row.client.name,
-        type: "text",
-        width: "160px",
-        align: "center",
-      },
-      {
-        key: "team",
-        title: "Team",
-        translationKey: "reports.table.team",
-        dataPath: (row) => row.team.name,
-        type: "text",
-        width: "120px",
-        align: "center",
-      },
-      {
-        key: "country",
-        title: "Country",
-        translationKey: "reports.table.country",
-        dataPath: "country",
-        type: "text",
-        width: "150px",
-        align: "center",
-      },
-      {
-        key: "timeWorked",
-        title: "Time",
-        translationKey: "reports.table.time",
-        dataPath: "timeWorked",
-        type: "time",
-        width: "100px",
-        align: "center",
-      },
-      {
-        key: "activityPercentage",
-        title: "Activity",
-        translationKey: "reports.table.activity",
-        dataPath: "activityPercentage",
-        type: "percentage",
-        width: "100px",
-        align: "center",
-        config: {
-          percentage: {
-            thresholds: [{ value: 50, color: "#2EC36D" }],
-            defaultColor: "#FF0004",
-          },
-        },
-      },
-      {
-        key: "activityDetail",
-        title: "Activity Detail",
-        translationKey: "reports.table.activityDetail",
-        dataPath: "id",
-        type: "action",
-        width: "120px",
-        align: "center",
-        config: {
-          action: {
-            label: "View Detail",
-            onClick: handleViewDetail,
-          },
-        },
-      },
-    ],
-    mobileConfig: {
-      primaryFields: [
+  const baseTableConfig = useMemo<DataTableConfig<UserActivity>>(
+    () => ({
+      columns: [
         {
           key: "user",
-          label: "User",
+          title: "User",
+          translationKey: "reports.table.user",
           dataPath: (row) => row.user.name,
+          type: "text",
+          width: "200px",
+          align: "center",
         },
         {
           key: "jobPosition",
-          label: "Job Position",
+          title: "Job Position",
+          translationKey: "reports.table.jobPosition",
           dataPath: "jobPosition",
+          type: "text",
+          width: "200px",
+          align: "center",
         },
-      ],
-      expandedFields: [
+        {
+          key: "client",
+          title: "Client",
+          translationKey: "reports.table.client",
+          dataPath: (row) => row.client.name,
+          type: "text",
+          width: "160px",
+          align: "center",
+        },
         {
           key: "team",
-          label: "Team",
+          title: "Team",
+          translationKey: "reports.table.team",
           dataPath: (row) => row.team.name,
+          type: "text",
+          width: "120px",
+          align: "center",
         },
         {
           key: "country",
-          label: "Country",
+          title: "Country",
+          translationKey: "reports.table.country",
           dataPath: "country",
+          type: "text",
+          width: "150px",
+          align: "center",
         },
         {
           key: "timeWorked",
-          label: "Time",
+          title: "Time",
+          translationKey: "reports.table.time",
           dataPath: "timeWorked",
+          type: "time",
+          width: "100px",
+          align: "center",
         },
         {
           key: "activityPercentage",
-          label: "Activity",
+          title: "Activity",
+          translationKey: "reports.table.activity",
           dataPath: "activityPercentage",
+          type: "percentage",
+          width: "100px",
+          align: "center",
+          config: {
+            percentage: {
+              thresholds: [{ value: 50, color: "#2EC36D" }],
+              defaultColor: "#FF0004",
+            },
+          },
+        },
+        {
+          key: "activityDetail",
+          title: "Activity Detail",
+          translationKey: "reports.table.activityDetail",
+          dataPath: "id",
+          type: "action",
+          width: "120px",
+          align: "center",
+          config: {
+            action: {
+              label: "View Detail",
+              onClick: handleViewDetail,
+            },
+          },
         },
       ],
-      expandable: true,
-    },
-    rowKey: "id",
-    striped: true,
-    evenRowColor: "#E2E2E2",
-    oddRowColor: "#FFFFFF",
-    emptyState: {
-      message: t("noActivities"),
-    },
-  };
+      mobileConfig: {
+        primaryFields: [
+          {
+            key: "user",
+            label: "User",
+            dataPath: (row) => row.user.name,
+          },
+          {
+            key: "jobPosition",
+            label: "Job Position",
+            dataPath: "jobPosition",
+          },
+        ],
+        expandedFields: [
+          {
+            key: "team",
+            label: "Team",
+            dataPath: (row) => row.team.name,
+          },
+          {
+            key: "country",
+            label: "Country",
+            dataPath: "country",
+          },
+          {
+            key: "timeWorked",
+            label: "Time",
+            dataPath: "timeWorked",
+          },
+          {
+            key: "activityPercentage",
+            label: "Activity",
+            dataPath: "activityPercentage",
+          },
+        ],
+        expandable: true,
+      },
+      rowKey: "id",
+      striped: true,
+      evenRowColor: "#E2E2E2",
+      oddRowColor: "#FFFFFF",
+      emptyState: {
+        message: t("noActivities"),
+      },
+    }),
+    [handleViewDetail, t],
+  );
 
   const tableConfig = useMemo(() => {
     return {
@@ -533,6 +612,7 @@ export default function ReportsPage() {
             </h1>
             <Button
               variant="primary"
+              onClick={handleOpenExportModal}
               style={{
                 background: "#0097B2",
                 color: "#FFFFFF",
@@ -563,6 +643,117 @@ export default function ReportsPage() {
           />
         </div>
       </div>
+
+      <Modal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        title={t("exportPdf") || "Export PDF"}
+        size="lg"
+      >
+        <div className="flex flex-col gap-6">
+          <div>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: "#000000" }}>
+              Filtros seleccionados
+            </h3>
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm"
+              style={{ color: "#1f1f1f" }}
+            >
+              <div>
+                <p className="font-medium">Fecha inicio:</p>
+                <p>{dateRange?.start || "N/A"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Fecha fin:</p>
+                <p>{dateRange?.end || dateRange?.start || "N/A"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Usuario:</p>
+                <p>{getLabel(filterOptions?.users, filters.userId as string) || "Todos"}</p>
+              </div>
+              <div>
+                <p className="font-medium">País:</p>
+                <p>{getLabel(filterOptions?.countries, filters.country as string) || "Todos"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Cliente:</p>
+                <p>{getLabel(filterOptions?.clients, filters.clientId as string) || "Todos"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Equipo:</p>
+                <p>{getLabel(filterOptions?.teams, filters.teamId as string) || "Todos"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Posición:</p>
+                <p>
+                  {getLabel(filterOptions?.jobPositions, filters.jobPosition as string) || "Todas"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: "#000000" }}>
+              Selecciona los campos del reporte
+            </h3>
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm"
+              style={{ color: "#1f1f1f" }}
+            >
+              {availableFields.map((field) => (
+                <label
+                  key={field.value}
+                  className="flex items-center gap-3 px-3 py-2 rounded-md border"
+                  style={{ borderColor: "#E5E5E5" }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedFields.includes(field.value)}
+                    onChange={() => handleToggleField(field.value)}
+                    disabled={field.required}
+                    className="h-4 w-4"
+                  />
+                  <span className="flex-1">
+                    {field.label}
+                    {field.required && " (requerido)"}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {exportError && (
+            <div
+              className="rounded-md px-4 py-3 text-sm"
+              style={{ background: "#FFF5F5", color: "#C53030", border: "1px solid #FED7D7" }}
+            >
+              {exportError}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setIsExportModalOpen(false)}
+              style={{ minWidth: "120px" }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleGenerateReport}
+              disabled={exportLoading}
+              style={{
+                background: "#0097B2",
+                color: "#FFFFFF",
+                minWidth: "140px",
+              }}
+            >
+              {exportLoading ? "Generando..." : "Generar PDF"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }
