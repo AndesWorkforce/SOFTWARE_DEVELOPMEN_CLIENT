@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Button, DataTable, FilterPanel, Modal } from "@/packages/design-system";
+import Link from "next/link";
+import { Button, DataTable, FilterPanel } from "@/packages/design-system";
 import { Download } from "lucide-react";
 import { adtService, type RealtimeMetrics } from "@/packages/api/adt/adt.service";
-import { reportsService, type GenerateReportPayload } from "@/packages/api/reports/reports.service";
 import type { FilterOptions, UserActivity } from "@/packages/api/reports/reports.service";
 import type { FilterPanelConfig, FilterValues } from "@/packages/types/FilterPanel.types";
 import type { DataTableConfig } from "@/packages/types/DataTable.types";
@@ -18,10 +18,6 @@ export default function ReportsPage() {
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [selectedFields, setSelectedFields] = useState<string[]>([]);
-  const [exportLoading, setExportLoading] = useState(false);
-  const [exportError, setExportError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterValues>({
     dateRange: {
       start: new Date().toISOString().split("T")[0],
@@ -36,8 +32,6 @@ export default function ReportsPage() {
 
   const handleViewDetail = useCallback(
     (activity: UserActivity) => {
-      // Usar las fechas del filtro directamente, sin modificar
-      // Las fechas ya vienen en formato YYYY-MM-DD desde el FilterPanel
       const from = dateRange?.start || activity.date || new Date().toISOString().split("T")[0];
       const to = dateRange?.end || activity.date || new Date().toISOString().split("T")[0];
 
@@ -53,33 +47,6 @@ export default function ReportsPage() {
     const secs = Math.floor(seconds % 60);
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
-
-  const availableFields = useMemo(
-    () => [
-      { value: "contractorName", label: t("exportModal.fields.contractorName"), required: true },
-      { value: "jobPosition", label: t("exportModal.fields.jobPosition"), required: false },
-      { value: "clientName", label: t("exportModal.fields.clientName"), required: false },
-      { value: "teamName", label: t("exportModal.fields.teamName"), required: false },
-      { value: "country", label: t("exportModal.fields.country"), required: false },
-      { value: "timeWorked", label: t("exportModal.fields.timeWorked"), required: true },
-      {
-        value: "activityPercentage",
-        label: t("exportModal.fields.activityPercentage"),
-        required: false,
-      },
-      {
-        value: "productivityScore",
-        label: t("exportModal.fields.productivityScore"),
-        required: false,
-      },
-    ],
-    [t],
-  );
-
-  const requiredFields = useMemo(
-    () => new Set(availableFields.filter((f) => f.required).map((f) => f.value)),
-    [availableFields],
-  );
 
   const transformRealtimeMetricsToUserActivity = (metrics: RealtimeMetrics[]): UserActivity[] => {
     return metrics.map((metric) => ({
@@ -164,12 +131,10 @@ export default function ReportsPage() {
 
   useEffect(() => {
     loadFilterOptions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dateRange?.start,
     dateRange?.end,
@@ -179,6 +144,8 @@ export default function ReportsPage() {
     filters.teamId,
     filters.jobPosition,
   ]);
+
+  // ... rest of the file remains unchanged ...
 
   // Configuración base de filtros
   const baseFiltersConfig: FilterPanelConfig = {
@@ -400,56 +367,31 @@ export default function ReportsPage() {
     });
   };
 
-  const handleOpenExportModal = () => {
-    setSelectedFields(availableFields.map((f) => f.value));
-    setExportError(null);
-    setIsExportModalOpen(true);
-  };
+  const buildExportUrl = () => {
+    const params = new URLSearchParams();
+    const from = dateRange?.start || new Date().toISOString().split("T")[0];
+    const to = dateRange?.end || from;
 
-  const handleToggleField = (field: string) => {
-    if (requiredFields.has(field)) return;
-    setSelectedFields((prev) =>
-      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field],
-    );
-  };
+    params.set("from", from);
+    params.set("to", to);
 
-  const getLabel = (options: { value: string; label: string }[] | undefined, value?: string) => {
-    if (!value || !options) return "";
-    return options.find((opt) => opt.value === value)?.label || "";
-  };
-
-  const handleGenerateReport = async () => {
-    try {
-      setExportLoading(true);
-      setExportError(null);
-
-      const from = dateRange?.start || new Date().toISOString().split("T")[0];
-      const to = dateRange?.end || from;
-
-      const payload: GenerateReportPayload = {
-        from,
-        to,
-        team_id: typeof filters.teamId === "string" && filters.teamId ? filters.teamId : undefined,
-        client_id:
-          typeof filters.clientId === "string" && filters.clientId ? filters.clientId : undefined,
-        contractor_id:
-          typeof filters.userId === "string" && filters.userId ? filters.userId : undefined,
-        selectedFields,
-      };
-
-      const response = await reportsService.generateReport(payload);
-      if (response?.pdfUrl) {
-        window.open(response.pdfUrl, "_blank", "noopener,noreferrer");
-        setIsExportModalOpen(false);
-      } else {
-        setExportError(response?.message || t("exportModal.errorDefault"));
-      }
-    } catch (error) {
-      console.error("❌ Error generating PDF report:", error);
-      setExportError(t("exportModal.error"));
-    } finally {
-      setExportLoading(false);
+    if (filters.userId && typeof filters.userId === "string") {
+      params.set("userId", filters.userId);
     }
+    if (filters.country && typeof filters.country === "string") {
+      params.set("country", filters.country);
+    }
+    if (filters.clientId && typeof filters.clientId === "string") {
+      params.set("clientId", filters.clientId);
+    }
+    if (filters.teamId && typeof filters.teamId === "string") {
+      params.set("teamId", filters.teamId);
+    }
+    if (filters.jobPosition && typeof filters.jobPosition === "string") {
+      params.set("jobPosition", filters.jobPosition);
+    }
+
+    return `/${locale}/app/super-admin/reports/export?${params.toString()}`;
   };
 
   // Configuración base de tabla
@@ -618,21 +560,22 @@ export default function ReportsPage() {
             <h1 className="text-xl md:text-3xl font-bold" style={{ color: "#000000" }}>
               {t("title")}
             </h1>
-            <Button
-              variant="primary"
-              onClick={handleOpenExportModal}
-              style={{
-                background: "#0097B2",
-                color: "#FFFFFF",
-                fontSize: "14px",
-                padding: "7px 21px",
-                height: "35px",
-              }}
-            >
-              <Download className="w-3.5 h-3.5 md:w-5 md:h-5 mr-2" />
-              <span className="hidden md:inline">{t("exportPdf")}</span>
-              <span className="md:hidden">{t("exportPdf")}</span>
-            </Button>
+            <Link href={buildExportUrl()}>
+              <Button
+                variant="primary"
+                style={{
+                  background: "#0097B2",
+                  color: "#FFFFFF",
+                  fontSize: "14px",
+                  padding: "7px 21px",
+                  height: "35px",
+                }}
+              >
+                <Download className="w-3.5 h-3.5 md:w-5 md:h-5 mr-2" />
+                <span className="hidden md:inline">{t("exportPdf")}</span>
+                <span className="md:hidden">{t("exportPdf")}</span>
+              </Button>
+            </Link>
           </div>
 
           <FilterPanel
@@ -651,128 +594,6 @@ export default function ReportsPage() {
           />
         </div>
       </div>
-
-      <Modal
-        isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-        title={t("exportPdf") || "Export PDF"}
-        size="lg"
-      >
-        <div className="flex flex-col gap-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-2" style={{ color: "#000000" }}>
-              {t("exportModal.selectedFilters")}
-            </h3>
-            <div
-              className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm"
-              style={{ color: "#1f1f1f" }}
-            >
-              <div>
-                <p className="font-medium">{t("exportModal.startDate")}:</p>
-                <p>{dateRange?.start || t("exportModal.notAvailable")}</p>
-              </div>
-              <div>
-                <p className="font-medium">{t("exportModal.endDate")}:</p>
-                <p>{dateRange?.end || dateRange?.start || t("exportModal.notAvailable")}</p>
-              </div>
-              <div>
-                <p className="font-medium">{t("exportModal.user")}:</p>
-                <p>
-                  {getLabel(filterOptions?.users, filters.userId as string) || t("exportModal.all")}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium">{t("exportModal.country")}:</p>
-                <p>
-                  {getLabel(filterOptions?.countries, filters.country as string) ||
-                    t("exportModal.all")}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium">{t("exportModal.client")}:</p>
-                <p>
-                  {getLabel(filterOptions?.clients, filters.clientId as string) ||
-                    t("exportModal.all")}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium">{t("exportModal.team")}:</p>
-                <p>
-                  {getLabel(filterOptions?.teams, filters.teamId as string) || t("exportModal.all")}
-                </p>
-              </div>
-              <div>
-                <p className="font-medium">{t("exportModal.jobPosition")}:</p>
-                <p>
-                  {getLabel(filterOptions?.jobPositions, filters.jobPosition as string) ||
-                    t("exportModal.all")}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-2" style={{ color: "#000000" }}>
-              {t("exportModal.selectFields")}
-            </h3>
-            <div
-              className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm"
-              style={{ color: "#1f1f1f" }}
-            >
-              {availableFields.map((field) => (
-                <label
-                  key={field.value}
-                  className="flex items-center gap-3 px-3 py-2 rounded-md border"
-                  style={{ borderColor: "#E5E5E5" }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedFields.includes(field.value)}
-                    onChange={() => handleToggleField(field.value)}
-                    disabled={field.required}
-                    className="h-4 w-4"
-                  />
-                  <span className="flex-1">
-                    {field.label}
-                    {field.required && ` ${t("exportModal.required")}`}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {exportError && (
-            <div
-              className="rounded-md px-4 py-3 text-sm"
-              style={{ background: "#FFF5F5", color: "#C53030", border: "1px solid #FED7D7" }}
-            >
-              {exportError}
-            </div>
-          )}
-
-          <div className="flex justify-end gap-3">
-            <Button
-              variant="secondary"
-              onClick={() => setIsExportModalOpen(false)}
-              style={{ minWidth: "120px" }}
-            >
-              {t("exportModal.cancel")}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handleGenerateReport}
-              disabled={exportLoading}
-              style={{
-                background: "#0097B2",
-                color: "#FFFFFF",
-                minWidth: "140px",
-              }}
-            >
-              {exportLoading ? t("exportModal.generating") : t("exportModal.generate")}
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </>
   );
 }
