@@ -17,7 +17,7 @@ export default function ExportPdfModal({ filterOptions }: ExportPdfModalProps) {
   const searchParams = useSearchParams();
 
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
-  const [exportLoading, setExportLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
   // Parse filters from URL
