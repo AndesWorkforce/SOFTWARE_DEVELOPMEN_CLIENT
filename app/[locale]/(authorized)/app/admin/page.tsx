@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import Link from "next/link";
 import { ChevronRight, Download, Calendar } from "lucide-react";
-import { DataTable } from "@/packages/design-system";
-import type { DataTableConfig } from "@/packages/types/DataTable.types";
+import { DataTable, DashboardSkeleton } from "@/packages/design-system";
 import { usersService } from "@/packages/api/users/users.service";
 import { clientsService, type Client } from "@/packages/api/clients/clients.service";
-import { contractorsService, type Contractor } from "@/packages/api/contractors/contractors.service";
+import {
+  contractorsService,
+  type Contractor,
+} from "@/packages/api/contractors/contractors.service";
+import { clientsTableConfig, getContractorsTableConfig } from "./constants";
 
 export default function AdminPage() {
   const locale = useLocale();
@@ -48,112 +51,22 @@ export default function AdminPage() {
   }, []);
 
   // Configuración de la tabla de clientes
-  const clientsTableConfig = useMemo<DataTableConfig<Client>>(
-    () => ({
-      columns: [
-        {
-          key: "name",
-          title: "Name Client",
-          translationKey: "clients.table.name",
-          dataPath: "name",
-          type: "text",
-          width: "200px",
-          align: "center",
-        },
-        {
-          key: "email",
-          title: "Email",
-          translationKey: "clients.table.email",
-          dataPath: (row) => row.email || "N/A",
-          type: "text",
-          width: "245px",
-          align: "center",
-        },
-      ],
-      rowKey: "id",
-      striped: true,
-      evenRowColor: "#E2E2E2",
-      oddRowColor: "#FFFFFF",
-      styles: {
-        table: {
-          border: "1px solid rgba(166,166,166,0.5)",
-          boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
-          borderRadius: "10px",
-        },
-      },
-    }),
-    []
-  );
+  const memoizedClientsConfig = useMemo(() => clientsTableConfig, []);
 
   // Configuración de la tabla de contractors
-  const contractorsTableConfig = useMemo<DataTableConfig<Contractor>>(
-    () => ({
-      columns: [
-        {
-          key: "name",
-          title: "User",
-          translationKey: "contractors.table.user",
-          dataPath: "name",
-          type: "text",
-          width: "250px",
-          align: "center",
-        },
-        {
-          key: "team",
-          title: "Team",
-          translationKey: "contractors.table.team",
-          dataPath: (row) => row.team_name || "N/A",
-          type: "text",
-          width: "240px",
-          align: "center",
-        },
-        {
-          key: "calendar",
-          title: "Calendar",
-          translationKey: "contractors.table.calendar",
-          dataPath: "id",
-          type: "custom",
-          width: "110px",
-          align: "center",
-          render: () => (
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 text-black hover:underline"
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span className="text-sm font-medium underline">View</span>
-            </button>
-          ),
-        },
-      ],
-      rowKey: "id",
-      striped: true,
-      evenRowColor: "#E2E2E2",
-      oddRowColor: "#FFFFFF",
-      styles: {
-        table: {
-          border: "1px solid rgba(166,166,166,0.5)",
-          boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
-          borderRadius: "10px",
-        },
-      },
-    }),
-    []
+  const memoizedContractorsConfig = useMemo(
+    () =>
+      getContractorsTableConfig(() => (
+        <button type="button" className="inline-flex items-center gap-1 text-black hover:underline">
+          <Calendar className="w-3.5 h-3.5" />
+          <span className="text-sm font-medium underline">View</span>
+        </button>
+      )),
+    [],
   );
 
   if (loading) {
-    return (
-      <div className="p-4 md:p-8 min-h-screen" style={{ background: "#FFFFFF" }}>
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="h-24 bg-gray-200 rounded"></div>
-            <div className="h-24 bg-gray-200 rounded"></div>
-            <div className="h-24 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton variant="admin" />;
   }
 
   // Obtener fecha actual formateada
@@ -257,7 +170,7 @@ export default function AdminPage() {
                 Clients
               </p>
               <div className="mb-4" style={{ maxHeight: "350px", overflow: "hidden" }}>
-                <DataTable config={clientsTableConfig} data={clients} />
+                <DataTable config={memoizedClientsConfig} data={clients} />
               </div>
               <div className="pt-3 flex justify-center">
                 <button
@@ -278,7 +191,7 @@ export default function AdminPage() {
               Contractors
             </p>
             <div className="mb-4" style={{ maxHeight: "548px", overflow: "hidden" }}>
-              <DataTable config={contractorsTableConfig} data={contractors} />
+              <DataTable config={memoizedContractorsConfig} data={contractors} />
             </div>
             <div className="pt-3 flex justify-center">
               <button
