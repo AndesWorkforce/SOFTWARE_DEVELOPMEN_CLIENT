@@ -41,8 +41,8 @@ export default function SuperAdminPage() {
         // Cargar todos los datos en paralelo
         const [talentPercentage, top5, worst5] = await Promise.all([
           adtService.getActiveTalentPercentage(selectedPeriod),
-          adtService.getTop5BestRanking(selectedPeriod),
-          adtService.getTop5WorstRanking(selectedPeriod),
+          adtService.getTopRanking(selectedPeriod, "best"),
+          adtService.getTopRanking(selectedPeriod, "worst"),
         ]);
 
         setTalentData({
