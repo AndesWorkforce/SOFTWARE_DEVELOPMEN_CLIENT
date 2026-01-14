@@ -6,6 +6,24 @@ import type {
   ReportSummary,
 } from "../../types/reports.types";
 
+export interface GenerateReportPayload {
+  from: string;
+  to: string;
+  team_id?: string;
+  client_id?: string;
+  contractor_id?: string;
+  selectedFields?: string[];
+}
+
+export interface GenerateReportResponse {
+  success: boolean;
+  pdfUrl?: string;
+  metricsCount?: number;
+  generatedAt?: string;
+  summary?: Record<string, unknown>;
+  message?: string;
+}
+
 // Re-export types for convenience
 export type { ReportFilters, UserActivity, FilterOptions, ReportSummary };
 
@@ -33,6 +51,14 @@ export class ReportsService {
    */
   async getFilterOptions(): Promise<FilterOptions> {
     const response = await http.get<FilterOptions>("/reports/filters/options");
+    return response.data;
+  }
+
+  /**
+   * Generate PDF report with dynamic fields
+   */
+  async generateReport(payload: GenerateReportPayload): Promise<GenerateReportResponse> {
+    const response = await http.post<GenerateReportResponse>("/reports/generate", payload);
     return response.data;
   }
 

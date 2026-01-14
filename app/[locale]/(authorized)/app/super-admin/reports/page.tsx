@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button, DataTable, FilterPanel } from "@/packages/design-system";
 import { Download } from "lucide-react";
 import { adtService, type RealtimeMetrics } from "@/packages/api/adt/adt.service";
@@ -31,8 +32,6 @@ export default function ReportsPage() {
 
   const handleViewDetail = useCallback(
     (activity: UserActivity) => {
-      // Usar las fechas del filtro directamente, sin modificar
-      // Las fechas ya vienen en formato YYYY-MM-DD desde el FilterPanel
       const from = dateRange?.start || activity.date || new Date().toISOString().split("T")[0];
       const to = dateRange?.end || activity.date || new Date().toISOString().split("T")[0];
 
@@ -132,12 +131,10 @@ export default function ReportsPage() {
 
   useEffect(() => {
     loadFilterOptions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dateRange?.start,
     dateRange?.end,
@@ -147,6 +144,8 @@ export default function ReportsPage() {
     filters.teamId,
     filters.jobPosition,
   ]);
+
+  // ... rest of the file remains unchanged ...
 
   // Configuración base de filtros
   const baseFiltersConfig: FilterPanelConfig = {
@@ -230,7 +229,7 @@ export default function ReportsPage() {
         return filter;
       }),
     };
-  }, [filterOptions, t, baseFiltersConfig]);
+  }, [filterOptions, baseFiltersConfig]);
 
   const loadFilterOptions = async () => {
     try {
@@ -368,139 +367,169 @@ export default function ReportsPage() {
     });
   };
 
+  const buildExportUrl = () => {
+    const params = new URLSearchParams();
+    const from = dateRange?.start || new Date().toISOString().split("T")[0];
+    const to = dateRange?.end || from;
+
+    params.set("from", from);
+    params.set("to", to);
+
+    if (filters.userId && typeof filters.userId === "string") {
+      params.set("userId", filters.userId);
+    }
+    if (filters.country && typeof filters.country === "string") {
+      params.set("country", filters.country);
+    }
+    if (filters.clientId && typeof filters.clientId === "string") {
+      params.set("clientId", filters.clientId);
+    }
+    if (filters.teamId && typeof filters.teamId === "string") {
+      params.set("teamId", filters.teamId);
+    }
+    if (filters.jobPosition && typeof filters.jobPosition === "string") {
+      params.set("jobPosition", filters.jobPosition);
+    }
+
+    return `/${locale}/app/super-admin/reports/export?${params.toString()}`;
+  };
+
   // Configuración base de tabla
-  const baseTableConfig: DataTableConfig<UserActivity> = {
-    columns: [
-      {
-        key: "user",
-        title: "User",
-        translationKey: "reports.table.user",
-        dataPath: (row) => row.user.name,
-        type: "text",
-        width: "200px",
-        align: "center",
-      },
-      {
-        key: "jobPosition",
-        title: "Job Position",
-        translationKey: "reports.table.jobPosition",
-        dataPath: "jobPosition",
-        type: "text",
-        width: "200px",
-        align: "center",
-      },
-      {
-        key: "client",
-        title: "Client",
-        translationKey: "reports.table.client",
-        dataPath: (row) => row.client.name,
-        type: "text",
-        width: "160px",
-        align: "center",
-      },
-      {
-        key: "team",
-        title: "Team",
-        translationKey: "reports.table.team",
-        dataPath: (row) => row.team.name,
-        type: "text",
-        width: "120px",
-        align: "center",
-      },
-      {
-        key: "country",
-        title: "Country",
-        translationKey: "reports.table.country",
-        dataPath: "country",
-        type: "text",
-        width: "150px",
-        align: "center",
-      },
-      {
-        key: "timeWorked",
-        title: "Time",
-        translationKey: "reports.table.time",
-        dataPath: "timeWorked",
-        type: "time",
-        width: "100px",
-        align: "center",
-      },
-      {
-        key: "activityPercentage",
-        title: "Activity",
-        translationKey: "reports.table.activity",
-        dataPath: "activityPercentage",
-        type: "percentage",
-        width: "100px",
-        align: "center",
-        config: {
-          percentage: {
-            thresholds: [{ value: 50, color: "#2EC36D" }],
-            defaultColor: "#FF0004",
-          },
-        },
-      },
-      {
-        key: "activityDetail",
-        title: "Activity Detail",
-        translationKey: "reports.table.activityDetail",
-        dataPath: "id",
-        type: "action",
-        width: "120px",
-        align: "center",
-        config: {
-          action: {
-            label: "View Detail",
-            onClick: handleViewDetail,
-          },
-        },
-      },
-    ],
-    mobileConfig: {
-      primaryFields: [
+  const baseTableConfig = useMemo<DataTableConfig<UserActivity>>(
+    () => ({
+      columns: [
         {
           key: "user",
-          label: "User",
+          title: "User",
+          translationKey: "reports.table.user",
           dataPath: (row) => row.user.name,
+          type: "text",
+          width: "200px",
+          align: "center",
         },
         {
           key: "jobPosition",
-          label: "Job Position",
+          title: "Job Position",
+          translationKey: "reports.table.jobPosition",
           dataPath: "jobPosition",
+          type: "text",
+          width: "200px",
+          align: "center",
         },
-      ],
-      expandedFields: [
+        {
+          key: "client",
+          title: "Client",
+          translationKey: "reports.table.client",
+          dataPath: (row) => row.client.name,
+          type: "text",
+          width: "160px",
+          align: "center",
+        },
         {
           key: "team",
-          label: "Team",
+          title: "Team",
+          translationKey: "reports.table.team",
           dataPath: (row) => row.team.name,
+          type: "text",
+          width: "120px",
+          align: "center",
         },
         {
           key: "country",
-          label: "Country",
+          title: "Country",
+          translationKey: "reports.table.country",
           dataPath: "country",
+          type: "text",
+          width: "150px",
+          align: "center",
         },
         {
           key: "timeWorked",
-          label: "Time",
+          title: "Time",
+          translationKey: "reports.table.time",
           dataPath: "timeWorked",
+          type: "time",
+          width: "100px",
+          align: "center",
         },
         {
           key: "activityPercentage",
-          label: "Activity",
+          title: "Activity",
+          translationKey: "reports.table.activity",
           dataPath: "activityPercentage",
+          type: "percentage",
+          width: "100px",
+          align: "center",
+          config: {
+            percentage: {
+              thresholds: [{ value: 50, color: "#2EC36D" }],
+              defaultColor: "#FF0004",
+            },
+          },
+        },
+        {
+          key: "activityDetail",
+          title: "Activity Detail",
+          translationKey: "reports.table.activityDetail",
+          dataPath: "id",
+          type: "action",
+          width: "120px",
+          align: "center",
+          config: {
+            action: {
+              label: "View Detail",
+              onClick: handleViewDetail,
+            },
+          },
         },
       ],
-      expandable: true,
-    },
-    rowKey: "id",
-    striped: true,
-    evenRowColor: "#E2E2E2",
-    oddRowColor: "#FFFFFF",
-    emptyState: {
-      message: t("noActivities"),
-    },
-  };
+      mobileConfig: {
+        primaryFields: [
+          {
+            key: "user",
+            label: "User",
+            dataPath: (row) => row.user.name,
+          },
+          {
+            key: "jobPosition",
+            label: "Job Position",
+            dataPath: "jobPosition",
+          },
+        ],
+        expandedFields: [
+          {
+            key: "team",
+            label: "Team",
+            dataPath: (row) => row.team.name,
+          },
+          {
+            key: "country",
+            label: "Country",
+            dataPath: "country",
+          },
+          {
+            key: "timeWorked",
+            label: "Time",
+            dataPath: "timeWorked",
+          },
+          {
+            key: "activityPercentage",
+            label: "Activity",
+            dataPath: "activityPercentage",
+          },
+        ],
+        expandable: true,
+      },
+      rowKey: "id",
+      striped: true,
+      evenRowColor: "#E2E2E2",
+      oddRowColor: "#FFFFFF",
+      emptyState: {
+        message: t("noActivities"),
+      },
+    }),
+    [handleViewDetail, t],
+  );
 
   const tableConfig = useMemo(() => {
     return {
@@ -531,20 +560,22 @@ export default function ReportsPage() {
             <h1 className="text-xl md:text-3xl font-bold" style={{ color: "#000000" }}>
               {t("title")}
             </h1>
-            <Button
-              variant="primary"
-              style={{
-                background: "#0097B2",
-                color: "#FFFFFF",
-                fontSize: "14px",
-                padding: "7px 21px",
-                height: "35px",
-              }}
-            >
-              <Download className="w-3.5 h-3.5 md:w-5 md:h-5 mr-2" />
-              <span className="hidden md:inline">{t("exportPdf")}</span>
-              <span className="md:hidden">Export PDF</span>
-            </Button>
+            <Link href={buildExportUrl()}>
+              <Button
+                variant="primary"
+                style={{
+                  background: "#0097B2",
+                  color: "#FFFFFF",
+                  fontSize: "14px",
+                  padding: "7px 21px",
+                  height: "35px",
+                }}
+              >
+                <Download className="w-3.5 h-3.5 md:w-5 md:h-5 mr-2" />
+                <span className="hidden md:inline">{t("exportPdf")}</span>
+                <span className="md:hidden">{t("exportPdf")}</span>
+              </Button>
+            </Link>
           </div>
 
           <FilterPanel
