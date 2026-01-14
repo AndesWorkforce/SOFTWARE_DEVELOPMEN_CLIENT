@@ -186,26 +186,29 @@ export class AdtService {
   }
 
   /**
-   * Obtiene top 5 mejores rankings de productividad.
+   * Obtiene top 5 rankings de productividad (mejores o peores).
    * @param period 'day' (día actual), 'week' (última semana), 'month' (mes actual)
+   * @param order 'best' para mejores, 'worst' para peores
    * @param useCache Si usar caché (default: true)
-   * @returns Top 5 contractors con mejor productividad_score
+   * @returns Top 5 contractors según el orden especificado
    */
-  async getTop5BestRanking(
+  async getTopRanking(
     period: "day" | "week" | "month" = "day",
+    order: "best" | "worst" = "best",
     useCache: boolean = true,
   ): Promise<RealtimeMetrics[]> {
     try {
-      const response = await http.get<RealtimeMetrics[]>("/adt/ranking/top5-best", {
+      const response = await http.get<RealtimeMetrics[]>("/adt/ranking/top5", {
         params: {
           period,
+          order,
           useCache: useCache ? "true" : "false",
         },
       });
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError;
-      console.error("❌ Error en getTop5BestRanking:", {
+      console.error(`❌ Error en getTopRanking (${order}):`, {
         message: axiosError?.message || "Unknown error",
         response: axiosError?.response?.data || null,
         status: axiosError?.response?.status || null,
@@ -215,32 +218,25 @@ export class AdtService {
   }
 
   /**
+   * @deprecated Usar getTopRanking(period, 'best', useCache) en su lugar
+   * Obtiene top 5 mejores rankings de productividad.
+   */
+  async getTop5BestRanking(
+    period: "day" | "week" | "month" = "day",
+    useCache: boolean = true,
+  ): Promise<RealtimeMetrics[]> {
+    return this.getTopRanking(period, "best", useCache);
+  }
+
+  /**
+   * @deprecated Usar getTopRanking(period, 'worst', useCache) en su lugar
    * Obtiene top 5 peores rankings de productividad.
-   * @param period 'day' (día actual), 'week' (última semana), 'month' (mes actual)
-   * @param useCache Si usar caché (default: true)
-   * @returns Top 5 contractors con peor productividad_score
    */
   async getTop5WorstRanking(
     period: "day" | "week" | "month" = "day",
     useCache: boolean = true,
   ): Promise<RealtimeMetrics[]> {
-    try {
-      const response = await http.get<RealtimeMetrics[]>("/adt/ranking/top5-worst", {
-        params: {
-          period,
-          useCache: useCache ? "true" : "false",
-        },
-      });
-      return response.data;
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      console.error("❌ Error en getTop5WorstRanking:", {
-        message: axiosError?.message || "Unknown error",
-        response: axiosError?.response?.data || null,
-        status: axiosError?.response?.status || null,
-      });
-      throw error;
-    }
+    return this.getTopRanking(period, "worst", useCache);
   }
 
   /**
