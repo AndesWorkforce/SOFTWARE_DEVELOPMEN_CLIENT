@@ -25,8 +25,16 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
+    console.log("📤 Attempting login with:", {
+      email: formData.email,
+      passwordLength: formData.password.length,
+    });
+
     try {
       const response = await authService.login(formData.email, formData.password);
+
+      console.log("🔍 Login response:", response);
+      console.log("👤 User role from backend:", response.user.role);
 
       // Store token, refreshToken and user data
       setToken(response.accessToken);
@@ -36,9 +44,38 @@ export default function LoginPage() {
       // Store session cookie
       document.cookie = `session=${response.accessToken}; path=/; max-age=3600`;
 
-      // Redirect all users to super-admin
-      router.push(`/${locale}/app/super-admin`);
+      // Redirect based on user role
+      let redirectPath = `/${locale}/app/super-admin`; // Default
+
+      console.log("🔀 Checking role for redirect...");
+      console.log("📋 Role value:", response.user.role);
+      console.log("📋 Role type:", typeof response.user.role);
+      console.log("📋 Role === 'TeamAdmin':", response.user.role === "TeamAdmin");
+      console.log("📋 Role === 'Superadmin':", response.user.role === "Superadmin");
+      console.log("📋 Role === 'Visualizer':", response.user.role === "Visualizer");
+      
+      switch (response.user.role) {
+        case "Superadmin":
+          console.log("✅ Redirecting to super-admin");
+          redirectPath = `/${locale}/app/super-admin`;
+          break;
+        case "TeamAdmin":
+          console.log("✅ Redirecting to admin (TeamAdmin)");
+          redirectPath = `/${locale}/app/admin`;
+          break;
+        case "Visualizer":
+          console.log("✅ Redirecting to client");
+          redirectPath = `/${locale}/app/client`;
+          break;
+        default:
+          console.log("⚠️ Unknown role, using default:", response.user.role);
+          redirectPath = `/${locale}/app/super-admin`;
+      }
+
+      console.log("🎯 Final redirect path:", redirectPath);
+      router.push(redirectPath);
     } catch (err) {
+      console.error("❌ Login error:", err);
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || "Invalid email or password");
       console.error("Login error:", err);
