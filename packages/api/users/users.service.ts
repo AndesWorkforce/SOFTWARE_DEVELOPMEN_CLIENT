@@ -203,6 +203,33 @@ export class UsersService {
       throw error;
     }
   }
+
+  /**
+   * Obtiene las estadísticas generales (clientes, contratistas, equipos)
+   * @returns Estadísticas
+   */
+  async getStats(): Promise<{
+    totalClients: number;
+    totalContractors: number;
+    totalTeams: number;
+  }> {
+    try {
+      const response = await http.get<{
+        totalClients: number;
+        totalContractors: number;
+        totalTeams: number;
+      }>("/users/stats");
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getStats:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      throw error;
+    }
+  }
 }
 
 export const usersService = new UsersService();

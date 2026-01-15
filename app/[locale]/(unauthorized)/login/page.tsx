@@ -36,12 +36,27 @@ export default function LoginPage() {
       // Store session cookie
       document.cookie = `session=${response.accessToken}; path=/; max-age=3600`;
 
-      // Redirect all users to super-admin
-      router.push(`/${locale}/app/super-admin`);
+      // Redirect based on user role
+      let redirectPath = `/${locale}/app/super-admin`; // Default
+
+      switch (response.user.role) {
+        case "Superadmin":
+          redirectPath = `/${locale}/app/super-admin`;
+          break;
+        case "TeamAdmin":
+          redirectPath = `/${locale}/app/admin`;
+          break;
+        case "Visualizer":
+          redirectPath = `/${locale}/app/client`;
+          break;
+        default:
+          redirectPath = `/${locale}/app/super-admin`;
+      }
+
+      router.push(redirectPath);
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || "Invalid email or password");
-      console.error("Login error:", err);
     } finally {
       setLoading(false);
     }
