@@ -175,7 +175,7 @@ export default function AdminPage() {
               <div className="pt-3 flex justify-center">
                 <button
                   type="button"
-                  onClick={() => router.push(`/${locale}/app/super-admin/clients`)}
+                  onClick={() => router.push(`/${locale}/app/admin/clients`)}
                   className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium"
                 >
                   <span>View Clients</span>
@@ -196,7 +196,7 @@ export default function AdminPage() {
             <div className="pt-3 flex justify-center">
               <button
                 type="button"
-                onClick={() => router.push(`/${locale}/app/super-admin/contractors`)}
+                onClick={() => router.push(`/${locale}/app/admin/contractors`)}
                 className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium"
               >
                 <span>View Contractors</span>
