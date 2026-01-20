@@ -233,7 +233,8 @@
       "userPlaceholder": "Buscar usuario aquí...",
       "countryPlaceholder": "Selecciona un país...",
       "clientPlaceholder": "Selecciona un cliente...",
-      "teamPlaceholder": "Selecciona un equipo..."
+      "teamPlaceholder": "Selecciona un equipo...",
+      "jobPositionPlaceholder": "Selecciona un cargo..."
     },
     "table": {
       "calendar": "Calendario",
@@ -243,7 +244,12 @@
       "client": "Cliente",
       "team": "Equipo",
       "country": "País",
-      "action": "Acción"
+      "activationKey": "Clave de Activación",
+      "action": "Acción",
+      "view": "Ver",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "copied": "¡Copiado!"
     },
     "modal": {
       "title": "Agregar Contratista",

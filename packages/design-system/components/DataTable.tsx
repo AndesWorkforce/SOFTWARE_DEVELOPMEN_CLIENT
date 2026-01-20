@@ -227,7 +227,7 @@ export function DataTable<T = Record<string, unknown>>({
         style={config.styles?.table}
       >
         <div className="overflow-x-auto">
-          <table className="w-full table-fixed" style={{ tableLayout: "fixed" }}>
+          <table className="w-full">
             <thead>
               <tr style={config.styles?.header}>
                 {visibleColumns.map((column) => {
@@ -299,6 +299,7 @@ export function DataTable<T = Record<string, unknown>>({
                         style={{
                           color: "#000000",
                           width: column.width,
+                          minWidth: column.minWidth,
                           textAlign: column.align || "center",
                           ...config.styles?.cell,
                         }}

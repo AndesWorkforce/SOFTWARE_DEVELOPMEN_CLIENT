@@ -186,7 +186,7 @@ export function FilterPanel({
               <p className="text-[14px] md:text-[16px] font-medium md:font-semibold text-black">
                 {label}
               </p>
-              <div className="flex h-[35px] md:h-[45px] items-center justify-end rounded-[5px] border border-[rgba(166,166,166,0.5)] bg-white shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-px gap-[10px]">
+              <div className="flex h-[35px] md:h-[40px] items-center justify-end rounded-[5px] border border-[rgba(166,166,166,0.5)] bg-white shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-px gap-[10px]">
                 <input
                   type="text"
                   value={nameDraft}
@@ -256,9 +256,11 @@ export function FilterPanel({
                 style={{
                   background: "#FF0004",
                   color: "#FFFFFF",
-                  fontSize: "12px",
+                  fontSize: "15px",
+                  fontWeight: 600,
                   padding: "9px 16px",
                   height: "35px",
+                  borderRadius: "5px",
                 }}
               >
                 {config.clearButtonLabel || t("reports.cleanFilters")}
@@ -277,30 +279,37 @@ export function FilterPanel({
     const countryFilter = config.filters.find((f) => f.key === "country");
     const clientFilter = config.filters.find((f) => f.key === "clientId");
     const teamFilter = config.filters.find((f) => f.key === "teamId");
+    const jobPositionFilter = config.filters.find((f) => f.key === "jobPosition");
     const otherFilters = config.filters.filter(
-      (f) => !["name", "country", "clientId", "teamId"].includes(f.key),
+      (f) => !["name", "country", "clientId", "teamId", "jobPosition"].includes(f.key),
     );
 
     // Si tiene los filtros específicos de contractors, usar layout mobile especial
-    const isContractorsLayout = nameFilter && countryFilter && clientFilter && teamFilter;
+    const isContractorsLayout =
+      nameFilter && countryFilter && clientFilter && teamFilter && jobPositionFilter;
 
     if (isContractorsLayout) {
       return (
         <>
           {/* Layout mobile (visible solo en pantallas pequeñas) */}
           <div className="flex flex-col gap-[12px] md:hidden">
-            {/* Row 1: User (ancho completo) */}
-            {nameFilter && <div className="w-full">{renderFilter(nameFilter)}</div>}
-
-            {/* Row 2: Country y Client */}
+            {/* Row 1: User y Country */}
             <div className="flex gap-[12px] w-full min-w-0">
+              {nameFilter && <div className="flex-1 min-w-0">{renderFilter(nameFilter)}</div>}
               {countryFilter && <div className="flex-1 min-w-0">{renderFilter(countryFilter)}</div>}
-              {clientFilter && <div className="flex-1 min-w-0">{renderFilter(clientFilter)}</div>}
             </div>
 
-            {/* Row 3: Team y Clean Filters */}
-            <div className="flex gap-[12px] items-end w-full min-w-0">
+            {/* Row 2: Client y Team */}
+            <div className="flex gap-[12px] w-full min-w-0">
+              {clientFilter && <div className="flex-1 min-w-0">{renderFilter(clientFilter)}</div>}
               {teamFilter && <div className="flex-1 min-w-0">{renderFilter(teamFilter)}</div>}
+            </div>
+
+            {/* Row 3: Job Position y Clean Filters */}
+            <div className="flex gap-[12px] items-end w-full min-w-0">
+              {jobPositionFilter && (
+                <div className="flex-1 min-w-0">{renderFilter(jobPositionFilter)}</div>
+              )}
               {config.showClearButton && config.clearButtonPosition === "end" && (
                 <div className="flex-1 min-w-0">
                   <Button
@@ -311,6 +320,7 @@ export function FilterPanel({
                       background: "#FF0004",
                       color: "#FFFFFF",
                       fontSize: "12px",
+                      fontWeight: 600,
                       padding: "9px 16px",
                       height: "35px",
                       borderRadius: "5px",
@@ -352,7 +362,8 @@ export function FilterPanel({
                     style={{
                       background: "#FF0004",
                       color: "#FFFFFF",
-                      fontSize: "16px",
+                      fontSize: "15px",
+                      fontWeight: 600,
                       padding: "8px 24px",
                       height: "40px",
                       borderRadius: "5px",
@@ -391,7 +402,8 @@ export function FilterPanel({
                     style={{
                       background: "#FF0004",
                       color: "#FFFFFF",
-                      fontSize: "12px",
+                      fontSize: "15px",
+                      fontWeight: 600,
                       padding: "9px 16px",
                       height: "35px",
                       borderRadius: "5px",
@@ -422,7 +434,8 @@ export function FilterPanel({
                     style={{
                       background: "#FF0004",
                       color: "#FFFFFF",
-                      fontSize: "16px",
+                      fontSize: "15px",
+                      fontWeight: 600,
                       padding: "8px 24px",
                       height: "40px",
                       borderRadius: "5px",
@@ -455,7 +468,8 @@ export function FilterPanel({
                 style={{
                   background: "#FF0004",
                   color: "#FFFFFF",
-                  fontSize: "16px",
+                  fontSize: "15px",
+                  fontWeight: 600,
                   padding: "8px 24px",
                   height: "40px",
                   borderRadius: "5px",
@@ -496,7 +510,8 @@ export function FilterPanel({
             style={{
               background: "#FF0004",
               color: "#FFFFFF",
-              fontSize: "16px",
+              fontSize: "15px",
+              fontWeight: 600,
               padding: "8px 24px",
               height: "40px",
               borderRadius: "5px",
