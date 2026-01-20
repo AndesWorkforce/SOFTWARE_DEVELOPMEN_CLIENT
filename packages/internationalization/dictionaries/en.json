@@ -233,7 +233,8 @@
       "userPlaceholder": "Search user here...",
       "countryPlaceholder": "Select country here...",
       "clientPlaceholder": "Select client here...",
-      "teamPlaceholder": "Select team here..."
+      "teamPlaceholder": "Select team here...",
+      "jobPositionPlaceholder": "Select job position here..."
     },
     "table": {
       "calendar": "Calendar",
@@ -243,7 +244,12 @@
       "client": "Client",
       "team": "Team",
       "country": "Country",
-      "action": "Action"
+      "activationKey": "Activation Key",
+      "action": "Action",
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "copied": "Copied!"
     },
     "modal": {
       "title": "Add Contractor",
