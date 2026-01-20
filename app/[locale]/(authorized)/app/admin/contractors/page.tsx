@@ -43,7 +43,7 @@ const ActivationKeyCell = ({ value }: { value: string | null }) => {
   };
 
   return (
-    <div className="flex items-center justify-center gap-2 whitespace-normal">
+    <div className="inline-flex items-center justify-start md:justify-center gap-2 whitespace-normal">
       <span className="text-[14px] font-normal font-mono max-w-[180px] text-left break-all leading-tight">
         {isVisible ? value : maskedValue}
       </span>
