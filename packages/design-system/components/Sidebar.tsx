@@ -9,6 +9,7 @@ interface NavItem {
   name: string;
   path: string;
   icon: ReactNode;
+  roles?: ("super-admin" | "admin" | "client")[];
 }
 
 export interface SidebarProps {
@@ -47,8 +48,11 @@ export const Sidebar = ({ role }: SidebarProps) => {
       name: t("roles"),
       path: `/${locale}/app/${role}/roles`,
       icon: <User className="w-5 h-5" />,
+      roles: ["super-admin"],
     },
   ];
+
+  const navItems = baseNavItems.filter((item) => !item.roles || item.roles.includes(role));
 
   const handleLogout = () => {
     logout();
@@ -78,7 +82,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
 
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1">
-          {baseNavItems.map((item) => {
+          {navItems.map((item) => {
             const active = isActive(item.path);
             return (
               <button
@@ -124,7 +128,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
         aria-label="Bottom Navigation"
       >
         <ul className="h-full flex items-center justify-around">
-          {baseNavItems.map((item) => {
+          {navItems.map((item) => {
             const active = isActive(item.path);
             return (
               <li key={item.path}>
