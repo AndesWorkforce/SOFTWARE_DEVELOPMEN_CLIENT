@@ -120,6 +120,7 @@
   "reports": {
     "title": "Reports",
     "exportPdf": "Export PDF",
+    "reportGenerator": "Report Generator",
     "applyFilters": "Apply Filters",
     "cleanFilters": "Clean filters",
     "date": "Date",
@@ -168,7 +169,8 @@
       "country": "Country",
       "time": "Time",
       "activity": "Activity",
-      "activityDetail": "Activity Detail"
+      "activityDetail": "Activity Detail",
+      "reportDetail": "Report Detail"
     },
     "viewDetail": "View",
     "modal": {
@@ -262,6 +264,7 @@
       "startTime": "Start Time",
       "finishTime": "Finish Time",
       "startLunchTime": "Start Lunch Time",
+      "finishLunchTime": "Lunch End Time",
       "optional": "Optional",
       "userPlaceholder": "Type name and last name here...",
       "emailPlaceholder": "mail@outlook.com",
@@ -445,5 +448,27 @@
     "minLength": "Must be at least {min} characters",
     "required": "{field} is required",
     "invalidEmail": "Invalid email address"
+  },
+  "admin": {
+    "title": "Dashboard",
+    "stats": {
+      "clients": "Clients",
+      "contractors": "Contractors",
+      "teams": "Teams"
+    },
+    "reports": {
+      "title": "Reports",
+      "exportPdf": "Export PDF",
+      "viewReports": "View Reports"
+    },
+    "clients": {
+      "title": "Clients",
+      "viewClients": "View Clients"
+    },
+    "contractors": {
+      "title": "Contractors",
+      "viewContractors": "View Contractors",
+      "view": "View"
+    }
   }
 }

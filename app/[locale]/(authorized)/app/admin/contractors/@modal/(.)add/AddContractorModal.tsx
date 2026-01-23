@@ -39,7 +39,16 @@ type AddContractorFormValues = {
   work_schedule_start: string;
   work_schedule_end: string;
   lunch_start: string;
+  lunch_end: string;
 };
+
+function addOneHour(time: string): string {
+  if (!time) return "";
+  const [hours, minutes] = time.split(":").map(Number);
+  if (isNaN(hours) || isNaN(minutes)) return "";
+  const newHours = (hours + 1) % 24;
+  return `${String(newHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
 
 export function AddContractorModal({
   onClose,
@@ -91,6 +100,7 @@ export function AddContractorModal({
       work_schedule_start: z.string().optional().or(z.literal("")),
       work_schedule_end: z.string().optional().or(z.literal("")),
       lunch_start: z.string().optional().or(z.literal("")),
+      lunch_end: z.string().optional().or(z.literal("")),
     });
   }, [t, tCommon]);
 
@@ -112,15 +122,42 @@ export function AddContractorModal({
       work_schedule_start: "",
       work_schedule_end: "",
       lunch_start: "",
+      lunch_end: "",
     },
     mode: "onSubmit",
   });
 
   const selectedClientId = watch("client_id");
+  const lunchStartValue = watch("lunch_start");
   const timeRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  const handleTimeIconClick = (fieldKey: keyof AddContractorFormValues) =>
-    openTimePicker(timeRefs.current[fieldKey]);
+  // Desestructuramos los refs de register para no sobreescribirlos
+  const { ref: workScheduleStartRef, ...workScheduleStartRegister } =
+    register("work_schedule_start");
+  const { ref: workScheduleEndRef, ...workScheduleEndRegister } = register("work_schedule_end");
+  const { ref: lunchStartRef, ...lunchStartRegister } = register("lunch_start");
+  const { ref: lunchEndRef, ...lunchEndRegister } = register("lunch_end");
+
+  useEffect(() => {
+    if (lunchStartValue) {
+      setValue("lunch_end", addOneHour(lunchStartValue), {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    } else {
+      setValue("lunch_end", "", {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+  }, [lunchStartValue, setValue]);
+
+  const handleTimeIconClick = (fieldKey: keyof AddContractorFormValues) => {
+    const input = timeRefs.current[fieldKey];
+    if (input && !input.disabled) {
+      openTimePicker(input);
+    }
+  };
 
   // Resetear team al cambiar client (misma lógica que en Edit)
   useEffect(() => {
@@ -186,6 +223,7 @@ export function AddContractorModal({
             work_schedule_start: pendingPayload.work_schedule_start || null,
             work_schedule_end: pendingPayload.work_schedule_end || null,
             lunch_start: pendingPayload.lunch_start || null,
+            lunch_end: pendingPayload.lunch_end || null,
           };
 
           if (pendingPayload.team_id && pendingPayload.team_id.trim()) {
@@ -400,8 +438,9 @@ export function AddContractorModal({
                   <div className="relative w-full">
                     <Input
                       type="time"
-                      {...register("work_schedule_start")}
+                      {...workScheduleStartRegister}
                       ref={(el) => {
+                        workScheduleStartRef(el);
                         timeRefs.current.work_schedule_start = el;
                       }}
                       className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
@@ -409,7 +448,11 @@ export function AddContractorModal({
                       disabled={isLoadingData || isPending}
                     />
                     <div
-                      className="absolute right-[15px] top-1/2 -translate-y-1/2 cursor-pointer"
+                      className={`absolute right-[15px] top-1/2 -translate-y-1/2 ${
+                        isLoadingData || isPending
+                          ? "cursor-not-allowed opacity-50"
+                          : "cursor-pointer"
+                      }`}
                       onClick={() => handleTimeIconClick("work_schedule_start")}
                     >
                       <Clock className="md:w-6 md:h-6 w-5 h-5" />
@@ -425,8 +468,9 @@ export function AddContractorModal({
                   <div className="relative w-full">
                     <Input
                       type="time"
-                      {...register("work_schedule_end")}
+                      {...workScheduleEndRegister}
                       ref={(el) => {
+                        workScheduleEndRef(el);
                         timeRefs.current.work_schedule_end = el;
                       }}
                       className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
@@ -434,7 +478,11 @@ export function AddContractorModal({
                       disabled={isLoadingData || isPending}
                     />
                     <div
-                      className="absolute right-[15px] top-1/2 -translate-y-1/2 cursor-pointer"
+                      className={`absolute right-[15px] top-1/2 -translate-y-1/2 ${
+                        isLoadingData || isPending
+                          ? "cursor-not-allowed opacity-50"
+                          : "cursor-pointer"
+                      }`}
                       onClick={() => handleTimeIconClick("work_schedule_end")}
                     >
                       <Clock className="md:w-6 md:h-6 w-5 h-5" />
@@ -453,8 +501,9 @@ export function AddContractorModal({
                   <div className="relative w-full">
                     <Input
                       type="time"
-                      {...register("lunch_start")}
+                      {...lunchStartRegister}
                       ref={(el) => {
+                        lunchStartRef(el);
                         timeRefs.current.lunch_start = el;
                       }}
                       className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
@@ -462,9 +511,36 @@ export function AddContractorModal({
                       disabled={isLoadingData || isPending}
                     />
                     <div
-                      className="absolute right-[15px] top-1/2 -translate-y-1/2 cursor-pointer"
+                      className={`absolute right-[15px] top-1/2 -translate-y-1/2 ${
+                        isLoadingData || isPending
+                          ? "cursor-not-allowed opacity-50"
+                          : "cursor-pointer"
+                      }`}
                       onClick={() => handleTimeIconClick("lunch_start")}
                     >
+                      <Clock className="md:w-6 md:h-6 w-5 h-5" />
+                    </div>
+                  </div>
+                </FormField>
+              </div>
+              <div className="w-full md:flex-1">
+                <FormField
+                  label={t("finishLunchTime") || "Lunch End Time"}
+                  error={errors.lunch_end?.message}
+                >
+                  <div className="relative w-full">
+                    <Input
+                      type="time"
+                      {...lunchEndRegister}
+                      ref={(el) => {
+                        lunchEndRef(el);
+                        timeRefs.current.lunch_end = el;
+                      }}
+                      className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
+                      style={getFormControlStyle(!!errors.lunch_end)}
+                      readOnly={true}
+                    />
+                    <div className="absolute right-[15px] top-1/2 -translate-y-1/2 cursor-not-allowed opacity-50">
                       <Clock className="md:w-6 md:h-6 w-5 h-5" />
                     </div>
                   </div>
