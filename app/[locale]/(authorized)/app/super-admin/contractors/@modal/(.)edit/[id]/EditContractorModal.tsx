@@ -17,6 +17,14 @@ interface EditContractorModalProps {
   onUpdated?: () => void;
 }
 
+function addOneHour(time: string): string {
+  if (!time) return "";
+  const [hours, minutes] = time.split(":").map(Number);
+  if (isNaN(hours) || isNaN(minutes)) return "";
+  const newHours = (hours + 1) % 24;
+  return `${String(newHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
 export function EditContractorModal({
   contractorId,
   onClose,
@@ -57,6 +65,9 @@ export function EditContractorModal({
           work_schedule_start: contractor.work_schedule_start || "",
           work_schedule_end: contractor.work_schedule_end || "",
           lunch_start: contractor.lunch_start || "",
+          lunch_end:
+            contractor.lunch_end ||
+            (contractor.lunch_start ? addOneHour(contractor.lunch_start) : ""),
         });
 
         setClients(
@@ -202,7 +213,22 @@ export function EditContractorModal({
           translationKey: "contractors.modal.startLunchTime",
           optional: true,
           icon: <Clock className="w-6 h-6" />,
-          colSpan: 1,
+          onValueChange: (value, _formValues, setFieldValue) => {
+            if (typeof value === "string" && value) {
+              setFieldValue("lunch_end", addOneHour(value));
+            } else {
+              setFieldValue("lunch_end", "");
+            }
+          },
+        },
+        {
+          key: "lunch_end",
+          type: "time",
+          label: t("finishLunchTime") || "Lunch End Time",
+          translationKey: "contractors.modal.finishLunchTime",
+          optional: true,
+          icon: <Clock className="w-6 h-6" />,
+          disabled: true,
         },
       ],
       buttons: [
@@ -234,6 +260,7 @@ export function EditContractorModal({
           work_schedule_start: values.work_schedule_start || null,
           work_schedule_end: values.work_schedule_end || null,
           lunch_start: values.lunch_start || null,
+          lunch_end: values.lunch_end || null,
         };
 
         if (typeof values.team_id === "string" && values.team_id.trim()) {

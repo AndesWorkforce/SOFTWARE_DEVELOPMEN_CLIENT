@@ -82,6 +82,15 @@ export interface FormFieldConfig {
   validator?: (value: unknown, formValues: Record<string, unknown>) => boolean | string;
 
   /**
+   * Acción a ejecutar cuando el valor del campo cambia
+   */
+  onValueChange?: (
+    value: unknown,
+    formValues: Record<string, unknown>,
+    setFieldValue: (key: string, value: unknown) => void,
+  ) => void;
+
+  /**
    * Renderizado personalizado (solo para type: "custom")
    */
   render?: (

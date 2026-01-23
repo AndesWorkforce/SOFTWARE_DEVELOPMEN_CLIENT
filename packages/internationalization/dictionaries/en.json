@@ -264,6 +264,7 @@
       "startTime": "Start Time",
       "finishTime": "Finish Time",
       "startLunchTime": "Start Lunch Time",
+      "finishLunchTime": "Lunch End Time",
       "optional": "Optional",
       "userPlaceholder": "Type name and last name here...",
       "emailPlaceholder": "mail@outlook.com",

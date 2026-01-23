@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Calendar, Eye, EyeOff, Copy } from "lucide-react";
+import { Plus, Pencil, Trash2, Calendar, Copy } from "lucide-react";
 import { Button, DataTable, FilterPanel } from "@/packages/design-system";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import { clientsService } from "@/packages/api/clients/clients.service";
@@ -21,44 +21,50 @@ interface FilterOptions {
   jobPositions: SelectOption[];
 }
 
-const ActivationKeyCell = ({ value }: { value: string | null }) => {
+const ActivationKeyCell = ({
+  value,
+  contractorId,
+}: {
+  value: string | null;
+  contractorId: string;
+}) => {
   const t = useTranslations();
-  const [isVisible, setIsVisible] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
 
   if (!value) return <span>N/A</span>;
 
-  const maskedValue = value.length > 6 ? `${value.slice(0, 3)}******${value.slice(-6)}` : "******";
-
-  const handleCopy = (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(value);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  };
+    if (isCopying) return;
 
-  const toggleVisibility = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsVisible(!isVisible);
+    try {
+      setIsCopying(true);
+      // Obtener la clave completa desde el backend
+      const fullKey = await contractorsService.getFullActivationKey(contractorId);
+      await navigator.clipboard.writeText(fullKey);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      console.error("Error copying activation key:", error);
+    } finally {
+      setIsCopying(false);
+    }
   };
 
   return (
     <div className="inline-flex items-center justify-start md:justify-center gap-2 whitespace-normal">
       <span className="text-[14px] font-normal font-mono max-w-[180px] text-left break-all leading-tight">
-        {isVisible ? value : maskedValue}
+        {value}
       </span>
       <div className="flex items-center gap-2 shrink-0">
-        <button
-          onClick={toggleVisibility}
-          className="text-[#0097B2] hover:opacity-70 transition-opacity"
-          title={isVisible ? "Hide" : "Show"}
-        >
-          {isVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-        </button>
         <div className="relative">
           <button
             onClick={handleCopy}
-            className="text-[#0097B2] hover:opacity-70 transition-opacity"
+            disabled={isCopying}
+            className={`text-[#0097B2] hover:opacity-70 transition-opacity ${
+              isCopying ? "cursor-wait opacity-50" : ""
+            }`}
             title="Copy"
           >
             <Copy className="w-4 h-4" />
@@ -192,7 +198,9 @@ export default function ContractorsPage() {
           type: "custom",
           minWidth: "220px",
           align: "center",
-          render: (value: unknown) => <ActivationKeyCell value={value as string} />,
+          render: (value: unknown, row: Contractor) => (
+            <ActivationKeyCell value={value as string} contractorId={row.id} />
+          ),
         },
         {
           key: "actions",
@@ -309,7 +317,9 @@ export default function ContractorsPage() {
             key: "activationKey",
             label: t("contractors.table.activationKey"),
             dataPath: "activation_key",
-            render: (value: unknown) => <ActivationKeyCell value={value as string} />,
+            render: (value: unknown, row: Contractor) => (
+              <ActivationKeyCell value={value as string} contractorId={row.id} />
+            ),
           },
           {
             key: "actions",

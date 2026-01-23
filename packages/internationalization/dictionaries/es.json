@@ -264,6 +264,7 @@
       "startTime": "Hora de Inicio",
       "finishTime": "Hora de Finalización",
       "startLunchTime": "Hora de Inicio de Almuerzo",
+      "finishLunchTime": "Hora de Finalización de Almuerzo",
       "optional": "Opcional",
       "userPlaceholder": "Escribe nombre y apellido aquí...",
       "emailPlaceholder": "correo@outlook.com",
