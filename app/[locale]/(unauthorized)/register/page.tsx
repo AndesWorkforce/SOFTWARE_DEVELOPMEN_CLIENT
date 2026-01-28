@@ -38,8 +38,24 @@ export default function RegisterPage() {
       // Store session cookie (you might want to do this on the backend)
       document.cookie = `session=${response.accessToken}; path=/; max-age=3600`;
 
-      // Redirect to dashboard
-      router.push(`/${locale}/app/client`);
+      // Redirect to dashboard based on role
+      let redirectPath = `/${locale}/app/visualizer`; // Default for registered users
+
+      switch (response.user.role) {
+        case "Superadmin":
+          redirectPath = `/${locale}/app/super-admin`;
+          break;
+        case "TeamAdmin":
+          redirectPath = `/${locale}/app/admin`;
+          break;
+        case "Visualizer":
+          redirectPath = `/${locale}/app/visualizer`;
+          break;
+        default:
+          redirectPath = `/${locale}/app/visualizer`;
+      }
+
+      router.push(redirectPath);
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error.response?.data?.message || "Error registering user");

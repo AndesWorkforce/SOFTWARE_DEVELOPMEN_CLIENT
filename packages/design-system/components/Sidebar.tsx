@@ -9,10 +9,11 @@ interface NavItem {
   name: string;
   path: string;
   icon: ReactNode;
+  roles?: ("super-admin" | "admin" | "client" | "visualizer")[];
 }
 
 export interface SidebarProps {
-  role: "super-admin" | "admin" | "client";
+  role: "super-admin" | "admin" | "client" | "visualizer";
 }
 
 export const Sidebar = ({ role }: SidebarProps) => {
@@ -29,9 +30,9 @@ export const Sidebar = ({ role }: SidebarProps) => {
       icon: <LayoutDashboard className="w-5 h-5" />,
     },
     {
-      name: t("reports"),
-      path: `/${locale}/app/${role}/reports`,
-      icon: <FileText className="w-5 h-5" />,
+      name: t("clients"),
+      path: `/${locale}/app/${role}/clients`,
+      icon: <Users className="w-5 h-5" />,
     },
     {
       name: t("contractors"),
@@ -39,16 +40,25 @@ export const Sidebar = ({ role }: SidebarProps) => {
       icon: <Users className="w-5 h-5" />,
     },
     {
-      name: t("clients"),
-      path: `/${locale}/app/${role}/clients`,
-      icon: <Users className="w-5 h-5" />,
+      name: t("reports"),
+      path: `/${locale}/app/${role}/reports`,
+      icon: <FileText className="w-5 h-5" />,
     },
     {
       name: t("roles"),
       path: `/${locale}/app/${role}/roles`,
       icon: <User className="w-5 h-5" />,
+      roles: ["super-admin"], // Solo para super-admin
     },
   ];
+
+  // Filtrar items según el rol
+  const navItems = baseNavItems.filter((item) => {
+    if (item.roles) {
+      return item.roles.includes(role);
+    }
+    return true;
+  });
 
   const handleLogout = () => {
     logout();
@@ -78,7 +88,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
 
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1">
-          {baseNavItems.map((item) => {
+          {navItems.map((item) => {
             const active = isActive(item.path);
             return (
               <button
@@ -124,7 +134,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
         aria-label="Bottom Navigation"
       >
         <ul className="h-full flex items-center justify-around">
-          {baseNavItems.map((item) => {
+          {navItems.map((item) => {
             const active = isActive(item.path);
             return (
               <li key={item.path}>

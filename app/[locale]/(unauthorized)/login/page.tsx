@@ -47,7 +47,7 @@ export default function LoginPage() {
           redirectPath = `/${locale}/app/admin`;
           break;
         case "Visualizer":
-          redirectPath = `/${locale}/app/client`;
+          redirectPath = `/${locale}/app/visualizer`;
           break;
         default:
           redirectPath = `/${locale}/app/super-admin`;

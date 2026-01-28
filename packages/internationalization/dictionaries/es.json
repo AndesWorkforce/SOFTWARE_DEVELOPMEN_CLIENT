@@ -117,6 +117,26 @@
       "idle": "Inactivo"
     }
   },
+  "visualizer": {
+    "title": "Dashboard Today",
+    "productivity": "Productividad",
+    "absences": "Ausencias",
+    "activeContractors": "Contratistas Activos",
+    "recentAlerts": "Alertas Recientes",
+    "filters": {
+      "all": "Todos",
+      "highProductivity": "Alta Productividad",
+      "absences": "Ausencias",
+      "lowContractors": "Bajo Contratistas"
+    },
+    "actions": {
+      "sendMessage": "Enviar Mensaje",
+      "viewHistory": "Ver Historial",
+      "viewAll": "Ver Todos"
+    },
+    "loading": "Cargando...",
+    "noDataAvailable": "No hay datos disponibles"
+  },
   "reports": {
     "title": "Reportes",
     "exportPdf": "Exportar PDF",
