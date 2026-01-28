@@ -140,6 +140,7 @@
   "reports": {
     "title": "Reportes",
     "exportPdf": "Exportar PDF",
+    "reportGenerator": "Generador de Reportes",
     "applyFilters": "Aplicar Filtros",
     "cleanFilters": "Limpiar filtros",
     "date": "Fecha",
@@ -188,7 +189,8 @@
       "country": "País",
       "time": "Tiempo",
       "activity": "Actividad",
-      "activityDetail": "Detalle de Actividad"
+      "activityDetail": "Detalle de Actividad",
+      "reportDetail": "Detalle de Reporte"
     },
     "viewDetail": "Ver",
     "modal": {
@@ -253,7 +255,8 @@
       "userPlaceholder": "Buscar usuario aquí...",
       "countryPlaceholder": "Selecciona un país...",
       "clientPlaceholder": "Selecciona un cliente...",
-      "teamPlaceholder": "Selecciona un equipo..."
+      "teamPlaceholder": "Selecciona un equipo...",
+      "jobPositionPlaceholder": "Selecciona un cargo..."
     },
     "table": {
       "calendar": "Calendario",
@@ -263,7 +266,12 @@
       "client": "Cliente",
       "team": "Equipo",
       "country": "País",
-      "action": "Acción"
+      "activationKey": "Clave de Activación",
+      "action": "Acción",
+      "view": "Ver",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "copied": "¡Copiado!"
     },
     "modal": {
       "title": "Agregar Contratista",
@@ -276,6 +284,7 @@
       "startTime": "Hora de Inicio",
       "finishTime": "Hora de Finalización",
       "startLunchTime": "Hora de Inicio de Almuerzo",
+      "finishLunchTime": "Hora de Finalización de Almuerzo",
       "optional": "Opcional",
       "userPlaceholder": "Escribe nombre y apellido aquí...",
       "emailPlaceholder": "correo@outlook.com",
@@ -459,5 +468,27 @@
     "minLength": "Debe tener al menos {min} caracteres",
     "required": "{field} es requerido",
     "invalidEmail": "Correo electrónico inválido"
+  },
+  "admin": {
+    "title": "Panel de Control",
+    "stats": {
+      "clients": "Clientes",
+      "contractors": "Contratistas",
+      "teams": "Equipos"
+    },
+    "reports": {
+      "title": "Reportes",
+      "exportPdf": "Exportar PDF",
+      "viewReports": "Ver Reportes"
+    },
+    "clients": {
+      "title": "Clientes",
+      "viewClients": "Ver Clientes"
+    },
+    "contractors": {
+      "title": "Contratistas",
+      "viewContractors": "Ver Contratistas",
+      "view": "Ver"
+    }
   }
 }

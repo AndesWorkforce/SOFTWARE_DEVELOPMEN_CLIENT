@@ -156,6 +156,10 @@ export default function ClientsPage() {
           boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
           borderRadius: "10px",
         },
+        cell: {
+          paddingTop: "4px",
+          paddingBottom: "4px",
+        },
         mobileCard: {
           border: "1px solid rgba(166,166,166,0.5)",
           boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",

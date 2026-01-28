@@ -8,7 +8,7 @@ import { setAuthToken, setRefreshToken } from "../setup/axios.config";
 export type AuthState = {
   token: string | null;
   refreshToken: string | null;
-  user: { id: string; email: string; role?: string } | null;
+  user: { id: string; email: string; name?: string; role?: string } | null;
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
   setToken: (token: string | null) => void;

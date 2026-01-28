@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Calendar } from "lucide-react";
+import { Plus, Pencil, Trash2, Calendar, Copy } from "lucide-react";
 import { Button, DataTable, FilterPanel } from "@/packages/design-system";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import { clientsService } from "@/packages/api/clients/clients.service";
@@ -20,6 +20,65 @@ interface FilterOptions {
   teams: SelectOption[];
   jobPositions: SelectOption[];
 }
+
+const ActivationKeyCell = ({
+  value,
+  contractorId,
+}: {
+  value: string | null;
+  contractorId: string;
+}) => {
+  const t = useTranslations();
+  const [isCopied, setIsCopied] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+
+  if (!value) return <span>N/A</span>;
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isCopying) return;
+
+    try {
+      setIsCopying(true);
+      // Obtener la clave completa desde el backend
+      const fullKey = await contractorsService.getFullActivationKey(contractorId);
+      await navigator.clipboard.writeText(fullKey);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      console.error("Error copying activation key:", error);
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <div className="inline-flex items-center justify-start md:justify-center gap-2 whitespace-normal">
+      <span className="text-[14px] font-normal font-mono max-w-[180px] text-left break-all leading-tight">
+        {value}
+      </span>
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="relative">
+          <button
+            onClick={handleCopy}
+            disabled={isCopying}
+            className={`text-[#0097B2] hover:opacity-70 transition-opacity ${
+              isCopying ? "cursor-wait opacity-50" : ""
+            }`}
+            title="Copy"
+          >
+            <Copy className="w-4 h-4" />
+          </button>
+          {isCopied && (
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded shadow-lg animate-in fade-in zoom-in duration-200 z-10 whitespace-nowrap">
+              {t("contractors.table.copied")}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function ContractorsPage() {
   const t = useTranslations();
@@ -64,18 +123,18 @@ export default function ContractorsPage() {
           title: "Calendar",
           translationKey: "contractors.table.calendar",
           dataPath: "id",
-          type: "action",
-          width: "110px",
+          type: "custom",
+          minWidth: "120px",
           align: "center",
-          config: {
-            action: {
-              label: "View",
-              onClick: (row: Contractor) => {
-                handleViewCalendar(row);
-              },
-              icon: <Calendar className="w-3.5 h-3.5" />,
-            },
-          },
+          render: (_value: unknown, row: Contractor) => (
+            <button
+              onClick={() => handleViewCalendar(row)}
+              className="inline-flex items-center gap-1.5 text-[#0097B2] hover:opacity-80 transition-opacity"
+            >
+              <Calendar className="w-5 h-5" />
+              <span className="text-[16px] underline">{t("contractors.table.view")}</span>
+            </button>
+          ),
         },
         {
           key: "user",
@@ -83,7 +142,7 @@ export default function ContractorsPage() {
           translationKey: "contractors.table.user",
           dataPath: "name",
           type: "text",
-          width: "160px",
+          minWidth: "160px",
           align: "center",
         },
         {
@@ -92,7 +151,7 @@ export default function ContractorsPage() {
           translationKey: "contractors.table.email",
           dataPath: "email",
           type: "text",
-          width: "170px",
+          minWidth: "180px",
           align: "center",
         },
         {
@@ -101,7 +160,7 @@ export default function ContractorsPage() {
           translationKey: "contractors.table.jobPosition",
           dataPath: "job_position",
           type: "text",
-          width: "160px",
+          minWidth: "180px",
           align: "center",
         },
         {
@@ -110,7 +169,7 @@ export default function ContractorsPage() {
           translationKey: "contractors.table.client",
           dataPath: (row) => row.client_name || "N/A",
           type: "text",
-          width: "160px",
+          minWidth: "160px",
           align: "center",
         },
         {
@@ -119,7 +178,7 @@ export default function ContractorsPage() {
           translationKey: "contractors.table.team",
           dataPath: (row) => row.team_name || "N/A",
           type: "text",
-          width: "160px",
+          minWidth: "160px",
           align: "center",
         },
         {
@@ -128,8 +187,20 @@ export default function ContractorsPage() {
           translationKey: "contractors.table.country",
           dataPath: "country",
           type: "text",
-          width: "110px",
+          minWidth: "120px",
           align: "center",
+        },
+        {
+          key: "activationKey",
+          title: "Activation Key",
+          translationKey: "contractors.table.activationKey",
+          dataPath: "activation_key",
+          type: "custom",
+          minWidth: "220px",
+          align: "center",
+          render: (value: unknown, row: Contractor) => (
+            <ActivationKeyCell value={value as string} contractorId={row.id} />
+          ),
         },
         {
           key: "actions",
@@ -137,7 +208,7 @@ export default function ContractorsPage() {
           translationKey: "contractors.table.action",
           dataPath: "id",
           type: "custom",
-          width: "100px",
+          minWidth: "120px",
           align: "left",
           render: (_value: unknown, row: Contractor) => (
             <div className="w-full flex justify-center">
@@ -150,7 +221,7 @@ export default function ContractorsPage() {
                   className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
                 >
                   <Pencil className="w-3.5 h-3.5" />
-                  <span className="text-sm font-semibold">Edit</span>
+                  <span className="text-sm">{t("contractors.table.edit")}</span>
                 </button>
                 <button
                   onClick={(e) => {
@@ -160,7 +231,7 @@ export default function ContractorsPage() {
                   className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span className="text-sm font-semibold">Delete</span>
+                  <span className="text-sm">{t("contractors.table.delete")}</span>
                 </button>
               </div>
             </div>
@@ -180,6 +251,10 @@ export default function ContractorsPage() {
           boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
           borderRadius: "10px",
         },
+        cell: {
+          paddingTop: "4px",
+          paddingBottom: "4px",
+        },
         mobileCard: {
           border: "1px solid rgba(166,166,166,0.5)",
           boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
@@ -195,14 +270,14 @@ export default function ContractorsPage() {
             render: (_value: unknown, row: Contractor) => (
               <button
                 type="button"
-                className="inline-flex items-center gap-1 underline"
+                className="inline-flex items-center gap-1 text-[#0097B2]"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleViewCalendar(row);
                 }}
               >
-                <Calendar className="w-3.5 h-3.5" />
-                <span>View</span>
+                <Calendar className="w-4.5 h-4.5" />
+                <span className="underline text-[16px]">{t("contractors.table.view")}</span>
               </button>
             ),
           },
@@ -239,6 +314,14 @@ export default function ContractorsPage() {
             dataPath: (row) => row.country || "",
           },
           {
+            key: "activationKey",
+            label: t("contractors.table.activationKey"),
+            dataPath: "activation_key",
+            render: (value: unknown, row: Contractor) => (
+              <ActivationKeyCell value={value as string} contractorId={row.id} />
+            ),
+          },
+          {
             key: "actions",
             label: t("contractors.table.action"),
             dataPath: "id",
@@ -252,7 +335,7 @@ export default function ContractorsPage() {
                   className="inline-flex items-center gap-1 text-[#0097B2] hover:underline text-sm"
                 >
                   <Pencil className="w-3.5 h-3.5" />
-                  <span className="font-semibold">Edit</span>
+                  <span>{t("contractors.table.edit")}</span>
                 </button>
                 <button
                   onClick={(e) => {
@@ -262,7 +345,7 @@ export default function ContractorsPage() {
                   className="inline-flex items-center gap-1 text-[#FF0004] hover:underline text-sm"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span className="font-semibold">Delete</span>
+                  <span>{t("contractors.table.delete")}</span>
                 </button>
               </span>
             ),
@@ -306,6 +389,13 @@ export default function ContractorsPage() {
           translationKey: "contractors.filters.team",
           options: [],
         },
+        {
+          key: "jobPosition",
+          type: "select",
+          label: t("contractors.filters.jobPosition"),
+          translationKey: "contractors.filters.jobPosition",
+          options: [],
+        },
       ],
       layout: "row",
       showClearButton: true,
@@ -339,6 +429,11 @@ export default function ContractorsPage() {
             value: "",
             label: t("contractors.filters.teamPlaceholder") || "Select team here...",
           };
+        case "jobPosition":
+          return {
+            value: "",
+            label: t("contractors.filters.jobPositionPlaceholder") || "Select job position here...",
+          };
         default:
           return {
             value: "",
@@ -366,6 +461,12 @@ export default function ContractorsPage() {
           return {
             ...filter,
             options: [makePlaceholder("teamId"), ...(filterOptions?.teams || [])],
+          };
+        }
+        if (filter.key === "jobPosition") {
+          return {
+            ...filter,
+            options: [makePlaceholder("jobPosition"), ...(filterOptions?.jobPositions || [])],
           };
         }
         return filter;
@@ -510,7 +611,8 @@ export default function ContractorsPage() {
               style={{
                 background: "#0097B2",
                 color: "#FFFFFF",
-                fontSize: "14px",
+                fontSize: "15px",
+                fontWeight: 600,
                 padding: "7px 21px",
                 display: "flex",
                 alignItems: "center",
@@ -518,7 +620,7 @@ export default function ContractorsPage() {
                 borderRadius: "8px",
                 boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
               }}
-              className="md:text-[16px] h-[35px] md:h-[40px]"
+              className="md:text-[15px] h-[35px] md:h-[40px]"
             >
               <Plus className="w-[14px] h-[14px] md:w-5 md:h-5" />
               <span className="font-semibold">{t("contractors.addContractor")}</span>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { ChevronRight, Download, Calendar } from "lucide-react";
 import { DataTable, DashboardSkeleton } from "@/packages/design-system";
@@ -17,6 +17,7 @@ import { clientsTableConfig, getContractorsTableConfig } from "./constants";
 export default function AdminPage() {
   const locale = useLocale();
   const router = useRouter();
+  const t = useTranslations("admin");
 
   const [stats, setStats] = useState<{
     totalClients: number;
@@ -59,7 +60,7 @@ export default function AdminPage() {
       getContractorsTableConfig(() => (
         <button type="button" className="inline-flex items-center gap-1 text-black hover:underline">
           <Calendar className="w-3.5 h-3.5" />
-          <span className="text-sm font-medium underline">View</span>
+          <span className="text-sm font-medium underline">{t("contractors.view")}</span>
         </button>
       )),
     [],
@@ -84,7 +85,7 @@ export default function AdminPage() {
         {/* Título */}
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-semibold" style={{ color: "#000000" }}>
-            Dashboard
+            {t("title")}
           </h1>
         </div>
 
@@ -95,7 +96,7 @@ export default function AdminPage() {
             style={{ height: "100px" }}
           >
             <p className="text-base font-medium text-center mb-2" style={{ color: "#0097B2" }}>
-              Clients
+              {t("stats.clients")}
             </p>
             <p className="text-3xl font-semibold text-center" style={{ color: "#000000" }}>
               {stats?.totalClients || 0}
@@ -107,7 +108,7 @@ export default function AdminPage() {
             style={{ height: "100px" }}
           >
             <p className="text-base font-medium text-center mb-2" style={{ color: "#0097B2" }}>
-              Contractors
+              {t("stats.contractors")}
             </p>
             <p className="text-3xl font-semibold text-center" style={{ color: "#000000" }}>
               {stats?.totalContractors || 0}
@@ -119,7 +120,7 @@ export default function AdminPage() {
             style={{ height: "100px" }}
           >
             <p className="text-base font-medium text-center mb-2" style={{ color: "#0097B2" }}>
-              Teams
+              {t("stats.teams")}
             </p>
             <p className="text-3xl font-semibold text-center" style={{ color: "#000000" }}>
               {stats?.totalTeams || 0}
@@ -139,7 +140,7 @@ export default function AdminPage() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <p className="text-xl font-semibold mb-1" style={{ color: "#000000" }}>
-                    Reports
+                    {t("reports.title")}
                   </p>
                   <p className="text-base" style={{ color: "#666666" }}>
                     {formattedDate}
@@ -150,7 +151,7 @@ export default function AdminPage() {
                   className="bg-[#0097B2] text-white text-sm font-semibold px-5 py-2 rounded-lg shadow-[0px_4px_4px_rgba(166,166,166,0.25)] flex items-center gap-2 hover:bg-[#007a94] transition-colors"
                 >
                   <Download className="w-4 h-4" />
-                  Export PDF
+                  {t("reports.exportPdf")}
                 </button>
               </div>
               <div className="pt-3 flex justify-center">
@@ -158,7 +159,7 @@ export default function AdminPage() {
                   href={`/${locale}/app/admin/reports`}
                   className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium"
                 >
-                  <span>View Reports</span>
+                  <span>{t("reports.viewReports")}</span>
                   <ChevronRight className="w-5 h-5" />
                 </Link>
               </div>
@@ -167,7 +168,7 @@ export default function AdminPage() {
             {/* Card de Clients */}
             <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-lg shadow-[0px_4px_4px_rgba(166,166,166,0.25)] p-6">
               <p className="text-xl font-semibold mb-4" style={{ color: "#000000" }}>
-                Clients
+                {t("clients.title")}
               </p>
               <div className="mb-4" style={{ maxHeight: "350px", overflow: "hidden" }}>
                 <DataTable config={memoizedClientsConfig} data={clients} />
@@ -175,10 +176,10 @@ export default function AdminPage() {
               <div className="pt-3 flex justify-center">
                 <button
                   type="button"
-                  onClick={() => router.push(`/${locale}/app/super-admin/clients`)}
+                  onClick={() => router.push(`/${locale}/app/admin/clients`)}
                   className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium"
                 >
-                  <span>View Clients</span>
+                  <span>{t("clients.viewClients")}</span>
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
@@ -188,7 +189,7 @@ export default function AdminPage() {
           {/* Columna derecha: Card de Contractors */}
           <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-lg shadow-[0px_4px_4px_rgba(166,166,166,0.25)] p-6">
             <p className="text-xl font-semibold mb-4" style={{ color: "#000000" }}>
-              Contractors
+              {t("contractors.title")}
             </p>
             <div className="mb-4" style={{ maxHeight: "548px", overflow: "hidden" }}>
               <DataTable config={memoizedContractorsConfig} data={contractors} />
@@ -196,10 +197,10 @@ export default function AdminPage() {
             <div className="pt-3 flex justify-center">
               <button
                 type="button"
-                onClick={() => router.push(`/${locale}/app/super-admin/contractors`)}
+                onClick={() => router.push(`/${locale}/app/admin/contractors`)}
                 className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium"
               >
-                <span>View Contractors</span>
+                <span>{t("contractors.viewContractors")}</span>
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>

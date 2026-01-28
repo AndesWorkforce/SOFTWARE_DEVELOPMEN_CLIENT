@@ -178,6 +178,15 @@ export function FormModal({
           }
         });
 
+        // Ejecutar efectos secundarios si existen
+        const currentField = config.fields.find((f) => f.key === key);
+        if (currentField?.onValueChange) {
+          const setFieldValue = (targetKey: string, targetValue: unknown) => {
+            newValues[targetKey] = targetValue;
+          };
+          currentField.onValueChange(value, newValues, setFieldValue);
+        }
+
         // Limpiar error del campo cuando cambia
         if (errors[key]) {
           setErrors((prevErrors) => {
@@ -254,21 +263,24 @@ export function FormModal({
     }
   };
 
-  const handleTimeIconClick = useCallback((fieldKey: string) => {
-    const input = fieldInputRefs.current[fieldKey];
-    if (!input) return;
+  const handleTimeIconClick = useCallback(
+    (fieldKey: string) => {
+      const input = fieldInputRefs.current[fieldKey];
+      if (!input || input.disabled) return;
 
-    // showPicker es una API experimental del navegador, necesitamos hacer un cast
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const anyInput = input as any;
-    if (typeof (anyInput as { showPicker?: () => void }).showPicker === "function") {
-      (anyInput as { showPicker: () => void }).showPicker();
-      return;
-    }
+      // showPicker es una API experimental del navegador, necesitamos hacer un cast
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const anyInput = input as any;
+      if (typeof (anyInput as { showPicker?: () => void }).showPicker === "function") {
+        (anyInput as { showPicker: () => void }).showPicker();
+        return;
+      }
 
-    input.focus();
-    input.click();
-  }, []);
+      input.focus();
+      input.click();
+    },
+    [fieldInputRefs],
+  );
 
   const renderField = (field: FormFieldConfig) => {
     const label = field.translationKey ? t(field.translationKey) : field.label;
@@ -375,7 +387,9 @@ export function FormModal({
               />
               {field.icon && (
                 <div
-                  className="absolute right-[15px] top-1/2 -translate-y-1/2 cursor-pointer"
+                  className={`absolute right-[15px] top-1/2 -translate-y-1/2 ${
+                    isDisabled || loading ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                  }`}
                   onClick={() => handleTimeIconClick(field.key)}
                 >
                   {field.icon}

@@ -255,6 +255,28 @@ export class ContractorsService {
     }
   }
 
+  /**
+   * Obtiene la clave de activación completa de un contractor
+   * @param id ID del contractor
+   * @returns Clave de activación completa
+   */
+  async getFullActivationKey(id: string): Promise<string> {
+    try {
+      const response = await http.get<{ activation_key: string }>(
+        `/contractors/${id}/activation-key`,
+      );
+      return response.data.activation_key;
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      console.error("❌ Error en getFullActivationKey:", {
+        message: axiosError?.message || "Unknown error",
+        responseData: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      throw error;
+    }
+  }
+
   // ==================== Contractor Day Offs ====================
 
   /**
