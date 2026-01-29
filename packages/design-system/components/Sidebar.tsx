@@ -9,11 +9,11 @@ interface NavItem {
   name: string;
   path: string;
   icon: ReactNode;
-  roles?: ("super-admin" | "admin" | "client")[];
+  roles?: ("super-admin" | "admin" | "client" | "visualizer")[];
 }
 
 export interface SidebarProps {
-  role: "super-admin" | "admin" | "client";
+  role: "super-admin" | "admin" | "client" | "visualizer";
 }
 
 export const Sidebar = ({ role }: SidebarProps) => {
@@ -30,9 +30,9 @@ export const Sidebar = ({ role }: SidebarProps) => {
       icon: <LayoutDashboard className="w-5 h-5" />,
     },
     {
-      name: t("reports"),
-      path: `/${locale}/app/${role}/reports`,
-      icon: <FileText className="w-5 h-5" />,
+      name: t("clients"),
+      path: `/${locale}/app/${role}/clients`,
+      icon: <Users className="w-5 h-5" />,
     },
     {
       name: t("contractors"),
@@ -40,19 +40,25 @@ export const Sidebar = ({ role }: SidebarProps) => {
       icon: <Users className="w-5 h-5" />,
     },
     {
-      name: t("clients"),
-      path: `/${locale}/app/${role}/clients`,
-      icon: <Users className="w-5 h-5" />,
+      name: t("reports"),
+      path: `/${locale}/app/${role}/reports`,
+      icon: <FileText className="w-5 h-5" />,
     },
     {
       name: t("roles"),
       path: `/${locale}/app/${role}/roles`,
       icon: <User className="w-5 h-5" />,
-      roles: ["super-admin"],
+      roles: ["super-admin"], // Solo para super-admin
     },
   ];
 
-  const navItems = baseNavItems.filter((item) => !item.roles || item.roles.includes(role));
+  // Filtrar items según el rol
+  const navItems = baseNavItems.filter((item) => {
+    if (item.roles) {
+      return item.roles.includes(role);
+    }
+    return true;
+  });
 
   const handleLogout = () => {
     logout();

@@ -117,6 +117,26 @@
       "idle": "Idle"
     }
   },
+  "visualizer": {
+    "title": "Dashboard Today",
+    "productivity": "Productivity",
+    "absences": "Absences",
+    "activeContractors": "Active Contractors",
+    "recentAlerts": "Recent Alerts",
+    "filters": {
+      "all": "All",
+      "highProductivity": "High Productivity",
+      "absences": "Absences",
+      "lowContractors": "Low Contractors"
+    },
+    "actions": {
+      "sendMessage": "Send Message",
+      "viewHistory": "View History",
+      "viewAll": "View All"
+    },
+    "loading": "Loading...",
+    "noDataAvailable": "No data available"
+  },
   "reports": {
     "title": "Reports",
     "exportPdf": "Export PDF",
