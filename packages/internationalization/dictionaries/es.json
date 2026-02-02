@@ -335,11 +335,13 @@
       "cleanFilters": "Limpiar filtros"
     },
     "table": {
+      "calendar": "Calendario",
       "name": "Nombre Cliente",
       "description": "Descripción",
       "email": "Correo Electrónico",
       "teams": "Equipos",
-      "action": "Acción"
+      "action": "Acción",
+      "view": "Ver"
     },
     "modal": {
       "addTitle": "Agregar Cliente",

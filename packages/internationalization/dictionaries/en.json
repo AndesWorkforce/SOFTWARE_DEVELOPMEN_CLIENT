@@ -335,11 +335,13 @@
       "cleanFilters": "Clean filters"
     },
     "table": {
+      "calendar": "Calendar",
       "name": "Name Client",
       "description": "Description",
       "email": "Email",
       "teams": "Teams",
-      "action": "Action"
+      "action": "Action",
+      "view": "View"
     },
     "modal": {
       "addTitle": "Add Client",
