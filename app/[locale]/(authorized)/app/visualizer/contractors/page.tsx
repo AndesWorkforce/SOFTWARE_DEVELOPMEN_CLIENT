@@ -3,15 +3,15 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
-import { Calendar, Copy } from "lucide-react";
+import { Copy } from "lucide-react";
 import { DataTable, FilterPanel } from "@/packages/design-system";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import { clientsService } from "@/packages/api/clients/clients.service";
 import { teamsService } from "@/packages/api/teams/teams.service";
 import type { Contractor } from "@/packages/types/contractors.types";
-import type { DataTableConfig } from "@/packages/types/DataTable.types";
-import type { FilterPanelConfig, FilterValues } from "@/packages/types/FilterPanel.types";
+import type { FilterValues } from "@/packages/types/FilterPanel.types";
 import type { SelectOption } from "@/packages/design-system";
+import { createTableConfig, createFiltersConfig, processFilterOptions } from "./contractors.config";
 
 interface FilterOptions {
   countries: SelectOption[];
@@ -97,302 +97,14 @@ export default function VisualizerContractorsPage() {
     [locale, router],
   );
 
-  const tableConfig = useMemo(() => {
-    const baseTableConfig: DataTableConfig<Contractor> = {
-      columns: [
-        {
-          key: "calendar",
-          title: "Calendar",
-          translationKey: "contractors.table.calendar",
-          dataPath: "id",
-          type: "custom",
-          minWidth: "120px",
-          align: "center",
-          render: (_value: unknown, row: Contractor) => (
-            <button
-              onClick={() => handleViewCalendar(row)}
-              className="inline-flex items-center gap-1.5 text-[#0097B2] hover:opacity-80 transition-opacity"
-            >
-              <Calendar className="w-5 h-5" />
-              <span className="text-[16px] underline">{t("contractors.table.view")}</span>
-            </button>
-          ),
-        },
-        {
-          key: "user",
-          title: "User",
-          translationKey: "contractors.table.user",
-          dataPath: "name",
-          type: "text",
-          minWidth: "160px",
-          align: "center",
-        },
-        {
-          key: "email",
-          title: "Email",
-          translationKey: "contractors.table.email",
-          dataPath: "email",
-          type: "text",
-          minWidth: "180px",
-          align: "center",
-        },
-        {
-          key: "jobPosition",
-          title: "Job Position",
-          translationKey: "contractors.table.jobPosition",
-          dataPath: "job_position",
-          type: "text",
-          minWidth: "180px",
-          align: "center",
-        },
-        {
-          key: "client",
-          title: "Client",
-          translationKey: "contractors.table.client",
-          dataPath: (row) => row.client_name || "N/A",
-          type: "text",
-          minWidth: "160px",
-          align: "center",
-        },
-        {
-          key: "team",
-          title: "Team",
-          translationKey: "contractors.table.team",
-          dataPath: (row) => row.team_name || "N/A",
-          type: "text",
-          minWidth: "160px",
-          align: "center",
-        },
-        {
-          key: "country",
-          title: "Country",
-          translationKey: "contractors.table.country",
-          dataPath: "country",
-          type: "text",
-          minWidth: "120px",
-          align: "center",
-        },
-        {
-          key: "activationKey",
-          title: "Activation Key",
-          translationKey: "contractors.table.activationKey",
-          dataPath: "activation_key",
-          type: "custom",
-          minWidth: "220px",
-          align: "center",
-          render: (value: unknown, row: Contractor) => (
-            <ActivationKeyCell value={value as string} contractorId={row.id} />
-          ),
-        },
-      ],
-      rowKey: "id",
-      striped: true,
-      evenRowColor: "#E2E2E2",
-      oddRowColor: "#FFFFFF",
-      emptyState: {
-        message: t("contractors.noContractors"),
-      },
-      styles: {
-        table: {
-          border: "1px solid rgba(166,166,166,0.5)",
-          boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
-          borderRadius: "10px",
-        },
-        cell: {
-          paddingTop: "4px",
-          paddingBottom: "4px",
-        },
-        mobileCard: {
-          border: "1px solid rgba(166,166,166,0.5)",
-          boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
-          borderRadius: "10px",
-        },
-      },
-      mobileConfig: {
-        primaryFields: [
-          {
-            key: "calendar",
-            label: t("contractors.table.calendar"),
-            dataPath: "id",
-            render: (_value: unknown, row: Contractor) => (
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 text-[#0097B2]"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleViewCalendar(row);
-                }}
-              >
-                <Calendar className="w-4.5 h-4.5" />
-                <span className="underline text-[16px]">{t("contractors.table.view")}</span>
-              </button>
-            ),
-          },
-          {
-            key: "user",
-            label: t("contractors.table.user"),
-            dataPath: (row) => row.name,
-          },
-        ],
-        expandedFields: [
-          {
-            key: "jobPosition",
-            label: t("contractors.table.jobPosition"),
-            dataPath: (row) => row.job_position,
-          },
-          {
-            key: "email",
-            label: t("contractors.table.email"),
-            dataPath: (row) => row.email || "",
-          },
-          {
-            key: "client",
-            label: t("contractors.table.client"),
-            dataPath: (row) => row.client_name || "N/A",
-          },
-          {
-            key: "team",
-            label: t("contractors.table.team"),
-            dataPath: (row) => row.team_name || "N/A",
-          },
-          {
-            key: "country",
-            label: t("contractors.table.country"),
-            dataPath: (row) => row.country || "",
-          },
-          {
-            key: "activationKey",
-            label: t("contractors.table.activationKey"),
-            dataPath: "activation_key",
-            render: (value: unknown, row: Contractor) => (
-              <ActivationKeyCell value={value as string} contractorId={row.id} />
-            ),
-          },
-        ],
-        expandable: true,
-      },
-    };
-    return baseTableConfig;
-  }, [t, handleViewCalendar]);
+  const tableConfig = useMemo(
+    () => createTableConfig(t, handleViewCalendar, ActivationKeyCell),
+    [t, handleViewCalendar],
+  );
 
-  const filtersConfig = useMemo(() => {
-    const baseFiltersConfig: FilterPanelConfig = {
-      filters: [
-        {
-          key: "name",
-          type: "text",
-          label: t("contractors.filters.name"),
-          translationKey: "contractors.filters.name",
-          placeholder: t("contractors.filters.userPlaceholder") || "Search user here...",
-        },
-        {
-          key: "country",
-          type: "select",
-          label: t("contractors.filters.country"),
-          translationKey: "contractors.filters.country",
-          options: [],
-        },
-        {
-          key: "clientId",
-          type: "select",
-          label: t("contractors.filters.client"),
-          translationKey: "contractors.filters.client",
-          options: [],
-        },
-        {
-          key: "teamId",
-          type: "select",
-          label: t("contractors.filters.team"),
-          translationKey: "contractors.filters.team",
-          options: [],
-        },
-        {
-          key: "jobPosition",
-          type: "select",
-          label: t("contractors.filters.jobPosition"),
-          translationKey: "contractors.filters.jobPosition",
-          options: [],
-        },
-      ],
-      layout: "row",
-      showClearButton: true,
-      clearButtonPosition: "end",
-      styles: {
-        panel: {
-          padding: "31px 28px",
-          marginBottom: "24px",
-        },
-        filterRow: {
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          gap: "10px",
-        },
-      },
-    };
+  const filtersConfig = useMemo(() => createFiltersConfig(t, filterOptions), [filterOptions, t]);
 
-    const makePlaceholder = (key: string): SelectOption => {
-      switch (key) {
-        case "country":
-          return {
-            value: "",
-            label: t("contractors.filters.countryPlaceholder") || "Select country here...",
-          };
-        case "clientId":
-          return {
-            value: "",
-            label: t("contractors.filters.clientPlaceholder") || "Select client here...",
-          };
-        case "teamId":
-          return {
-            value: "",
-            label: t("contractors.filters.teamPlaceholder") || "Select team here...",
-          };
-        case "jobPosition":
-          return {
-            value: "",
-            label: t("contractors.filters.jobPositionPlaceholder") || "Select job position here...",
-          };
-        default:
-          return {
-            value: "",
-            label: t("formModal.selectPlaceholder") || "Select...",
-          };
-      }
-    };
-
-    return {
-      ...baseFiltersConfig,
-      filters: baseFiltersConfig.filters.map((filter) => {
-        if (filter.key === "country") {
-          return {
-            ...filter,
-            options: [makePlaceholder("country"), ...(filterOptions?.countries || [])],
-          };
-        }
-        if (filter.key === "clientId") {
-          return {
-            ...filter,
-            options: [makePlaceholder("clientId"), ...(filterOptions?.clients || [])],
-          };
-        }
-        if (filter.key === "teamId") {
-          return {
-            ...filter,
-            options: [makePlaceholder("teamId"), ...(filterOptions?.teams || [])],
-          };
-        }
-        if (filter.key === "jobPosition") {
-          return {
-            ...filter,
-            options: [makePlaceholder("jobPosition"), ...(filterOptions?.jobPositions || [])],
-          };
-        }
-        return filter;
-      }),
-    };
-  }, [filterOptions, t]);
-
-  const loadFilterOptions = async () => {
+  const loadFilterOptions = useCallback(async () => {
     try {
       const [allContractors, allClients, allTeams] = await Promise.all([
         contractorsService.getAll(),
@@ -400,34 +112,8 @@ export default function VisualizerContractorsPage() {
         teamsService.getAll(),
       ]);
 
-      const countriesSet = new Set<string>();
-      allContractors.forEach((contractor) => {
-        if (contractor.country) {
-          countriesSet.add(contractor.country);
-        }
-      });
-
-      const jobPositionsSet = new Set<string>();
-      allContractors.forEach((contractor) => {
-        if (contractor.job_position) {
-          jobPositionsSet.add(contractor.job_position);
-        }
-      });
-
-      setFilterOptions({
-        countries: Array.from(countriesSet)
-          .sort()
-          .map((country) => ({ value: country, label: country })),
-        clients: allClients
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map((client) => ({ value: client.id, label: client.name })),
-        teams: allTeams
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map((team) => ({ value: team.id, label: team.name })),
-        jobPositions: Array.from(jobPositionsSet)
-          .sort()
-          .map((position) => ({ value: position, label: position })),
-      });
+      const processedOptions = processFilterOptions(allContractors, allClients, allTeams);
+      setFilterOptions(processedOptions);
     } catch (error) {
       console.error("Error loading filter options:", error);
       setFilterOptions({
@@ -437,45 +123,38 @@ export default function VisualizerContractorsPage() {
         jobPositions: [],
       });
     }
-  };
+  }, []);
 
-  const loadContractors = async () => {
+  const apiFilters = useMemo(() => {
+    const result: {
+      name?: string;
+      country?: string;
+      client_id?: string;
+      team_id?: string;
+      job_position?: string;
+      isActive?: boolean;
+    } = {
+      isActive: true,
+    };
+
+    const name = typeof filters.name === "string" ? filters.name : "";
+    const country = typeof filters.country === "string" ? filters.country : "";
+    const clientId = typeof filters.clientId === "string" ? filters.clientId : "";
+    const teamId = typeof filters.teamId === "string" ? filters.teamId : "";
+    const jobPosition = typeof filters.jobPosition === "string" ? filters.jobPosition : "";
+
+    if (name) result.name = name.trim();
+    if (country) result.country = country.trim();
+    if (clientId) result.client_id = clientId.trim();
+    if (teamId) result.team_id = teamId.trim();
+    if (jobPosition) result.job_position = jobPosition.trim();
+
+    return result;
+  }, [filters.name, filters.country, filters.clientId, filters.teamId, filters.jobPosition]);
+
+  const loadContractors = useCallback(async () => {
     try {
       setLoading(true);
-
-      const apiFilters: {
-        name?: string;
-        country?: string;
-        client_id?: string;
-        team_id?: string;
-        job_position?: string;
-        isActive?: boolean;
-      } = {
-        isActive: true,
-      };
-
-      const name = typeof filters.name === "string" ? filters.name : "";
-      const country = typeof filters.country === "string" ? filters.country : "";
-      const clientId = typeof filters.clientId === "string" ? filters.clientId : "";
-      const teamId = typeof filters.teamId === "string" ? filters.teamId : "";
-      const jobPosition = typeof filters.jobPosition === "string" ? filters.jobPosition : "";
-
-      if (name) {
-        apiFilters.name = name.trim();
-      }
-      if (country) {
-        apiFilters.country = country.trim();
-      }
-      if (clientId) {
-        apiFilters.client_id = clientId.trim();
-      }
-      if (teamId) {
-        apiFilters.team_id = teamId.trim();
-      }
-      if (jobPosition) {
-        apiFilters.job_position = jobPosition.trim();
-      }
-
       const data = await contractorsService.getAll(apiFilters);
       setContractors(data);
     } catch (error) {
@@ -484,30 +163,30 @@ export default function VisualizerContractorsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiFilters]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setFilters({});
-  };
-
-  useEffect(() => {
-    loadFilterOptions();
   }, []);
 
+  // Cargar opciones de filtros solo una vez al montar
+  useEffect(() => {
+    loadFilterOptions();
+  }, [loadFilterOptions]);
+
+  // Cargar contractors cuando cambien los filtros
   useEffect(() => {
     loadContractors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.name, filters.country, filters.clientId, filters.teamId, filters.jobPosition]);
+  }, [loadContractors]);
 
+  // Recargar cuando navegues de vuelta a esta página
   useEffect(() => {
     const basePath = `/${locale}/app/visualizer/contractors`;
 
-    if (pathname === basePath && filterOptions !== null) {
+    if (pathname === basePath) {
       loadContractors();
-      loadFilterOptions();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, locale]);
+  }, [pathname, locale, loadContractors]);
 
   return (
     <div className="p-4 md:p-8 min-h-screen" style={{ background: "#FFFFFF" }}>
