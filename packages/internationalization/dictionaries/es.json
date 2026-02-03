@@ -256,7 +256,8 @@
       "countryPlaceholder": "Selecciona un país...",
       "clientPlaceholder": "Selecciona un cliente...",
       "teamPlaceholder": "Selecciona un equipo...",
-      "jobPositionPlaceholder": "Selecciona un cargo..."
+      "jobPositionPlaceholder": "Selecciona un cargo...",
+      "cleanFilters": "Limpiar filtros"
     },
     "table": {
       "calendar": "Calendario",
@@ -335,11 +336,13 @@
       "cleanFilters": "Limpiar filtros"
     },
     "table": {
+      "calendar": "Calendario",
       "name": "Nombre Cliente",
       "description": "Descripción",
       "email": "Correo Electrónico",
       "teams": "Equipos",
-      "action": "Acción"
+      "action": "Acción",
+      "view": "Ver"
     },
     "modal": {
       "addTitle": "Agregar Cliente",
