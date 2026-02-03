@@ -8,12 +8,20 @@ import { setAuthToken, setRefreshToken } from "../setup/axios.config";
 export type AuthState = {
   token: string | null;
   refreshToken: string | null;
-  user: { id: string; email: string; name?: string; role?: string } | null;
+  user: {
+    id: string;
+    email: string;
+    name?: string;
+    role?: string;
+    extraRoles?: string[];
+    selectedRole?: string;
+  } | null;
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
   setToken: (token: string | null) => void;
   setRefreshToken: (refreshToken: string | null) => void;
   setUser: (user: AuthState["user"]) => void;
+  setSelectedRole: (role: string | null) => void;
   logout: () => void;
 };
 
@@ -37,6 +45,12 @@ const authCreator: StateCreator<AuthState> = (
     set({ refreshToken: refreshTokenValue });
   },
   setUser: (user: AuthState["user"]) => set({ user }),
+  setSelectedRole: (role: string | null) => {
+    const currentUser = useAuthStore.getState().user;
+    if (currentUser) {
+      set({ user: { ...currentUser, selectedRole: role || undefined } });
+    }
+  },
   logout: () => {
     setAuthToken(null); // Clear axios token
     setRefreshToken(null); // Clear refresh token

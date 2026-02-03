@@ -240,6 +240,7 @@
     "contractors": "Contractors",
     "clients": "Clients",
     "roles": "Roles",
+    "changeRole": "Role Change",
     "logout": "Logout"
   },
   "contractors": {

@@ -3,7 +3,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useAuthStore } from "@/packages/store";
 import { ReactNode } from "react";
-import { LayoutDashboard, FileText, Users, LogOut, User } from "lucide-react";
+import { LayoutDashboard, FileText, Users, LogOut, User, RefreshCw } from "lucide-react";
+import { hasRole } from "@/packages/utils/role.utils";
 
 interface NavItem {
   name: string;
@@ -21,7 +22,35 @@ export const Sidebar = ({ role }: SidebarProps) => {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("sidebar");
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
+
+  // Check if user has multiple roles
+  const hasMultipleRoles = (): boolean => {
+    if (!user) return false;
+    const allRoles: string[] = [];
+    if (user.role) {
+      allRoles.push(user.role);
+    }
+    if (user.extraRoles && user.extraRoles.length > 0) {
+      allRoles.push(...user.extraRoles);
+    }
+    return allRoles.length > 1;
+  };
+
+  const handleChangeRole = () => {
+    // Store all available roles in sessionStorage for the selection page
+    if (user) {
+      const allRoles: string[] = [];
+      if (user.role) {
+        allRoles.push(user.role);
+      }
+      if (user.extraRoles && user.extraRoles.length > 0) {
+        allRoles.push(...user.extraRoles);
+      }
+      sessionStorage.setItem("available_roles", JSON.stringify(allRoles));
+      router.push(`/${locale}/select-role`);
+    }
+  };
 
   const baseNavItems: NavItem[] = [
     {
@@ -113,8 +142,22 @@ export const Sidebar = ({ role }: SidebarProps) => {
           })}
         </nav>
 
-        {/* Logout */}
+        {/* Change Role & Logout */}
         <div className="p-4" style={{ borderTop: "1px solid #E5E5E5" }}>
+          {/* Change Role button - only show if user has multiple roles */}
+          {hasMultipleRoles() && (
+            <button
+              onClick={handleChangeRole}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left mb-2"
+              style={{ color: "#000000" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#F5F5F5")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            >
+              <RefreshCw className="w-5 h-5" />
+              <span className="text-sm font-medium">{t("changeRole")}</span>
+            </button>
+          )}
+          {/* Logout */}
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
@@ -153,6 +196,21 @@ export const Sidebar = ({ role }: SidebarProps) => {
               </li>
             );
           })}
+          {/* Change Role icon - only show if user has multiple roles */}
+          {hasMultipleRoles() && (
+            <li>
+              <button
+                aria-label={t("changeRole")}
+                onClick={handleChangeRole}
+                className="p-2"
+                style={{ color: "#000000" }}
+              >
+                <span className="inline-flex w-6 h-6 items-center justify-center">
+                  <RefreshCw className="w-5 h-5" />
+                </span>
+              </button>
+            </li>
+          )}
           {/* Logout icon */}
           <li>
             <button
