@@ -117,26 +117,6 @@
       "idle": "Idle"
     }
   },
-  "visualizer": {
-    "title": "Dashboard Today",
-    "productivity": "Productivity",
-    "absences": "Absences",
-    "activeContractors": "Active Contractors",
-    "recentAlerts": "Recent Alerts",
-    "filters": {
-      "all": "All",
-      "highProductivity": "High Productivity",
-      "absences": "Absences",
-      "lowContractors": "Low Contractors"
-    },
-    "actions": {
-      "sendMessage": "Send Message",
-      "viewHistory": "View History",
-      "viewAll": "View All"
-    },
-    "loading": "Loading...",
-    "noDataAvailable": "No data available"
-  },
   "reports": {
     "title": "Reports",
     "exportPdf": "Export PDF",
@@ -240,7 +220,6 @@
     "contractors": "Contractors",
     "clients": "Clients",
     "roles": "Roles",
-    "changeRole": "Role Change",
     "logout": "Logout"
   },
   "contractors": {
@@ -257,8 +236,7 @@
       "countryPlaceholder": "Select country here...",
       "clientPlaceholder": "Select client here...",
       "teamPlaceholder": "Select team here...",
-      "jobPositionPlaceholder": "Select job position here...",
-      "cleanFilters": "Clean filters"
+      "jobPositionPlaceholder": "Select job position here..."
     },
     "table": {
       "calendar": "Calendar",
@@ -337,13 +315,11 @@
       "cleanFilters": "Clean filters"
     },
     "table": {
-      "calendar": "Calendar",
       "name": "Name Client",
       "description": "Description",
       "email": "Email",
       "teams": "Teams",
-      "action": "Action",
-      "view": "View"
+      "action": "Action"
     },
     "modal": {
       "addTitle": "Add Client",

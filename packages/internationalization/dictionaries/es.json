@@ -117,26 +117,6 @@
       "idle": "Inactivo"
     }
   },
-  "visualizer": {
-    "title": "Dashboard Today",
-    "productivity": "Productividad",
-    "absences": "Ausencias",
-    "activeContractors": "Contratistas Activos",
-    "recentAlerts": "Alertas Recientes",
-    "filters": {
-      "all": "Todos",
-      "highProductivity": "Alta Productividad",
-      "absences": "Ausencias",
-      "lowContractors": "Bajo Contratistas"
-    },
-    "actions": {
-      "sendMessage": "Enviar Mensaje",
-      "viewHistory": "Ver Historial",
-      "viewAll": "Ver Todos"
-    },
-    "loading": "Cargando...",
-    "noDataAvailable": "No hay datos disponibles"
-  },
   "reports": {
     "title": "Reportes",
     "exportPdf": "Exportar PDF",
@@ -240,7 +220,6 @@
     "contractors": "Contratistas",
     "clients": "Clientes",
     "roles": "Roles",
-    "changeRole": "Cambiar de Rol",
     "logout": "Cerrar Sesión"
   },
   "contractors": {
@@ -257,8 +236,7 @@
       "countryPlaceholder": "Selecciona un país...",
       "clientPlaceholder": "Selecciona un cliente...",
       "teamPlaceholder": "Selecciona un equipo...",
-      "jobPositionPlaceholder": "Selecciona un cargo...",
-      "cleanFilters": "Limpiar filtros"
+      "jobPositionPlaceholder": "Selecciona un cargo..."
     },
     "table": {
       "calendar": "Calendario",
@@ -337,13 +315,11 @@
       "cleanFilters": "Limpiar filtros"
     },
     "table": {
-      "calendar": "Calendario",
       "name": "Nombre Cliente",
       "description": "Descripción",
       "email": "Correo Electrónico",
       "teams": "Equipos",
-      "action": "Acción",
-      "view": "Ver"
+      "action": "Acción"
     },
     "modal": {
       "addTitle": "Agregar Cliente",

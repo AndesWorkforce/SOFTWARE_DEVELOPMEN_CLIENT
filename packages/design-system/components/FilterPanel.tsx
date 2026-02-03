@@ -253,7 +253,6 @@ export function FilterPanel({
                 variant="danger"
                 onClick={handleClear}
                 disabled={loading}
-                className="cursor-pointer"
                 style={{
                   background: "#FF0004",
                   color: "#FFFFFF",
@@ -317,7 +316,6 @@ export function FilterPanel({
                     variant="danger"
                     onClick={handleClear}
                     disabled={loading}
-                    className="cursor-pointer"
                     style={{
                       background: "#FF0004",
                       color: "#FFFFFF",
@@ -361,7 +359,6 @@ export function FilterPanel({
                     variant="danger"
                     onClick={handleClear}
                     disabled={loading}
-                    className="cursor-pointer"
                     style={{
                       background: "#FF0004",
                       color: "#FFFFFF",
@@ -402,7 +399,6 @@ export function FilterPanel({
                     variant="danger"
                     onClick={handleClear}
                     disabled={loading}
-                    className="cursor-pointer"
                     style={{
                       background: "#FF0004",
                       color: "#FFFFFF",
@@ -435,7 +431,6 @@ export function FilterPanel({
                     variant="danger"
                     onClick={handleClear}
                     disabled={loading}
-                    className="cursor-pointer"
                     style={{
                       background: "#FF0004",
                       color: "#FFFFFF",
@@ -470,7 +465,6 @@ export function FilterPanel({
                 variant="danger"
                 onClick={handleClear}
                 disabled={loading}
-                className="cursor-pointer"
                 style={{
                   background: "#FF0004",
                   color: "#FFFFFF",
@@ -513,7 +507,6 @@ export function FilterPanel({
             variant="danger"
             onClick={handleClear}
             disabled={loading}
-            className="cursor-pointer"
             style={{
               background: "#FF0004",
               color: "#FFFFFF",
