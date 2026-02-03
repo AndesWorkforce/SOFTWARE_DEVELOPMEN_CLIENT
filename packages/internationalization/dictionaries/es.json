@@ -240,6 +240,7 @@
     "contractors": "Contratistas",
     "clients": "Clientes",
     "roles": "Roles",
+    "changeRole": "Cambiar de Rol",
     "logout": "Cerrar Sesión"
   },
   "contractors": {

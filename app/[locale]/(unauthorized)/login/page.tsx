@@ -2,9 +2,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 import { authService } from "@/packages/api/auth/auth.service";
 import { useAuthStore } from "@/packages/store";
-import { Button, Input } from "@/packages/design-system";
+import { Button } from "@/packages/design-system";
+
+// Importar imágenes
+import loginAndesImage from "@/packages/design-system/images/login-andes.png";
+import andesLogo from "@/packages/design-system/images/andes logo login.png";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,6 +25,7 @@ export default function LoginPage() {
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,10 +43,57 @@ export default function LoginPage() {
       // Store session cookie
       document.cookie = `session=${response.accessToken}; path=/; max-age=3600`;
 
+      // Check if user has multiple roles (role + extraRoles)
+      const allRoles: string[] = [];
+      if (response.user.role) {
+        allRoles.push(response.user.role);
+      }
+
+      // Handle extraRoles - could be array, string, or null/undefined
+      let extraRolesArray: string[] = [];
+      const extraRoles: string[] | string | undefined = response.user.extraRoles;
+      if (extraRoles) {
+        if (Array.isArray(extraRoles)) {
+          extraRolesArray = extraRoles;
+        } else {
+          // If it's a string, try to parse it
+          const extraRolesStr = extraRoles as string;
+          try {
+            const parsed = JSON.parse(extraRolesStr);
+            extraRolesArray = Array.isArray(parsed) ? parsed : [];
+          } catch {
+            // If JSON.parse fails, it might be a PostgreSQL array string format
+            // Format: "{TeamAdmin,Visualizer}" or "[TeamAdmin,Visualizer]"
+            const cleaned = extraRolesStr
+              .replace(/^[{\[]/, "")
+              .replace(/[}\]]$/, "")
+              .split(",")
+              .map((r: string) => r.trim())
+              .filter((r: string) => r.length > 0);
+            extraRolesArray = cleaned;
+          }
+        }
+      }
+
+      if (extraRolesArray.length > 0) {
+        allRoles.push(...extraRolesArray);
+      }
+
+      // If user has more than one role, redirect to role selection
+      if (allRoles.length > 1) {
+        // Store roles in sessionStorage for the selection page
+        sessionStorage.setItem("available_roles", JSON.stringify(allRoles));
+        router.push(`/${locale}/select-role`);
+        return;
+      }
+
+      // If only one role, use it directly
+      const roleToUse = allRoles[0] || response.user.role;
+
       // Redirect based on user role
       let redirectPath = `/${locale}/app/super-admin`; // Default
 
-      switch (response.user.role) {
+      switch (roleToUse) {
         case "Superadmin":
           redirectPath = `/${locale}/app/super-admin`;
           break;
@@ -70,60 +124,99 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-8 bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("login.title")}</h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{t("login.subtitle")}</p>
-        </div>
+    <main className="flex min-h-screen bg-white">
+      {/* Sección izquierda con imagen */}
+      <div className="hidden lg:block relative w-[45%] h-screen flex-shrink-0">
+        <Image src={loginAndesImage} alt="Andes Workforce" fill className="object-cover" priority />
+      </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md"
-        >
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
-              {error}
+      {/* Sección derecha con formulario */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-[494px] flex flex-col items-center gap-[50px]">
+          {/* Logo y título */}
+          <div className="flex flex-col items-center gap-[75px]">
+            <div className="relative w-[216px] h-[72px] flex-shrink-0">
+              <Image
+                src={andesLogo}
+                alt="Andes Workforce Logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
-          )}
-
-          <div className="space-y-4">
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              label={t("login.email")}
-              placeholder={t("login.emailPlaceholder")}
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              label={t("login.password")}
-              placeholder={t("login.passwordPlaceholder")}
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <h1 className="text-[24px] font-bold text-black text-center leading-normal">
+              {t("login.title")}
+            </h1>
           </div>
 
-          <div className="flex items-center justify-end">
+          {/* Formulario */}
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-[25px]">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-[10px] text-sm">
+                {error}
+              </div>
+            )}
+
+            {/* Campo Email */}
+            <div className="flex flex-col items-start w-full">
+              <label
+                htmlFor="email"
+                className="text-[16px] font-normal text-black leading-normal mb-0"
+              >
+                {t("login.email")}
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full h-[55px] bg-white border border-[#b6b4b4] rounded-[10px] px-4 text-[16px] text-black focus:outline-none focus:ring-2 focus:ring-[#0097b2] focus:border-[#0097b2]"
+                placeholder={t("login.emailPlaceholder")}
+              />
+            </div>
+
+            {/* Campo Password */}
+            <div className="flex flex-col items-start w-full">
+              <label
+                htmlFor="password"
+                className="text-[16px] font-normal text-black leading-normal mb-0"
+              >
+                {t("login.password")}
+              </label>
+              <div className="relative w-full">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="w-full h-[55px] bg-white border border-[#b6b4b4] rounded-[10px] px-4 pr-[50px] text-[16px] text-black focus:outline-none focus:ring-2 focus:ring-[#0097b2] focus:border-[#0097b2]"
+                  placeholder={t("login.passwordPlaceholder")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-[19px] top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-black hover:opacity-70 transition-opacity"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Botón Login */}
             <button
-              type="button"
-              className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              type="submit"
+              disabled={loading}
+              className="w-full h-[55px] bg-[#0097b2] text-white text-[16px] font-bold rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {t("login.forgotPassword")}
+              {loading ? t("login.submitting") : t("login.submit")}
             </button>
-          </div>
-
-          <Button type="submit" loading={loading} fullWidth variant="primary">
-            {t("login.submit")}
-          </Button>
-        </form>
+          </form>
+        </div>
       </div>
     </main>
   );
