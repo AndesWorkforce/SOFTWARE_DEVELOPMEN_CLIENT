@@ -43,11 +43,6 @@ export default function LoginPage() {
       // Store session cookie
       document.cookie = `session=${response.accessToken}; path=/; max-age=3600`;
 
-      // Debug: Log user data to see what we're receiving
-      console.log("Login response user:", response.user);
-      console.log("extraRoles type:", typeof response.user.extraRoles);
-      console.log("extraRoles value:", response.user.extraRoles);
-
       // Check if user has multiple roles (role + extraRoles)
       const allRoles: string[] = [];
       if (response.user.role) {
@@ -83,8 +78,6 @@ export default function LoginPage() {
       if (extraRolesArray.length > 0) {
         allRoles.push(...extraRolesArray);
       }
-
-      console.log("All roles detected:", allRoles);
 
       // If user has more than one role, redirect to role selection
       if (allRoles.length > 1) {

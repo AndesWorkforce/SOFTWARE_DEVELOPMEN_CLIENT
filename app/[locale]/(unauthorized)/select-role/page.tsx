@@ -49,7 +49,6 @@ export default function SelectRolePage() {
 
       setRoles(parsedRoles);
     } catch (e) {
-      console.error("Error reading available roles:", e);
       router.replace(`/${locale}/login`);
     } finally {
       setLoading(false);
