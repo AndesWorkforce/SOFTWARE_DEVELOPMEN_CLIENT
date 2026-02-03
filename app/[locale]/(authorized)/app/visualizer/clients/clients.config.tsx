@@ -22,7 +22,7 @@ export const createTableConfig = (
       render: (_value: unknown, row: Client) => (
         <button
           type="button"
-          className="inline-flex items-center gap-1 text-[#0097B2]"
+          className="inline-flex items-center gap-1 text-[#0097B2] cursor-pointer hover:opacity-80 transition-opacity"
           onClick={(e) => {
             e.stopPropagation();
             handleViewCalendar(row);
@@ -77,7 +77,7 @@ export const createTableConfig = (
             e.stopPropagation();
             handleViewTeams(row);
           }}
-          className="inline-flex items-center gap-1 text-black hover:underline"
+          className="inline-flex items-center gap-1 text-black hover:underline cursor-pointer transition-opacity hover:opacity-80"
         >
           <UsersRound className="w-3.5 h-3.5" />
           <span className="text-sm font-medium underline">{t("clients.table.view")}</span>
@@ -144,7 +144,7 @@ export const createTableConfig = (
             }}
             className={`absolute right-[10px] ${
               isExpanded ? "top-[8px]" : "top-[15px]"
-            } flex items-center justify-center`}
+            } flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity`}
             aria-label={isExpanded ? "Collapse" : "Expand"}
           >
             {isExpanded ? (
@@ -160,7 +160,7 @@ export const createTableConfig = (
                 <span className="font-semibold whitespace-nowrap">Calendar:</span>
                 <button
                   type="button"
-                  className="inline-flex items-center gap-[5px] text-[#0097B2] underline font-medium text-[14px]"
+                  className="inline-flex items-center gap-[5px] text-[#0097B2] underline font-medium text-[14px] cursor-pointer hover:opacity-80 transition-opacity"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleViewCalendar(row);
@@ -202,7 +202,7 @@ export const createTableConfig = (
                     <span className="font-semibold">: </span>
                     <button
                       type="button"
-                      className="inline-flex items-center gap-[5px] underline font-medium text-[14px] max-w-full"
+                      className="inline-flex items-center gap-[5px] underline font-medium text-[14px] max-w-full cursor-pointer hover:opacity-80 transition-opacity"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleViewTeams(row);

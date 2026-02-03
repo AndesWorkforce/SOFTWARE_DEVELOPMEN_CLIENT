@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { DataTable, FilterPanel, Header } from "@/packages/design-system";
 import { clientsService, type Client } from "@/packages/api/clients/clients.service";
 import { teamsService } from "@/packages/api/teams/teams.service";
@@ -17,6 +17,7 @@ interface FilterOptions {
 export default function ClientsPage() {
   const t = useTranslations();
   const locale = useLocale();
+  const router = useRouter();
   const pathname = usePathname();
   const [clients, setClients] = useState<Client[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
@@ -28,10 +29,13 @@ export default function ClientsPage() {
     console.log("View calendar for client:", client.id);
   }, []);
 
-  const handleViewTeams = useCallback((client: Client) => {
-    // TODO: Implement teams view navigation
-    console.log("View teams for client:", client.id);
-  }, []);
+  const handleViewTeams = useCallback(
+    (client: Client) => {
+      const path = `/${locale}/app/visualizer/clients/${client.id}`;
+      router.push(path);
+    },
+    [locale, router],
+  );
 
   const tableConfig = useMemo(
     () => createTableConfig(t, handleViewCalendar, handleViewTeams, clients),
