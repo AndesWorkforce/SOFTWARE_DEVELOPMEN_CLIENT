@@ -25,5 +25,6 @@ export * from "./components/TalentPercentageChart";
 export * from "./components/TopEfficiency";
 export * from "./components/LowPerformers";
 export * from "./components/DashboardSkeleton";
+export * from "./components/GroupReportsView";
 export * from "../types/FilterPanel.types";
 export * from "../types/DataTable.types";
