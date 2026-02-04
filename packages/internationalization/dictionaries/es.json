@@ -318,11 +318,20 @@
       "errorDeleting": "Error al eliminar el contratista. Por favor, intenta de nuevo.",
       "deleteSuccessTitle": "Contratista eliminado correctamente",
       "deleteSuccessContinue": "Continuar"
+    }
+  },
+  "calendar": {
+    "title": "Calendario - {name}",
+    "noEvents": "No hay eventos para este día",
+    "noAbsences": "No hay ausencias para este mes",
+    "viewEvent": "Ver Evento",
+    "stats": {
+      "todayCapacity": "Capacidad Hoy",
+      "todayAbsences": "Ausencias Hoy",
+      "activeContractors": "Contratistas Activos"
     },
-    "calendar": {
-      "title": "Calendario - {name}",
-      "noEvents": "No hay eventos para este día",
-      "viewEvent": "Ver Evento"
+    "filters": {
+      "allTeams": "Todos los Equipos"
     }
   },
   "clients": {

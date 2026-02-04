@@ -318,11 +318,20 @@
       "errorDeleting": "Error deleting contractor. Please try again.",
       "deleteSuccessTitle": "Contractor deleted successfully",
       "deleteSuccessContinue": "Continue"
+    }
+  },
+  "calendar": {
+    "title": "Calendar - {name}",
+    "noEvents": "No events for this day",
+    "noAbsences": "No absences for this month",
+    "viewEvent": "View Event",
+    "stats": {
+      "todayCapacity": "Today Capacity",
+      "todayAbsences": "Today Absences",
+      "activeContractors": "Active Contractors"
     },
-    "calendar": {
-      "title": "Calendar - {name}",
-      "noEvents": "No events for this day",
-      "viewEvent": "View Event"
+    "filters": {
+      "allTeams": "All Teams"
     }
   },
   "clients": {
