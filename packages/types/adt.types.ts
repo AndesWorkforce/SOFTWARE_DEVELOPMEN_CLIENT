@@ -52,3 +52,57 @@ export interface RealtimeMetrics {
   team_id?: string | null;
   team_name?: string;
 }
+
+/**
+ * Actividad promedio por hora.
+ * Útil para gráficos de patrones de actividad a lo largo de la jornada laboral.
+ */
+export interface HourlyActivity {
+  hour: number; // 8, 9, 10, ..., 16
+  hour_label: string; // "08:00", "09:00", etc.
+  days_with_data: number; // Cantidad de días que tuvieron actividad en esta hora
+  total_beat_count: number; // Total de beats (para referencia)
+  avg_beat_count: number; // Promedio de beats por día
+  avg_duration_seconds: number; // Duración promedio en segundos
+  avg_active_seconds: number; // Tiempo activo promedio
+  avg_idle_seconds: number; // Tiempo idle promedio
+  avg_keyboard_inputs: number; // Inputs de teclado promedio
+  avg_mouse_clicks: number; // Clicks de mouse promedio
+}
+
+/**
+ * Productividad promedio por hora.
+ * Útil para gráficos de productividad horaria en la jornada laboral.
+ */
+export interface HourlyProductivity {
+  hour: number; // 8, 9, 10, ..., 16
+  hour_label: string; // "08:00", "09:00", etc.
+  days_with_data: number; // Cantidad de días con datos en esta hora
+  avg_productivity_score: number; // 0-100
+  avg_active_percentage: number; // 0-100
+  avg_keyboard_mouse_score: number; // 0-100
+  avg_app_score: number; // 0-100
+  avg_browser_score: number; // 0-100
+}
+
+/**
+ * Duración real de sesiones por hora.
+ * Calcula cuánto tiempo de sesión hubo activo DURANTE cada hora específica.
+ */
+export interface HourlySessionDuration {
+  hour: number; // 8, 9, 10, ..., 16
+  hour_label: string; // "08:00", "09:00", etc.
+  days_with_data: number; // Cantidad de días con datos en esta hora
+  avg_duration_seconds: number; // Duración promedio en segundos
+}
+
+/**
+ * Duración promedio de sesiones agrupada dinámicamente.
+ * El grupo puede ser cliente, equipo o contratista individual según los filtros.
+ */
+export interface GroupedAvgDuration {
+  group_id: string; // ID del cliente, equipo o contratista
+  group_name: string; // Nombre del cliente, equipo o contratista
+  contractor_count: number; // Cantidad de contratistas en el grupo
+  avg_duration_hours: number; // Duración promedio en horas
+}

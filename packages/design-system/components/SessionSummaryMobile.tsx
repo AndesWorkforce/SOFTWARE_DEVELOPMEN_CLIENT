@@ -31,9 +31,8 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
     const count = sessions.length;
     const totalSeconds = sessions.reduce((sum, s) => sum + s.total_seconds, 0);
     const avgSeconds = count > 0 ? totalSeconds / count : 0;
-    const avgProductivity = count > 0 
-      ? sessions.reduce((sum, s) => sum + (s.productivity_score || 0), 0) / count 
-      : 0;
+    const avgProductivity =
+      count > 0 ? sessions.reduce((sum, s) => sum + (s.productivity_score || 0), 0) / count : 0;
 
     return {
       count,
@@ -50,7 +49,7 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
         day: "numeric",
         year: "numeric",
       });
-    } catch (e) {
+    } catch {
       return dateStr;
     }
   };
@@ -88,9 +87,9 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
                   className="w-full flex items-center justify-between relative"
                   style={{ minHeight: isExpanded ? "195px" : "69px" }}
                 >
-                  <div 
+                  <div
                     className="flex flex-col text-left min-w-0 flex-1"
-                    style={{ 
+                    style={{
                       maxWidth: "335px",
                       paddingLeft: "12px",
                       paddingRight: "40px",
@@ -112,7 +111,10 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
                         </p>
                       </>
                     ) : (
-                      <div className="flex flex-col gap-0 text-[16px] font-semibold text-black" style={{ justifyContent: "center", minHeight: "195px" }}>
+                      <div
+                        className="flex flex-col gap-0 text-[16px] font-semibold text-black"
+                        style={{ justifyContent: "center", minHeight: "195px" }}
+                      >
                         <p className="mb-0 leading-[25px]">
                           <span style={{ marginRight: "12px" }}>{index + 1}</span>
                         </p>
@@ -138,15 +140,17 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
                         </p>
                         <p className="leading-[25px]">
                           <span style={{ marginRight: "12px" }}>Productivity: </span>
-                          <span className="font-normal" style={{ color: productivityColor }}>{productivity}</span>
+                          <span className="font-normal" style={{ color: productivityColor }}>
+                            {productivity}
+                          </span>
                         </p>
                       </div>
                     )}
                   </div>
-                  <div 
+                  <div
                     className="absolute right-[11px] flex items-center justify-center"
-                    style={{ 
-                      width: "20px", 
+                    style={{
+                      width: "20px",
                       height: "20px",
                       top: isExpanded ? "8.5px" : "50%",
                       transform: isExpanded ? "none" : "translateY(-50%)",
@@ -197,4 +201,3 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
     </div>
   );
 };
-

@@ -4,15 +4,14 @@ import { useMemo, useState, useEffect } from "react";
 
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
-export interface ProductivityDurationChartProps {
+export interface HourlyProductivityChartProps {
   hourlyData: Array<{
-    hour: string;
-    productivity: number;
-    duration: number; // in hours (decimal)
+    hour_label: string;
+    avg_productivity_score: number;
   }>;
 }
 
-export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationChartProps) => {
+export const HourlyProductivityChart = ({ hourlyData }: HourlyProductivityChartProps) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -25,16 +24,6 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
 
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  const formatHoursToTime = (hoursDecimal: number): string => {
-    const totalMinutes = Math.round(hoursDecimal * 60);
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
-    }
-    return `${mins}m`;
-  };
 
   const option = useMemo(() => {
     return {
@@ -50,14 +39,13 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
             "seriesName" in param &&
             "value" in param
           ) {
-            const value = typeof param.value === "number" ? param.value : 0;
-            return `${String(param.name)}<br/>${String(param.seriesName)}: ${formatHoursToTime(value)}`;
+            return `${String(param.name)}<br/>${String(param.seriesName)}: ${String(param.value)}%`;
           }
           return "";
         },
       },
       legend: {
-        data: ["Avg. Duration"],
+        data: ["Avg. Productivity"],
         bottom: 0,
         icon: "roundRect",
       },
@@ -71,7 +59,7 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
       xAxis: {
         type: "category",
         boundaryGap: false,
-        data: hourlyData.map((d) => d.hour),
+        data: hourlyData.map((d) => d.hour_label),
         axisLine: { lineStyle: { color: "#E5E5E5" } },
         axisLabel: {
           color: "#000000",
@@ -85,12 +73,12 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
       },
       yAxis: {
         type: "value",
-        name: "Duration (h)",
+        name: "Productivity (%)",
         min: 0,
-        max: 5,
-        interval: 1,
+        max: 100,
+        interval: 20,
         axisLabel: {
-          formatter: "{value}h",
+          formatter: "{value}%",
           color: "#000000",
           fontSize: 12,
         },
@@ -99,15 +87,15 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
       },
       series: [
         {
-          name: "Avg. Duration",
+          name: "Avg. Productivity",
           type: "line",
           smooth: true,
           showSymbol: true,
           symbol: "circle",
           symbolSize: 8,
-          data: hourlyData.map((d) => d.duration),
-          itemStyle: { color: "#0097B2" },
-          lineStyle: { width: 2, color: "#0097B2" },
+          data: hourlyData.map((d) => Math.round(d.avg_productivity_score || 0)),
+          itemStyle: { color: "#7DA40A" },
+          lineStyle: { width: 2, color: "#7DA40A" },
           areaStyle: {
             color: {
               type: "linear",
@@ -116,8 +104,8 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: "rgba(0, 151, 178, 0.4)" },
-                { offset: 1, color: "rgba(0, 151, 178, 0.05)" },
+                { offset: 0, color: "rgba(125, 164, 10, 0.35)" },
+                { offset: 1, color: "rgba(125, 164, 10, 0.05)" },
               ],
             },
           },
