@@ -6,6 +6,11 @@ export type FilterType = "select" | "dateRange" | "text" | "number" | "multisele
 export interface SelectOption {
   value: string;
   label: string;
+  /**
+   * Valor del filtro padre al que pertenece esta opción (para filtros dependientes)
+   * Ej: un equipo pertenece a un cliente específico
+   */
+  parentValue?: string;
 }
 
 /**
@@ -48,6 +53,13 @@ export interface FilterConfig {
   getOptions?: () => Promise<SelectOption[]>;
 
   /**
+   * Clave del filtro del que depende este filtro (para habilitar/deshabilitar y filtrar opciones).
+   * Cuando se especifica, el filtro estará deshabilitado hasta que el filtro padre tenga un valor.
+   * Las opciones se filtrarán automáticamente mostrando solo las que tengan `parentValue` igual al valor del padre.
+   */
+  dependsOn?: string;
+
+  /**
    * Valores por defecto
    */
   defaultValue?: string | string[] | { start: string; end: string };
@@ -73,6 +85,11 @@ export interface FilterConfig {
    * Si el filtro está deshabilitado
    */
   disabled?: boolean;
+
+  /**
+   * Icono a mostrar junto al filtro (opcional)
+   */
+  icon?: React.ReactNode;
 }
 
 /**

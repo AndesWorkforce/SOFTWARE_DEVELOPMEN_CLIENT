@@ -43,7 +43,7 @@ export interface UserActivity {
     totalSessionTimeSeconds: number;
     effectiveWorkSeconds: number;
     productivityScore: number;
-    appUsage?: Array<{ appName: string; seconds: number }>;
+    appUsage?: Array<{ appName: string; seconds: number; type?: string }>;
     browserUsage?: Array<{ domain: string; seconds: number }>;
   };
 }
@@ -67,6 +67,11 @@ export interface ReportSummary {
 export interface FilterOption {
   value: string;
   label: string;
+  /**
+   * Valor del filtro padre al que pertenece esta opción (para filtros dependientes)
+   * Ej: un equipo pertenece a un cliente específico
+   */
+  parentValue?: string;
 }
 
 export interface FilterOptions {

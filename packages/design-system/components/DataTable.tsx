@@ -45,11 +45,15 @@ function formatCurrency(value: number, currency?: { symbol?: string; locale?: st
   return formatter.format(value);
 }
 
-function getPercentageColor(value: number, thresholds: Array<{ value: number; color: string }>) {
-  if (thresholds.length === 0) return "#000000";
+function getPercentageColor(
+  value: number,
+  thresholds: Array<{ value: number; color: string }>,
+  defaultColor?: string,
+) {
+  if (thresholds.length === 0) return defaultColor || "#000000";
   const sorted = [...thresholds].sort((a, b) => b.value - a.value);
   const found = sorted.find((t) => value >= t.value);
-  return found?.color || sorted[sorted.length - 1].color;
+  return found?.color || defaultColor || "#000000";
 }
 
 export function DataTable<T = Record<string, unknown>>({
@@ -113,12 +117,12 @@ export function DataTable<T = Record<string, unknown>>({
 
   const renderPercentage = (value: number, column: ColumnConfig<T>) => {
     const thresholds = column.config?.percentage?.thresholds || [{ value: 50, color: "#2EC36D" }];
-    const color = getPercentageColor(value, thresholds);
     const defaultColor = column.config?.percentage?.defaultColor;
+    const color = getPercentageColor(value, thresholds, defaultColor);
     return (
       <span
         style={{
-          color: defaultColor && value < thresholds[0].value ? defaultColor : color,
+          color,
           fontWeight: 700,
         }}
       >

@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, DataTable, FilterPanel } from "@/packages/design-system";
-import { Download } from "lucide-react";
+import { FileText, List } from "lucide-react";
 import { adtService, type RealtimeMetrics } from "@/packages/api/adt/adt.service";
 import type { FilterOptions, UserActivity } from "@/packages/api/reports/reports.service";
 import type { FilterPanelConfig, FilterValues } from "@/packages/types/FilterPanel.types";
@@ -67,7 +67,7 @@ export default function ReportsPage() {
       },
       country: metric.country || "N/A",
       timeWorked: formatSecondsToTime(metric.total_session_time_seconds),
-      activityPercentage: Math.round(metric.active_percentage),
+      activityPercentage: Math.round(metric.productivity_score),
       date: metric.workday,
       details: [],
       metrics: {
@@ -91,7 +91,8 @@ export default function ReportsPage() {
     const usersMap = new Map<string, string>();
     const countriesSet = new Set<string>();
     const clientsMap = new Map<string, string>();
-    const teamsMap = new Map<string, string>();
+    // Para equipos, guardar team_id -> { team_name, client_id }
+    const teamsMap = new Map<string, { name: string; clientId: string }>();
     const jobPositionsSet = new Set<string>();
 
     metrics.forEach((metric) => {
@@ -104,8 +105,8 @@ export default function ReportsPage() {
       if (metric.client_id && metric.client_name) {
         clientsMap.set(metric.client_id, metric.client_name);
       }
-      if (metric.team_id && metric.team_name) {
-        teamsMap.set(metric.team_id, metric.team_name);
+      if (metric.team_id && metric.team_name && metric.client_id) {
+        teamsMap.set(metric.team_id, { name: metric.team_name, clientId: metric.client_id });
       }
       if (metric.job_position) {
         jobPositionsSet.add(metric.job_position);
@@ -120,9 +121,10 @@ export default function ReportsPage() {
       clients: Array.from(clientsMap.entries())
         .sort((a, b) => a[1].localeCompare(b[1]))
         .map(([value, label]) => ({ value, label })),
+      // Equipos incluyen parentValue para indicar a qué cliente pertenecen
       teams: Array.from(teamsMap.entries())
-        .sort((a, b) => a[1].localeCompare(b[1]))
-        .map(([value, label]) => ({ value, label })),
+        .sort((a, b) => a[1].name.localeCompare(b[1].name))
+        .map(([value, data]) => ({ value, label: data.name, parentValue: data.clientId })),
       jobPositions: Array.from(jobPositionsSet)
         .sort()
         .map((position) => ({ value: position, label: position })),
@@ -202,6 +204,7 @@ export default function ReportsPage() {
 
   const filtersConfig = useMemo(() => {
     const selectPlaceholder = { value: "", label: "Select..." };
+
     return {
       ...baseFiltersConfig,
       filters: baseFiltersConfig.filters.map((filter) => {
@@ -215,7 +218,11 @@ export default function ReportsPage() {
           return { ...filter, options: [selectPlaceholder, ...(filterOptions?.clients || [])] };
         }
         if (filter.key === "teamId") {
-          return { ...filter, options: [selectPlaceholder, ...(filterOptions?.teams || [])] };
+          return {
+            ...filter,
+            options: [selectPlaceholder, ...(filterOptions?.teams || [])],
+            dependsOn: "clientId", // El filtro de equipos depende del filtro de cliente
+          };
         }
         if (filter.key === "jobPosition") {
           return {
@@ -310,6 +317,7 @@ export default function ReportsPage() {
 
       if (realtimeMetrics.length > 0) {
         const currentOptions = extractFilterOptionsFromMetrics(realtimeMetrics);
+
         setFilterOptions((prevOptions) => {
           if (!prevOptions) return currentOptions;
 
@@ -324,6 +332,7 @@ export default function ReportsPage() {
           const clientsMap = new Map(prevOptions.clients.map((c) => [c.value, c]));
           currentOptions.clients.forEach((c) => clientsMap.set(c.value, c));
 
+          // Mantener parentValue al fusionar equipos
           const teamsMap = new Map(prevOptions.teams.map((t) => [t.value, t]));
           currentOptions.teams.forEach((t) => teamsMap.set(t.value, t));
 
@@ -388,7 +397,7 @@ export default function ReportsPage() {
       params.set("jobPosition", filters.jobPosition);
     }
 
-    return `/${locale}/app/admin/reports/export?${params.toString()}`;
+    return `/${locale}/app/admin/reports/group?${params.toString()}`;
   };
 
   const baseTableConfig = useMemo<DataTableConfig<UserActivity>>(
@@ -450,33 +459,42 @@ export default function ReportsPage() {
         },
         {
           key: "activityPercentage",
-          title: "Activity",
-          translationKey: "reports.table.activity",
+          title: "Productivity",
+          translationKey: "reports.table.productivity",
           dataPath: "activityPercentage",
           type: "percentage",
           width: "100px",
           align: "center",
           config: {
             percentage: {
-              thresholds: [{ value: 50, color: "#2EC36D" }],
-              defaultColor: "#FF0004",
+              thresholds: [
+                { value: 65, color: "#0097B2" }, // Verde para >= 65%
+                { value: 40, color: "#FF9800" }, // Naranja para 40-64%
+              ],
+              defaultColor: "#FF0004", // Rojo para < 40%
             },
           },
         },
         {
           key: "activityDetail",
-          title: "Activity Detail",
-          translationKey: "reports.table.activityDetail",
+          title: "Report Detail",
+          translationKey: "reports.table.reportDetail",
           dataPath: "id",
-          type: "action",
-          width: "120px",
+          type: "custom",
+          width: "100px",
           align: "center",
-          config: {
-            action: {
-              label: "View Detail",
-              onClick: handleViewDetail,
-            },
-          },
+          render: (value, row) => (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewDetail(row as UserActivity);
+              }}
+              className="mx-auto inline-flex items-center gap-1.5 text-black hover:text-black transition-colors underline font-medium text-sm"
+            >
+              <List className="w-3.5 h-3.5" />
+              <span>{t("viewDetail")}</span>
+            </button>
+          ),
         },
       ],
       mobileConfig: {
@@ -510,7 +528,7 @@ export default function ReportsPage() {
           },
           {
             key: "activityPercentage",
-            label: "Activity",
+            label: "Productivity",
             dataPath: "activityPercentage",
           },
         ],
@@ -534,14 +552,21 @@ export default function ReportsPage() {
         col.key === "activityDetail"
           ? {
               ...col,
-              config: {
-                ...col.config,
-                action: {
-                  ...col.config?.action,
-                  label: t("viewDetail"),
-                  onClick: handleViewDetail,
-                },
-              },
+              title: "Report Detail",
+              translationKey: "reports.table.reportDetail",
+              type: "custom" as const,
+              render: (value: unknown, row: UserActivity) => (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewDetail(row);
+                  }}
+                  className="mx-auto inline-flex items-center gap-1.5 text-black hover:text-black transition-colors underline font-medium text-sm"
+                >
+                  <List className="w-3.5 h-3.5" />
+                  <span>{t("viewDetail")}</span>
+                </button>
+              ),
             }
           : col,
       ),
@@ -564,12 +589,12 @@ export default function ReportsPage() {
                   color: "#FFFFFF",
                   fontSize: "14px",
                   padding: "7px 21px",
-                  height: "35px",
+                  height: "40px",
+                  fontWeight: 600,
                 }}
               >
-                <Download className="w-3.5 h-3.5 md:w-5 md:h-5 mr-2" />
-                <span className="hidden md:inline">{t("exportPdf")}</span>
-                <span className="md:hidden">{t("exportPdf")}</span>
+                <FileText className="w-4 h-4 mr-2" />
+                <span>{t("reportGenerator")}</span>
               </Button>
             </Link>
           </div>

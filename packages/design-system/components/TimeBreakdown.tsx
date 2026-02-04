@@ -42,23 +42,23 @@ export const TimeBreakdown = ({ activity, t }: TimeBreakdownProps) => {
 
   return (
     <div
-      className="px-[20px] py-[28px] rounded-[5px]"
+      className="px-[20px] py-[28px] rounded-[5px] min-w-0 overflow-hidden"
       style={{
         background: "#FFFFFF",
         border: "1px solid rgba(166, 166, 166, 0.5)",
         height: "132px",
       }}
     >
-      <div className="flex flex-col gap-[15px]" style={{ width: "100%" }}>
+      <div className="flex flex-col gap-[15px] min-w-0" style={{ width: "100%" }}>
         <h5
           className="text-[16px] font-semibold leading-normal mb-0"
           style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
         >
           {t("modal.timeBreakdown") || "Time Breakdown"}
         </h5>
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center justify-between w-full min-w-0">
           {/* Total Time */}
-          <div className="flex flex-col items-center w-[100px] shrink-0">
+          <div className="flex flex-col items-center min-w-0 flex-1">
             <p
               className="text-[20px] font-semibold leading-normal mb-0 text-center w-full"
               style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
@@ -73,8 +73,8 @@ export const TimeBreakdown = ({ activity, t }: TimeBreakdownProps) => {
             </p>
           </div>
           {/* Active Time */}
-          <div className="flex flex-col items-center w-[110px] shrink-0">
-            <div className="flex gap-[5px] items-center mb-0 w-full justify-center">
+          <div className="flex flex-col items-center min-w-0 flex-1">
+            <div className="flex gap-[5px] items-center mb-0 w-full justify-center min-w-0">
               <div
                 className="w-[10px] h-[10px] rounded-full shrink-0"
                 style={{ background: "#2EC36D" }}
@@ -94,8 +94,8 @@ export const TimeBreakdown = ({ activity, t }: TimeBreakdownProps) => {
             </p>
           </div>
           {/* Inactive Time */}
-          <div className="flex flex-col items-center w-[115px] shrink-0">
-            <div className="flex gap-[5px] items-center mb-0 w-full justify-center">
+          <div className="flex flex-col items-center min-w-0 flex-1">
+            <div className="flex gap-[5px] items-center mb-0 w-full justify-center min-w-0">
               <div
                 className="w-[10px] h-[10px] rounded-full shrink-0"
                 style={{ background: "#FF0004" }}
