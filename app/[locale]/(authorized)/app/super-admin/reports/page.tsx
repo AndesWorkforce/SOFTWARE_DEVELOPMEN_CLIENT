@@ -91,7 +91,8 @@ export default function ReportsPage() {
     const usersMap = new Map<string, string>();
     const countriesSet = new Set<string>();
     const clientsMap = new Map<string, string>();
-    const teamsMap = new Map<string, string>();
+    // Para equipos, guardar team_id -> { team_name, client_id }
+    const teamsMap = new Map<string, { name: string; clientId: string }>();
     const jobPositionsSet = new Set<string>();
 
     metrics.forEach((metric) => {
@@ -104,8 +105,8 @@ export default function ReportsPage() {
       if (metric.client_id && metric.client_name) {
         clientsMap.set(metric.client_id, metric.client_name);
       }
-      if (metric.team_id && metric.team_name) {
-        teamsMap.set(metric.team_id, metric.team_name);
+      if (metric.team_id && metric.team_name && metric.client_id) {
+        teamsMap.set(metric.team_id, { name: metric.team_name, clientId: metric.client_id });
       }
       if (metric.job_position) {
         jobPositionsSet.add(metric.job_position);
@@ -120,9 +121,10 @@ export default function ReportsPage() {
       clients: Array.from(clientsMap.entries())
         .sort((a, b) => a[1].localeCompare(b[1]))
         .map(([value, label]) => ({ value, label })),
+      // Equipos incluyen parentValue para indicar a qué cliente pertenecen
       teams: Array.from(teamsMap.entries())
-        .sort((a, b) => a[1].localeCompare(b[1]))
-        .map(([value, label]) => ({ value, label })),
+        .sort((a, b) => a[1].name.localeCompare(b[1].name))
+        .map(([value, data]) => ({ value, label: data.name, parentValue: data.clientId })),
       jobPositions: Array.from(jobPositionsSet)
         .sort()
         .map((position) => ({ value: position, label: position })),
@@ -218,7 +220,11 @@ export default function ReportsPage() {
           return { ...filter, options: [selectPlaceholder, ...(filterOptions?.clients || [])] };
         }
         if (filter.key === "teamId") {
-          return { ...filter, options: [selectPlaceholder, ...(filterOptions?.teams || [])] };
+          return {
+            ...filter,
+            options: [selectPlaceholder, ...(filterOptions?.teams || [])],
+            dependsOn: "clientId", // El filtro de equipos depende del filtro de cliente
+          };
         }
         if (filter.key === "jobPosition") {
           return {
@@ -327,6 +333,7 @@ export default function ReportsPage() {
           const clientsMap = new Map(prevOptions.clients.map((c) => [c.value, c]));
           currentOptions.clients.forEach((c) => clientsMap.set(c.value, c));
 
+          // Mantener parentValue al fusionar equipos
           const teamsMap = new Map(prevOptions.teams.map((t) => [t.value, t]));
           currentOptions.teams.forEach((t) => teamsMap.set(t.value, t));
 

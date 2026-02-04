@@ -81,7 +81,7 @@ export function FilterPanel({
     }
   }, [filterValues, onChange]);
 
-  // Cargar opciones dinámicas
+  // Cargar opciones dinámicas (async)
   useEffect(() => {
     const loadDynamicOptions = async () => {
       const promises = config.filters
@@ -108,12 +108,78 @@ export function FilterPanel({
     loadDynamicOptions();
   }, [config.filters]);
 
+  // Limpiar valores de filtros dependientes cuando cambia el filtro padre
+  useEffect(() => {
+    const dependentFilters = config.filters.filter((f) => f.dependsOn);
+
+    if (dependentFilters.length === 0) return;
+
+    // Usar queueMicrotask para diferir la actualización y evitar setState síncrono
+    queueMicrotask(() => {
+      setFilterValues((prev) => {
+        const updated = { ...prev };
+        let hasChanges = false;
+
+        dependentFilters.forEach((filter) => {
+          const parentKey = filter.dependsOn!;
+          const parentValue = prev[parentKey];
+          const parentValueString = typeof parentValue === "string" ? parentValue : "";
+          const currentValue = prev[filter.key];
+          const currentValueString = typeof currentValue === "string" ? currentValue : "";
+
+          // Si el padre no tiene valor o cambió, limpiar el filtro dependiente
+          if (!parentValueString || parentValueString === "") {
+            if (currentValueString && currentValueString !== "") {
+              updated[filter.key] = undefined;
+              hasChanges = true;
+            }
+          } else {
+            // El padre tiene valor, verificar si el valor actual del dependiente sigue siendo válido
+            const allOptions = dynamicOptions[filter.key] ?? filter.options ?? [];
+            const filteredOptions = allOptions.filter(
+              (opt) => !opt.parentValue || opt.parentValue === parentValueString,
+            );
+
+            if (
+              currentValueString &&
+              !filteredOptions.some((opt) => opt.value === currentValueString)
+            ) {
+              updated[filter.key] = undefined;
+              hasChanges = true;
+            }
+          }
+        });
+
+        return hasChanges ? updated : prev;
+      });
+    });
+  }, [config.filters, filterValues, dynamicOptions]);
+
   const handleFilterChange = (
     key: string,
     value: string | string[] | { start: string; end: string } | undefined,
   ) => {
     setFilterValues((prev) => {
       const newValues = { ...prev, [key]: value };
+
+      // Limpiar valores de filtros dependientes cuando cambia el filtro padre
+      config.filters.forEach((filter) => {
+        if (filter.dependsOn === key) {
+          // Si el filtro padre cambió y el valor del dependiente ya no es válido, limpiarlo
+          const dependencyValue = typeof value === "string" ? value : undefined;
+          if (!dependencyValue || dependencyValue === "") {
+            newValues[filter.key] = undefined;
+          } else {
+            // Verificar si el valor actual del dependiente sigue siendo válido
+            const currentDependentValue = newValues[filter.key];
+            if (currentDependentValue) {
+              // Las opciones dependientes se actualizarán en el siguiente render
+              // Por ahora, solo limpiamos si el padre se deseleccionó
+            }
+          }
+        }
+      });
+
       return newValues;
     });
   };
@@ -148,13 +214,49 @@ export function FilterPanel({
       }
       case "select":
       case "multiselect": {
-        const options = dynamicOptions[filterConfig.key] ?? filterConfig.options ?? [];
+        // Determinar si el filtro depende de otro
+        const dependsOnKey = filterConfig.dependsOn;
+        const parentValue = dependsOnKey
+          ? (filterValues[dependsOnKey] as string | undefined)
+          : undefined;
+
+        // Obtener todas las opciones (dinámicas o estáticas)
+        const allOptions = dynamicOptions[filterConfig.key] ?? filterConfig.options ?? [];
+
+        // Filtrar opciones basándose en el valor del padre si el filtro tiene dependencia
+        let options: SelectOption[];
+        if (dependsOnKey) {
+          if (!parentValue || parentValue === "") {
+            // Si no hay valor en el padre, mostrar solo opciones sin parentValue (como el placeholder)
+            options = allOptions.filter((opt) => !opt.parentValue);
+          } else {
+            // Filtrar opciones que pertenecen al padre seleccionado
+            // (opciones sin parentValue se muestran siempre, como el placeholder)
+            options = allOptions.filter(
+              (opt) => !opt.parentValue || opt.parentValue === parentValue,
+            );
+          }
+        } else {
+          options = allOptions;
+        }
+
         const value = (currentValue as string | string[] | undefined) ?? "";
+
+        // Determinar si el filtro debe estar deshabilitado
+        const isDisabled = Boolean(
+          filterConfig.disabled ||
+            loading ||
+            (dependsOnKey && (!parentValue || parentValue === "")),
+        );
+
         return (
           <div className="flex flex-col gap-[5px]">
-            <p className="text-[14px] md:text-[16px] font-medium md:font-semibold text-black">
-              {label}
-            </p>
+            <div className="flex items-center gap-2">
+              {filterConfig.icon && <div className="text-black shrink-0">{filterConfig.icon}</div>}
+              <p className="text-[14px] md:text-[16px] font-medium md:font-semibold text-black">
+                {label}
+              </p>
+            </div>
             <Select
               value={
                 typeof value === "string" ? value : Array.isArray(value) ? value.join(",") : ""
@@ -170,7 +272,7 @@ export function FilterPanel({
                 }
               }}
               options={options}
-              disabled={filterConfig.disabled || loading}
+              disabled={isDisabled}
               className="text-[12px] md:text-[16px]"
             />
           </div>
