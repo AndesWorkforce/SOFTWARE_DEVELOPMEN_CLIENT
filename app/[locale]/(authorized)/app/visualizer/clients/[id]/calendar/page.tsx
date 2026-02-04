@@ -36,6 +36,8 @@ export default function ClientCalendarPage({ params }: PageProps) {
   const [teams, setTeams] = useState<TeamFilterOption[]>([]);
   const [absences, setAbsences] = useState<AbsenceEvent[]>([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [activeContractors, setActiveContractors] = useState<number>(0);
+  const [totalContractors, setTotalContractors] = useState<number>(0);
 
   // Detect mobile view
   useEffect(() => {
@@ -52,13 +54,38 @@ export default function ClientCalendarPage({ params }: PageProps) {
   const [modalDate, setModalDate] = useState<Date | null>(null);
   const [modalAbsences, setModalAbsences] = useState<AbsenceEvent[]>([]);
 
-  // Stats (estos deberían venir del API en producción)
+  // Calcular estadísticas en tiempo real
+  const todayAbsences = absences.filter((absence) => {
+    const today = new Date();
+    const absenceDate = new Date(absence.date);
+    return (
+      absenceDate.getFullYear() === today.getFullYear() &&
+      absenceDate.getMonth() === today.getMonth() &&
+      absenceDate.getDate() === today.getDate()
+    );
+  }).length;
+
+  const todayCapacity =
+    totalContractors > 0
+      ? Math.round(((totalContractors - todayAbsences) / totalContractors) * 100)
+      : 0;
+
   const stats: CalendarStat[] = [
-    { label: t("calendar.stats.todayCapacity") || "Today Capacity", value: "70%" },
-    { label: t("calendar.stats.todayAbsences") || "Today Absences", value: "3" },
-    { label: t("calendar.stats.activeContractors") || "Active Contractors", value: "7/10" },
+    {
+      label: t("calendar.stats.todayCapacity") || "Today Capacity",
+      value: `${todayCapacity}%`,
+    },
+    {
+      label: t("calendar.stats.todayAbsences") || "Today Absences",
+      value: todayAbsences.toString(),
+    },
+    {
+      label: t("calendar.stats.activeContractors") || "Active Contractors",
+      value: `${activeContractors}/${totalContractors}`,
+    },
   ];
 
+  // Cargar datos iniciales del cliente (solo una vez)
   const loadClientData = useCallback(async () => {
     try {
       setLoading(true);
@@ -74,135 +101,66 @@ export default function ClientCalendarPage({ params }: PageProps) {
           label: team.name,
         })),
       );
-
-      // TODO: Cargar ausencias reales desde el API
-      // Por ahora usamos datos de ejemplo
-      const mockAbsences: AbsenceEvent[] = [
-        {
-          id: "1",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 6),
-          contractorName: "Alejandra Vila",
-          contractorRole: "Fullstack Engineer",
-          type: "license",
-        },
-        {
-          id: "2",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 8),
-          contractorName: "Oliver Ortega",
-          contractorRole: "Backend Developer",
-          type: "health",
-        },
-        {
-          id: "3",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 12),
-          contractorName: "Adriana Soto",
-          contractorRole: "Frontend Developer",
-          type: "vacation",
-        },
-        {
-          id: "4",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 13),
-          contractorName: "Adriana Soto",
-          contractorRole: "Frontend Developer",
-          type: "vacation",
-        },
-        {
-          id: "5",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 13),
-          contractorName: "Alejandra Vila",
-          contractorRole: "Fullstack Engineer",
-          type: "license",
-        },
-        {
-          id: "6",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 14),
-          contractorName: "Adriana Soto",
-          contractorRole: "Frontend Developer",
-          type: "vacation",
-        },
-        {
-          id: "7",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 16),
-          contractorName: "Adriana Soto",
-          contractorRole: "Frontend Developer",
-          type: "vacation",
-        },
-        {
-          id: "8",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 16),
-          contractorName: "Alejandra Vila",
-          contractorRole: "Fullstack Engineer",
-          type: "license",
-        },
-        {
-          id: "9",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 16),
-          contractorName: "Daniel Ayala",
-          contractorRole: "UX/UI Designer",
-          type: "license",
-        },
-        {
-          id: "10",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 16),
-          contractorName: "Mateo Cantillo",
-          contractorRole: "Support Engineer",
-          type: "health",
-        },
-        {
-          id: "11",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 19),
-          contractorName: "Daniel Ayala",
-          contractorRole: "UX/UI Designer",
-          type: "license",
-        },
-        {
-          id: "12",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 19),
-          contractorName: "Mateo Cantillo",
-          contractorRole: "Support Engineer",
-          type: "health",
-        },
-        {
-          id: "13",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 20),
-          contractorName: "Alejandra Vila",
-          contractorRole: "Fullstack Engineer",
-          type: "license",
-        },
-        {
-          id: "14",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 20),
-          contractorName: "Alejandra Vila",
-          contractorRole: "Fullstack Engineer",
-          type: "license",
-        },
-        {
-          id: "15",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 22),
-          contractorName: "Valentina Bernal",
-          contractorRole: "DevOps Engineer",
-          type: "health",
-        },
-        {
-          id: "16",
-          date: new Date(currentDate.getFullYear(), currentDate.getMonth(), 22),
-          contractorName: "Oliver Ortega",
-          contractorRole: "Backend Developer",
-          type: "health",
-        },
-      ];
-
-      setAbsences(mockAbsences);
     } catch (error) {
       console.error("Error loading client data:", error);
     } finally {
       setLoading(false);
     }
-  }, [id, currentDate]);
+  }, [id]);
 
+  // Cargar datos del calendario (ausencias y estadísticas)
+  const loadCalendarData = useCallback(async () => {
+    try {
+      // Cargar ausencias reales desde el API
+      const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+      const dayOffs = await clientsService.getDayOffs(id, {
+        startDate: startDate.toISOString().split("T")[0],
+        endDate: endDate.toISOString().split("T")[0],
+        ...(selectedTeamId && { teamId: selectedTeamId }),
+      });
+
+      // Mapear day-offs a formato AbsenceEvent
+      const mappedAbsences: AbsenceEvent[] = dayOffs.map((dayOff) => ({
+        id: dayOff.id,
+        date: new Date(dayOff.date),
+        contractorName: dayOff.contractor_name,
+        contractorRole: dayOff.team_name || "Sin equipo",
+        type: dayOff.reason as "license" | "vacation" | "health",
+      }));
+
+      setAbsences(mappedAbsences);
+
+      // Cargar contratistas del cliente para las estadísticas
+      const contractors = await contractorsService.getAll({
+        client_id: id,
+        ...(selectedTeamId && { team_id: selectedTeamId }),
+      });
+
+      const active = contractors.filter((c) => c.isActive).length;
+      setActiveContractors(active);
+      setTotalContractors(contractors.length);
+    } catch (error) {
+      console.error("Error loading calendar data:", error);
+      // En caso de error, mantener array vacío
+      setAbsences([]);
+      setActiveContractors(0);
+      setTotalContractors(0);
+    }
+  }, [id, currentDate, selectedTeamId]);
+
+  // Cargar datos iniciales solo una vez
   useEffect(() => {
     loadClientData();
   }, [loadClientData]);
+
+  // Cargar datos del calendario cuando cambien mes o equipo
+  useEffect(() => {
+    if (clientName) {
+      loadCalendarData();
+    }
+  }, [clientName, loadCalendarData]);
 
   const handleBack = () => {
     router.push(`/${locale}/app/visualizer/clients`);
@@ -228,9 +186,11 @@ export default function ClientCalendarPage({ params }: PageProps) {
     setShowAbsenceModal(true);
   };
 
-  const filteredAbsences = selectedTeamId
-    ? absences.filter(() => true) // TODO: Filtrar por team cuando tengamos la data
-    : absences;
+  // El filtrado ahora se hace en el servidor, no necesitamos filtrar localmente
+  const handleTeamChange = (teamId: string | null) => {
+    setSelectedTeamId(teamId);
+    // loadClientData se ejecutará automáticamente por el useEffect
+  };
 
   if (loading) {
     return (
@@ -269,7 +229,7 @@ export default function ClientCalendarPage({ params }: PageProps) {
           <TeamFilters
             teams={teams}
             selectedTeamId={selectedTeamId}
-            onTeamChange={setSelectedTeamId}
+            onTeamChange={handleTeamChange}
             allTeamsLabel={t("calendar.filters.allTeams") || "All Teams"}
             className="mb-5 md:mb-6"
           />
@@ -306,15 +266,11 @@ export default function ClientCalendarPage({ params }: PageProps) {
 
           {/* Calendar - Desktop Grid or Mobile List */}
           {isMobile ? (
-            <MobileCalendarList
-              currentDate={currentDate}
-              absences={filteredAbsences}
-              locale={locale}
-            />
+            <MobileCalendarList currentDate={currentDate} absences={absences} locale={locale} />
           ) : (
             <ClientCalendarGrid
               currentDate={currentDate}
-              absences={filteredAbsences}
+              absences={absences}
               locale={locale}
               onMoreAbsencesClick={handleMoreAbsencesClick}
             />
