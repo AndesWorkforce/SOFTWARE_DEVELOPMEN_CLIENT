@@ -43,7 +43,7 @@ export interface UserActivity {
     totalSessionTimeSeconds: number;
     effectiveWorkSeconds: number;
     productivityScore: number;
-    appUsage?: Array<{ appName: string; seconds: number }>;
+    appUsage?: Array<{ appName: string; seconds: number; type?: string }>;
     browserUsage?: Array<{ domain: string; seconds: number }>;
   };
 }

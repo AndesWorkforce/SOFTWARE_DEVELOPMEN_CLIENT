@@ -468,7 +468,7 @@ export default function ReportsPage() {
           config: {
             percentage: {
               thresholds: [
-                { value: 65, color: "#2EC36D" }, // Verde para >= 65%
+                { value: 65, color: "#0097B2" }, // Verde para >= 65%
                 { value: 40, color: "#FF9800" }, // Naranja para 40-64%
               ],
               defaultColor: "#FF0004", // Rojo para < 40%

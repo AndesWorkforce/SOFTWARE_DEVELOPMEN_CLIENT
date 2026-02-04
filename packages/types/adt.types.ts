@@ -5,6 +5,7 @@
 export interface AppUsage {
   appName: string;
   seconds: number;
+  type?: string;
 }
 
 export interface BrowserUsage {

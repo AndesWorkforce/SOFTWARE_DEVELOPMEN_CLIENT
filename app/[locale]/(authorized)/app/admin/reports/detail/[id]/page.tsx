@@ -58,201 +58,7 @@ const APP_TYPE_COLORS: Record<AppType, string> = {
   Other: "#BDC3C7", // Gris neutro - Sin categoría
 };
 
-// Función para detectar el tipo de app basado en su nombre
-const detectAppType = (appName: string): AppType => {
-  const name = appName.toLowerCase();
-
-  // Code/IDEs
-  if (
-    name.includes("code") ||
-    name.includes("visual studio") ||
-    name.includes("intellij") ||
-    name.includes("eclipse") ||
-    name.includes("sublime") ||
-    name.includes("atom") ||
-    name.includes("vim") ||
-    name.includes("emacs") ||
-    name.includes("jetbrains") ||
-    name.includes("pycharm") ||
-    name.includes("webstorm") ||
-    name.includes("phpstorm") ||
-    name.includes("rider") ||
-    name.includes("goland") ||
-    name.includes("cursor") ||
-    name === "code"
-  ) {
-    return "Code";
-  }
-
-  // Web/Browsers
-  if (
-    name.includes("chrome") ||
-    name.includes("edge") ||
-    name.includes("firefox") ||
-    name.includes("safari") ||
-    name.includes("opera") ||
-    name.includes("brave") ||
-    name.includes("browser") ||
-    name === "web"
-  ) {
-    return "Web";
-  }
-
-  // Design
-  if (
-    name.includes("figma") ||
-    name.includes("photoshop") ||
-    name.includes("illustrator") ||
-    name.includes("sketch") ||
-    name.includes("adobe") ||
-    name.includes("canva") ||
-    name.includes("invision") ||
-    name.includes("xd") ||
-    name.includes("affinity") ||
-    name.includes("gimp") ||
-    name.includes("inkscape")
-  ) {
-    return "Design";
-  }
-
-  // Chat/Messaging
-  if (
-    name.includes("slack") ||
-    name.includes("teams") ||
-    name.includes("discord") ||
-    name.includes("whatsapp") ||
-    name.includes("telegram") ||
-    name.includes("zoom") ||
-    name.includes("skype") ||
-    name.includes("messenger") ||
-    name.includes("meet") ||
-    name.includes("webex") ||
-    name === "chat"
-  ) {
-    return "Chat";
-  }
-
-  // Office
-  if (
-    name.includes("word") ||
-    name.includes("excel") ||
-    name.includes("powerpoint") ||
-    name.includes("outlook") ||
-    name.includes("onenote") ||
-    name.includes("office") ||
-    name.includes("libreoffice") ||
-    name.includes("openoffice") ||
-    name.includes("sheets") ||
-    name.includes("docs") ||
-    name.includes("slides") ||
-    name.includes("calendar")
-  ) {
-    return "Office";
-  }
-
-  // Productivity
-  if (
-    name.includes("notion") ||
-    name.includes("trello") ||
-    name.includes("asana") ||
-    name.includes("jira") ||
-    name.includes("confluence") ||
-    name.includes("todoist") ||
-    name.includes("evernote") ||
-    name.includes("obsidian") ||
-    name.includes("clickup") ||
-    name.includes("monday") ||
-    name.includes("linear")
-  ) {
-    return "Productivity";
-  }
-
-  // Development Tools
-  if (
-    name.includes("git") ||
-    name.includes("docker") ||
-    name.includes("kubernetes") ||
-    name.includes("terminal") ||
-    name.includes("cmd") ||
-    name.includes("powershell") ||
-    name.includes("postman") ||
-    name.includes("insomnia") ||
-    name.includes("wsl") ||
-    name.includes("hyper") ||
-    name.includes("iterm") ||
-    name.includes("console")
-  ) {
-    return "Development";
-  }
-
-  // Database
-  if (
-    name.includes("pgadmin") ||
-    name.includes("dbeaver") ||
-    name.includes("mysql") ||
-    name.includes("mongodb") ||
-    name.includes("redis") ||
-    name.includes("sql") ||
-    name.includes("datagrip") ||
-    name.includes("tableplus") ||
-    name.includes("studio 3t")
-  ) {
-    return "Database";
-  }
-
-  // Cloud
-  if (
-    name.includes("aws") ||
-    name.includes("azure") ||
-    name.includes("gcp") ||
-    name.includes("google cloud") ||
-    name.includes("heroku") ||
-    name.includes("vercel") ||
-    name.includes("netlify") ||
-    name.includes("cloudflare") ||
-    name.includes("digitalocean")
-  ) {
-    return "Cloud";
-  }
-
-  // Entertainment
-  if (
-    name.includes("youtube") ||
-    name.includes("spotify") ||
-    name.includes("netflix") ||
-    name.includes("twitch") ||
-    name.includes("steam") ||
-    name.includes("game") ||
-    name.includes("music") ||
-    name.includes("media") ||
-    name.includes("vlc") ||
-    name.includes("disney") ||
-    name.includes("hbo") ||
-    name.includes("prime video") ||
-    name === "entertainment"
-  ) {
-    return "Entertainment";
-  }
-
-  // System
-  if (
-    name.includes("explorer") ||
-    name.includes("finder") ||
-    name.includes("settings") ||
-    name.includes("control panel") ||
-    name.includes("task manager") ||
-    name.includes("system") ||
-    name.includes("windows") ||
-    name.includes("macos") ||
-    name.includes("linux") ||
-    name.includes("activity monitor") ||
-    name.includes("preferences")
-  ) {
-    return "System";
-  }
-
-  return "Other";
-};
+const VALID_APP_TYPES = Object.keys(APP_TYPE_COLORS) as AppType[];
 
 // Componente interno para los selectores de fecha con estilo Figma
 const ReportDateSelector = ({
@@ -261,12 +67,16 @@ const ReportDateSelector = ({
   displayValue,
   onChange,
   icon,
+  min,
+  max,
 }: {
   label: string;
   value: string;
   displayValue: string;
   onChange: (val: string) => void;
   icon: React.ReactNode;
+  min?: string;
+  max?: string;
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -279,13 +89,13 @@ const ReportDateSelector = ({
   return (
     <div
       onClick={handleClick}
-      className="flex-1 bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] px-[15px] py-[10px] flex items-center justify-between relative cursor-pointer hover:bg-gray-50 transition-colors h-[56px] min-w-0"
+      className="flex-1 bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] px-[15px] py-[10px] lg:p-3 flex items-center justify-between relative cursor-pointer hover:bg-gray-50 transition-colors h-[56px] lg:h-auto min-w-0"
     >
-      <div className="flex items-center gap-[5px] min-w-0 flex-1">
+      <div className="flex items-center gap-[5px] lg:gap-3 min-w-0 flex-1">
         <div className="text-black shrink-0">{icon}</div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] text-[#6D6D6D] truncate mb-0">{label}</p>
-          <p className="text-[14px] font-medium text-black truncate">{displayValue}</p>
+          <p className="text-[10px] lg:text-[12px] text-[#6D6D6D] truncate mb-0">{label}</p>
+          <p className="text-[14px] lg:text-base font-medium text-black truncate">{displayValue}</p>
         </div>
       </div>
       <ChevronDown className="w-6 h-6 text-black shrink-0 ml-2" />
@@ -294,6 +104,8 @@ const ReportDateSelector = ({
         type="date"
         className="absolute inset-0 opacity-0 pointer-events-none"
         value={value}
+        min={min}
+        max={max}
         onChange={(e) => onChange(e.target.value)}
       />
     </div>
@@ -464,7 +276,10 @@ export default function ReportDetailPage() {
     let totalSeconds = 0;
 
     for (const app of apps) {
-      const type = detectAppType(app.appName);
+      const appType = app.type as string;
+      const type: AppType =
+        appType && VALID_APP_TYPES.includes(appType as AppType) ? (appType as AppType) : "Other";
+
       byType[type] = (byType[type] || 0) + app.seconds;
       totalSeconds += app.seconds;
     }
@@ -487,9 +302,18 @@ export default function ReportDetailPage() {
     router.push(`/${locale}/app/admin/reports`);
   };
 
+  // Obtener fecha máxima (hoy)
+  const maxDate = useMemo(() => {
+    return new Date().toISOString().split("T")[0];
+  }, []);
+
   // Manejador para cambios de fecha - actualiza estado local y URL
   const handleStartDateChange = useCallback(
     (newStartDate: string) => {
+      // Validar: fecha de inicio no puede ser mayor a fecha de fin
+      if (newStartDate > endDate) {
+        return; // No hacer nada si la fecha es inválida
+      }
       setStartDate(newStartDate);
       // Actualizar URL sin scroll para mantener la posición
       router.replace(
@@ -502,6 +326,10 @@ export default function ReportDetailPage() {
 
   const handleEndDateChange = useCallback(
     (newEndDate: string) => {
+      // Validar: fecha de fin no puede ser mayor a hoy, ni menor a fecha de inicio
+      if (newEndDate > maxDate || newEndDate < startDate) {
+        return; // No hacer nada si la fecha es inválida
+      }
       setEndDate(newEndDate);
       // Actualizar URL sin scroll para mantener la posición
       router.replace(
@@ -509,7 +337,7 @@ export default function ReportDetailPage() {
         { scroll: false },
       );
     },
-    [locale, contractorId, startDate, router],
+    [locale, contractorId, startDate, maxDate, router],
   );
 
   if (loading || !activity) {
@@ -525,7 +353,7 @@ export default function ReportDetailPage() {
             <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
               <button
                 onClick={handleBack}
-                className="p-1 hover:bg-gray-100 rounded-full transition-colors shrink-0"
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors shrink-0 cursor-pointer"
               >
                 <ArrowLeft className="w-6 h-6 text-black" />
               </button>
@@ -604,6 +432,7 @@ export default function ReportDetailPage() {
                   displayValue={formatDateForDisplay(startDate)}
                   onChange={handleStartDateChange}
                   icon={<Calendar className="w-[25px] h-[25px]" />}
+                  max={endDate}
                 />
               </div>
               <div className="flex-1 min-w-0">
@@ -613,6 +442,8 @@ export default function ReportDetailPage() {
                   displayValue={formatDateForDisplay(endDate)}
                   onChange={handleEndDateChange}
                   icon={<Calendar className="w-[25px] h-[25px]" />}
+                  min={startDate}
+                  max={maxDate}
                 />
               </div>
             </div>
@@ -709,6 +540,7 @@ export default function ReportDetailPage() {
                   displayValue={formatDateForDisplay(startDate)}
                   onChange={handleStartDateChange}
                   icon={<Calendar className="w-7 h-7" />}
+                  max={endDate}
                 />
                 <ReportDateSelector
                   label={t("endDate")}
@@ -716,6 +548,8 @@ export default function ReportDetailPage() {
                   displayValue={formatDateForDisplay(endDate)}
                   onChange={handleEndDateChange}
                   icon={<Calendar className="w-7 h-7" />}
+                  min={startDate}
+                  max={maxDate}
                 />
                 <div className="flex-1 bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors min-w-0">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
