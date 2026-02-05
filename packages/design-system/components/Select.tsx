@@ -32,6 +32,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             border rounded-[5px]
             shadow-[0px_4px_4px_rgba(166,166,166,0.25)]
             appearance-none
+            cursor-pointer
             focus:outline-none focus:ring-2 focus:ring-[#0097B2] focus:border-[#0097B2]
             disabled:opacity-50 disabled:cursor-not-allowed
             ${

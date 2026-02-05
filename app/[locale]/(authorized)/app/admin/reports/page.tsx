@@ -30,6 +30,59 @@ export default function ReportsPage() {
       ? filters.dateRange
       : undefined;
 
+  const maxDate = useMemo(() => {
+    return new Date().toISOString().split("T")[0];
+  }, []);
+
+  const handleFiltersChange = useCallback(
+    (incomingFilters: FilterValues) => {
+      setFilters((prevFilters) => {
+        const next: FilterValues = { ...incomingFilters };
+
+        const rawDateRange =
+          incomingFilters.dateRange &&
+          typeof incomingFilters.dateRange === "object" &&
+          !Array.isArray(incomingFilters.dateRange)
+            ? (incomingFilters.dateRange as { start?: string; end?: string })
+            : undefined;
+
+        if (rawDateRange) {
+          let { start = "", end = "" } = rawDateRange;
+
+          // Normalizar fechas vacías: si solo hay una, usarla para ambas
+          if (start && !end) {
+            end = start;
+          } else if (!start && end) {
+            start = end;
+          }
+
+          // No permitir fechas futuras
+          if (start && start > maxDate) {
+            start = maxDate;
+          }
+          if (end && end > maxDate) {
+            end = maxDate;
+          }
+
+          // Asegurar que "to" nunca sea menor que "from"
+          if (start && end && end < start) {
+            end = start;
+          }
+
+          next.dateRange = { start, end };
+        }
+
+        // Evitar updates si no hay cambios reales (para no generar loops)
+        if (JSON.stringify(next) === JSON.stringify(prevFilters)) {
+          return prevFilters;
+        }
+
+        return next;
+      });
+    },
+    [maxDate],
+  );
+
   const handleViewDetail = useCallback(
     (activity: UserActivity) => {
       const from = dateRange?.start || activity.date || new Date().toISOString().split("T")[0];
@@ -140,7 +193,7 @@ export default function ReportsPage() {
   }, [
     dateRange?.start,
     dateRange?.end,
-    filters.userId,
+    filters.name,
     filters.country,
     filters.clientId,
     filters.teamId,
@@ -155,17 +208,18 @@ export default function ReportsPage() {
         label: "Date",
         translationKey: "reports.date",
         defaultValue: {
-          start: new Date().toISOString().split("T")[0],
-          end: new Date().toISOString().split("T")[0],
+          start: maxDate,
+          end: maxDate,
         },
         minWidth: "260px",
+        maxDate: maxDate,
       },
       {
-        key: "userId",
-        type: "select",
+        key: "name",
+        type: "text",
         label: "User",
         translationKey: "reports.user",
-        options: [],
+        placeholder: "Search user here...",
       },
       {
         key: "country",
@@ -199,7 +253,6 @@ export default function ReportsPage() {
     layout: "row",
     showClearButton: true,
     clearButtonPosition: "end",
-    clearButtonLabel: "Clean Filters",
   };
 
   const filtersConfig = useMemo(() => {
@@ -208,9 +261,6 @@ export default function ReportsPage() {
     return {
       ...baseFiltersConfig,
       filters: baseFiltersConfig.filters.map((filter) => {
-        if (filter.key === "userId") {
-          return { ...filter, options: [selectPlaceholder, ...(filterOptions?.users || [])] };
-        }
         if (filter.key === "country") {
           return { ...filter, options: [selectPlaceholder, ...(filterOptions?.countries || [])] };
         }
@@ -228,6 +278,7 @@ export default function ReportsPage() {
           return {
             ...filter,
             options: [selectPlaceholder, ...(filterOptions?.jobPositions || [])],
+            dependsOn: "teamId", // El filtro de cargo depende del filtro de equipo
           };
         }
         return filter;
@@ -291,16 +342,13 @@ export default function ReportsPage() {
         adtFilters.to = today;
       }
 
-      const userId = typeof filters.userId === "string" ? filters.userId : "";
+      const name = typeof filters.name === "string" ? filters.name : "";
       const country = typeof filters.country === "string" ? filters.country : "";
       const clientId = typeof filters.clientId === "string" ? filters.clientId : "";
       const teamId = typeof filters.teamId === "string" ? filters.teamId : "";
       const jobPosition = typeof filters.jobPosition === "string" ? filters.jobPosition : "";
 
-      if (userId) {
-        const selectedUser = filterOptions?.users.find((u) => u.value === userId);
-        if (selectedUser?.label) adtFilters.name = selectedUser.label.trim();
-      }
+      // No enviar name al backend, lo filtraremos en el frontend para búsqueda parcial
       if (country) adtFilters.country = country.trim();
       if (clientId) adtFilters.client_id = clientId.trim();
       if (teamId) adtFilters.team_id = teamId.trim();
@@ -313,8 +361,20 @@ export default function ReportsPage() {
         return;
       }
 
-      const transformedActivities = transformRealtimeMetricsToUserActivity(realtimeMetrics);
+      // Filtrar por nombre parcialmente (búsqueda case-insensitive)
+      let filteredMetrics = realtimeMetrics;
+      if (name && name.trim() !== "") {
+        const searchTerm = name.trim().toLowerCase();
+        filteredMetrics = realtimeMetrics.filter((metric) => {
+          const contractorName = (metric.contractor_name || "").toLowerCase();
+          return contractorName.includes(searchTerm);
+        });
+      }
 
+      const transformedActivities = transformRealtimeMetricsToUserActivity(filteredMetrics);
+
+      // Usar todos los metrics (sin filtrar por nombre) para las opciones de filtros
+      // pero mostrar solo los filtrados en la tabla
       if (realtimeMetrics.length > 0) {
         const currentOptions = extractFilterOptionsFromMetrics(realtimeMetrics);
 
@@ -381,8 +441,8 @@ export default function ReportsPage() {
     params.set("from", from);
     params.set("to", to);
 
-    if (filters.userId && typeof filters.userId === "string") {
-      params.set("userId", filters.userId);
+    if (filters.name && typeof filters.name === "string") {
+      params.set("userId", filters.name);
     }
     if (filters.country && typeof filters.country === "string") {
       params.set("country", filters.country);
@@ -489,7 +549,7 @@ export default function ReportsPage() {
                 e.stopPropagation();
                 handleViewDetail(row as UserActivity);
               }}
-              className="mx-auto inline-flex items-center gap-1.5 text-black hover:text-black transition-colors underline font-medium text-sm"
+              className="mx-auto inline-flex items-center gap-1.5 text-black hover:text-black transition-colors underline font-medium text-sm cursor-pointer"
             >
               <List className="w-3.5 h-3.5" />
               <span>{t("viewDetail")}</span>
@@ -561,7 +621,7 @@ export default function ReportsPage() {
                     e.stopPropagation();
                     handleViewDetail(row);
                   }}
-                  className="mx-auto inline-flex items-center gap-1.5 text-black hover:text-black transition-colors underline font-medium text-sm"
+                  className="mx-auto inline-flex items-center gap-1.5 text-black hover:text-black transition-colors underline font-medium text-sm cursor-pointer"
                 >
                   <List className="w-3.5 h-3.5" />
                   <span>{t("viewDetail")}</span>
@@ -591,6 +651,7 @@ export default function ReportsPage() {
                   padding: "7px 21px",
                   height: "40px",
                   fontWeight: 600,
+                  cursor: "pointer",
                 }}
               >
                 <FileText className="w-4 h-4 mr-2" />
@@ -602,7 +663,7 @@ export default function ReportsPage() {
           <FilterPanel
             config={filtersConfig}
             initialValues={filters}
-            onChange={setFilters}
+            onChange={handleFiltersChange}
             onClear={handleClearFilters}
             loading={loading}
           />

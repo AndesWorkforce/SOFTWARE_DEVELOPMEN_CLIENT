@@ -100,10 +100,10 @@ export default function ClientsPage() {
                 e.stopPropagation();
                 handleViewTeams(row);
               }}
-              className="inline-flex items-center gap-1 text-black hover:underline"
+              className="inline-flex items-center gap-1 text-black hover:underline cursor-pointer"
             >
               <UsersRound className="w-3.5 h-3.5" />
-              <span className="text-sm font-medium underline">View</span>
+              <span className="text-sm font-medium underline">{t("clients.table.view")}</span>
             </button>
           ),
         },
@@ -123,20 +123,20 @@ export default function ClientsPage() {
                     e.stopPropagation();
                     handleEdit(row);
                   }}
-                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline cursor-pointer"
                 >
                   <Pencil className="w-3.5 h-3.5" />
-                  <span className="text-sm font-semibold">Edit</span>
+                  <span className="text-sm">{t("clients.table.edit")}</span>
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDelete(row);
                   }}
-                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
+                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span className="text-sm font-semibold">Delete</span>
+                  <span className="text-sm">{t("clients.table.delete")}</span>
                 </button>
               </div>
             </div>
@@ -200,7 +200,7 @@ export default function ClientsPage() {
                 }}
                 className={`absolute right-[10px] ${
                   isExpanded ? "top-[8px]" : "top-[15px]"
-                } flex items-center justify-center`}
+                } flex items-center justify-center cursor-pointer`}
                 aria-label={isExpanded ? "Collapse" : "Expand"}
               >
                 {isExpanded ? (
@@ -241,14 +241,14 @@ export default function ClientsPage() {
                         <span className="font-semibold">: </span>
                         <button
                           type="button"
-                          className="inline-flex items-center gap-[5px] underline font-medium text-[14px] max-w-full"
+                          className="inline-flex items-center gap-[5px] underline font-medium text-[14px] max-w-full cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleViewTeams(row);
                           }}
                         >
                           <UsersRound className="w-[14px] h-[14px]" />
-                          <span>View</span>
+                          <span>{t("clients.table.view")}</span>
                         </button>
                       </p>
 
@@ -262,10 +262,10 @@ export default function ClientsPage() {
                               e.stopPropagation();
                               handleEdit(row);
                             }}
-                            className="inline-flex items-center gap-[10px] text-[#0097B2] text-[14px] font-semibold"
+                            className="inline-flex items-center gap-1 text-[#0097B2] hover:underline text-sm cursor-pointer"
                           >
-                            <Pencil className="w-[14px] h-[14px]" />
-                            <span>Edit</span>
+                            <Pencil className="w-3.5 h-3.5" />
+                            <span>{t("clients.table.edit")}</span>
                           </button>
                           <button
                             type="button"
@@ -273,10 +273,10 @@ export default function ClientsPage() {
                               e.stopPropagation();
                               handleDelete(row);
                             }}
-                            className="inline-flex items-center gap-[10px] text-[#FF0004] text-[14px] font-semibold"
+                            className="inline-flex items-center gap-1 text-[#FF0004] hover:underline text-sm cursor-pointer"
                           >
-                            <Trash2 className="w-[14px] h-[14px]" />
-                            <span>Delete</span>
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>{t("clients.table.delete")}</span>
                           </button>
                         </span>
                       </p>
@@ -442,6 +442,7 @@ export default function ClientsPage() {
                 gap: "10px",
                 borderRadius: "8px",
                 boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
+                cursor: "pointer",
               }}
               className="md:text-[16px] h-[35px] md:h-[40px]"
             >

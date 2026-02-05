@@ -9,11 +9,27 @@ export interface DateRangePickerProps {
   onEndDateChange: (date: string) => void;
   error?: string;
   className?: string;
+  minDate?: string;
+  maxDate?: string;
+  startDateMax?: string;
+  endDateMin?: string;
 }
 
 export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
   (
-    { label, startDate, endDate, onStartDateChange, onEndDateChange, error, className = "" },
+    {
+      label,
+      startDate,
+      endDate,
+      onStartDateChange,
+      onEndDateChange,
+      error,
+      className = "",
+      minDate,
+      maxDate,
+      startDateMax,
+      endDateMin,
+    },
     ref,
   ) => {
     const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,7 +48,7 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
           </p>
         )}
         <div
-          className="relative flex items-center rounded-[5px] h-[35px] md:h-[45px]"
+          className="relative flex items-center rounded-[5px] h-[35px] md:h-[45px] cursor-pointer"
           style={{
             background: "#FFFFFF",
             border: error ? "1px solid #EF4444" : "1px solid rgba(166, 166, 166, 0.5)",
@@ -43,7 +59,9 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
             type="date"
             value={startDate}
             onChange={handleStartDateChange}
-            className="flex-1 h-[33px] md:h-[38px] px-[12px] border-none outline-none bg-transparent text-[12px] md:text-[16px]"
+            min={minDate}
+            max={startDateMax || maxDate}
+            className="flex-1 h-[33px] md:h-[38px] px-[12px] border-none outline-none bg-transparent text-[12px] md:text-[16px] cursor-pointer"
             style={{
               color: startDate ? "#000000" : "#B6B4B4",
               fontFamily: "Inter, sans-serif",
@@ -60,7 +78,9 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
             type="date"
             value={endDate}
             onChange={handleEndDateChange}
-            className="flex-1 h-[33px] md:h-[38px] px-[12px] border-none outline-none bg-transparent text-[12px] md:text-[16px]"
+            min={endDateMin || minDate}
+            max={maxDate}
+            className="flex-1 h-[33px] md:h-[38px] px-[12px] border-none outline-none bg-transparent text-[12px] md:text-[16px] cursor-pointer"
             style={{
               color: endDate ? "#000000" : "#B6B4B4",
               fontFamily: "Inter, sans-serif",

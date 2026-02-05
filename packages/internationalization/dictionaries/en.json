@@ -382,7 +382,9 @@
       "email": "Email",
       "teams": "Teams",
       "action": "Action",
-      "view": "View"
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete"
     },
     "modal": {
       "addTitle": "Add Client",
@@ -432,7 +434,9 @@
       "user": "User",
       "email": "Email",
       "role": "Role",
-      "action": "Action"
+      "action": "Action",
+      "edit": "Edit",
+      "delete": "Delete"
     },
     "modal": {
       "title": "Add User",
@@ -522,6 +526,7 @@
     "reports": {
       "title": "Reports",
       "exportPdf": "Export PDF",
+      "reportGenerator": "Report Generator",
       "viewReports": "View Reports"
     },
     "clients": {

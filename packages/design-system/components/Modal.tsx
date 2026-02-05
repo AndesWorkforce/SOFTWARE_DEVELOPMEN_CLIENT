@@ -96,7 +96,7 @@ export const Modal = ({
             </h2>
             <button
               onClick={onClose}
-              className="p-1 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+              className="p-1 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0 cursor-pointer"
               aria-label="Close modal"
             >
               <X className="w-6 h-6" style={{ color: "#000000" }} />

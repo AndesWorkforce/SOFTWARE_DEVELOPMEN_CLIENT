@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, DataTable, FilterPanel } from "@/packages/design-system";
-import { Download } from "lucide-react";
+import { FileText, List } from "lucide-react";
 import { adtService, type RealtimeMetrics } from "@/packages/api/adt/adt.service";
 import type { FilterOptions, UserActivity } from "@/packages/api/reports/reports.service";
 import type { FilterPanelConfig, FilterValues } from "@/packages/types/FilterPanel.types";
@@ -29,6 +29,59 @@ export default function ReportsPage() {
     filters.dateRange && typeof filters.dateRange === "object" && !Array.isArray(filters.dateRange)
       ? filters.dateRange
       : undefined;
+
+  const maxDate = useMemo(() => {
+    return new Date().toISOString().split("T")[0];
+  }, []);
+
+  const handleFiltersChange = useCallback(
+    (incomingFilters: FilterValues) => {
+      setFilters((prevFilters) => {
+        const next: FilterValues = { ...incomingFilters };
+
+        const rawDateRange =
+          incomingFilters.dateRange &&
+          typeof incomingFilters.dateRange === "object" &&
+          !Array.isArray(incomingFilters.dateRange)
+            ? (incomingFilters.dateRange as { start?: string; end?: string })
+            : undefined;
+
+        if (rawDateRange) {
+          let { start = "", end = "" } = rawDateRange;
+
+          // Normalizar fechas vacías: si solo hay una, usarla para ambas
+          if (start && !end) {
+            end = start;
+          } else if (!start && end) {
+            start = end;
+          }
+
+          // No permitir fechas futuras
+          if (start && start > maxDate) {
+            start = maxDate;
+          }
+          if (end && end > maxDate) {
+            end = maxDate;
+          }
+
+          // Asegurar que "to" nunca sea menor que "from"
+          if (start && end && end < start) {
+            end = start;
+          }
+
+          next.dateRange = { start, end };
+        }
+
+        // Evitar updates si no hay cambios reales (para no generar loops)
+        if (JSON.stringify(next) === JSON.stringify(prevFilters)) {
+          return prevFilters;
+        }
+
+        return next;
+      });
+    },
+    [maxDate],
+  );
 
   const handleViewDetail = useCallback(
     (activity: UserActivity) => {
@@ -67,7 +120,7 @@ export default function ReportsPage() {
       },
       country: metric.country || "N/A",
       timeWorked: formatSecondsToTime(metric.total_session_time_seconds),
-      activityPercentage: Math.round(metric.active_percentage),
+      activityPercentage: Math.round(metric.productivity_score),
       date: metric.workday,
       details: [],
       metrics: {
@@ -140,16 +193,13 @@ export default function ReportsPage() {
   }, [
     dateRange?.start,
     dateRange?.end,
-    filters.userId,
+    filters.name,
     filters.country,
     filters.clientId,
     filters.teamId,
     filters.jobPosition,
   ]);
 
-  // ... rest of the file remains unchanged ...
-
-  // Configuración base de filtros
   const baseFiltersConfig: FilterPanelConfig = {
     filters: [
       {
@@ -158,17 +208,18 @@ export default function ReportsPage() {
         label: "Date",
         translationKey: "reports.date",
         defaultValue: {
-          start: new Date().toISOString().split("T")[0],
-          end: new Date().toISOString().split("T")[0],
+          start: maxDate,
+          end: maxDate,
         },
         minWidth: "260px",
+        maxDate: maxDate,
       },
       {
-        key: "userId",
-        type: "select",
+        key: "name",
+        type: "text",
         label: "User",
         translationKey: "reports.user",
-        options: [],
+        placeholder: "Search user here...",
       },
       {
         key: "country",
@@ -202,17 +253,14 @@ export default function ReportsPage() {
     layout: "row",
     showClearButton: true,
     clearButtonPosition: "end",
-    clearButtonLabel: "Clean Filters",
   };
 
   const filtersConfig = useMemo(() => {
     const selectPlaceholder = { value: "", label: "Select..." };
+
     return {
       ...baseFiltersConfig,
       filters: baseFiltersConfig.filters.map((filter) => {
-        if (filter.key === "userId") {
-          return { ...filter, options: [selectPlaceholder, ...(filterOptions?.users || [])] };
-        }
         if (filter.key === "country") {
           return { ...filter, options: [selectPlaceholder, ...(filterOptions?.countries || [])] };
         }
@@ -230,6 +278,7 @@ export default function ReportsPage() {
           return {
             ...filter,
             options: [selectPlaceholder, ...(filterOptions?.jobPositions || [])],
+            dependsOn: "teamId", // El filtro de cargo depende del filtro de equipo
           };
         }
         return filter;
@@ -293,16 +342,13 @@ export default function ReportsPage() {
         adtFilters.to = today;
       }
 
-      const userId = typeof filters.userId === "string" ? filters.userId : "";
+      const name = typeof filters.name === "string" ? filters.name : "";
       const country = typeof filters.country === "string" ? filters.country : "";
       const clientId = typeof filters.clientId === "string" ? filters.clientId : "";
       const teamId = typeof filters.teamId === "string" ? filters.teamId : "";
       const jobPosition = typeof filters.jobPosition === "string" ? filters.jobPosition : "";
 
-      if (userId) {
-        const selectedUser = filterOptions?.users.find((u) => u.value === userId);
-        if (selectedUser?.label) adtFilters.name = selectedUser.label.trim();
-      }
+      // No enviar name al backend, lo filtraremos en el frontend para búsqueda parcial
       if (country) adtFilters.country = country.trim();
       if (clientId) adtFilters.client_id = clientId.trim();
       if (teamId) adtFilters.team_id = teamId.trim();
@@ -315,10 +361,23 @@ export default function ReportsPage() {
         return;
       }
 
-      const transformedActivities = transformRealtimeMetricsToUserActivity(realtimeMetrics);
+      // Filtrar por nombre parcialmente (búsqueda case-insensitive)
+      let filteredMetrics = realtimeMetrics;
+      if (name && name.trim() !== "") {
+        const searchTerm = name.trim().toLowerCase();
+        filteredMetrics = realtimeMetrics.filter((metric) => {
+          const contractorName = (metric.contractor_name || "").toLowerCase();
+          return contractorName.includes(searchTerm);
+        });
+      }
 
+      const transformedActivities = transformRealtimeMetricsToUserActivity(filteredMetrics);
+
+      // Usar todos los metrics (sin filtrar por nombre) para las opciones de filtros
+      // pero mostrar solo los filtrados en la tabla
       if (realtimeMetrics.length > 0) {
         const currentOptions = extractFilterOptionsFromMetrics(realtimeMetrics);
+
         setFilterOptions((prevOptions) => {
           if (!prevOptions) return currentOptions;
 
@@ -368,8 +427,8 @@ export default function ReportsPage() {
   const handleClearFilters = () => {
     setFilters({
       dateRange: {
-        start: new Date().toISOString().split("T")[0],
-        end: new Date().toISOString().split("T")[0],
+        start: maxDate,
+        end: maxDate,
       },
     });
   };
@@ -382,8 +441,8 @@ export default function ReportsPage() {
     params.set("from", from);
     params.set("to", to);
 
-    if (filters.userId && typeof filters.userId === "string") {
-      params.set("userId", filters.userId);
+    if (filters.name && typeof filters.name === "string") {
+      params.set("userId", filters.name);
     }
     if (filters.country && typeof filters.country === "string") {
       params.set("country", filters.country);
@@ -398,10 +457,9 @@ export default function ReportsPage() {
       params.set("jobPosition", filters.jobPosition);
     }
 
-    return `/${locale}/app/super-admin/reports/export?${params.toString()}`;
+    return `/${locale}/app/super-admin/reports/group?${params.toString()}`;
   };
 
-  // Configuración base de tabla
   const baseTableConfig = useMemo<DataTableConfig<UserActivity>>(
     () => ({
       columns: [
@@ -461,33 +519,42 @@ export default function ReportsPage() {
         },
         {
           key: "activityPercentage",
-          title: "Activity",
-          translationKey: "reports.table.activity",
+          title: "Productivity",
+          translationKey: "reports.table.productivity",
           dataPath: "activityPercentage",
           type: "percentage",
           width: "100px",
           align: "center",
           config: {
             percentage: {
-              thresholds: [{ value: 50, color: "#2EC36D" }],
-              defaultColor: "#FF0004",
+              thresholds: [
+                { value: 65, color: "#0097B2" }, // Verde para >= 65%
+                { value: 40, color: "#FF9800" }, // Naranja para 40-64%
+              ],
+              defaultColor: "#FF0004", // Rojo para < 40%
             },
           },
         },
         {
           key: "activityDetail",
-          title: "Activity Detail",
-          translationKey: "reports.table.activityDetail",
+          title: "Report Detail",
+          translationKey: "reports.table.reportDetail",
           dataPath: "id",
-          type: "action",
-          width: "120px",
+          type: "custom",
+          width: "100px",
           align: "center",
-          config: {
-            action: {
-              label: "View Detail",
-              onClick: handleViewDetail,
-            },
-          },
+          render: (value, row) => (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewDetail(row as UserActivity);
+              }}
+              className="mx-auto inline-flex items-center gap-1.5 text-black hover:text-black transition-colors underline font-medium text-sm cursor-pointer"
+            >
+              <List className="w-3.5 h-3.5" />
+              <span>{t("viewDetail")}</span>
+            </button>
+          ),
         },
       ],
       mobileConfig: {
@@ -521,7 +588,7 @@ export default function ReportsPage() {
           },
           {
             key: "activityPercentage",
-            label: "Activity",
+            label: "Productivity",
             dataPath: "activityPercentage",
           },
         ],
@@ -545,14 +612,21 @@ export default function ReportsPage() {
         col.key === "activityDetail"
           ? {
               ...col,
-              config: {
-                ...col.config,
-                action: {
-                  ...col.config?.action,
-                  label: t("viewDetail"),
-                  onClick: handleViewDetail,
-                },
-              },
+              title: "Report Detail",
+              translationKey: "reports.table.reportDetail",
+              type: "custom" as const,
+              render: (value: unknown, row: UserActivity) => (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewDetail(row);
+                  }}
+                  className="mx-auto inline-flex items-center gap-1.5 text-black hover:text-black transition-colors underline font-medium text-sm cursor-pointer"
+                >
+                  <List className="w-3.5 h-3.5" />
+                  <span>{t("viewDetail")}</span>
+                </button>
+              ),
             }
           : col,
       ),
@@ -575,12 +649,13 @@ export default function ReportsPage() {
                   color: "#FFFFFF",
                   fontSize: "14px",
                   padding: "7px 21px",
-                  height: "35px",
+                  height: "40px",
+                  fontWeight: 600,
+                  cursor: "pointer",
                 }}
               >
-                <Download className="w-3.5 h-3.5 md:w-5 md:h-5 mr-2" />
-                <span className="hidden md:inline">{t("exportPdf")}</span>
-                <span className="md:hidden">{t("exportPdf")}</span>
+                <FileText className="w-4 h-4 mr-2" />
+                <span>{t("reportGenerator")}</span>
               </Button>
             </Link>
           </div>
@@ -588,7 +663,7 @@ export default function ReportsPage() {
           <FilterPanel
             config={filtersConfig}
             initialValues={filters}
-            onChange={setFilters}
+            onChange={handleFiltersChange}
             onClear={handleClearFilters}
             loading={loading}
           />
