@@ -21,6 +21,23 @@ export interface GetAllClientsParams {
   teamId?: string;
 }
 
+export interface ClientDayOff {
+  id: string;
+  contractor_id: string;
+  contractor_name: string;
+  team_id: string | null;
+  team_name: string | null;
+  date: string;
+  reason: string;
+  created_at: string;
+}
+
+export interface GetClientDayOffsParams {
+  startDate?: string;
+  endDate?: string;
+  teamId?: string;
+}
+
 export class ClientsService {
   /**
    * Obtiene todos los clientes
@@ -90,6 +107,27 @@ export class ClientsService {
     } catch (error) {
       const axiosError = error as AxiosError;
       console.error("❌ Error en remove client:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene los day-offs de un cliente con filtros opcionales
+   * @param id ID del cliente
+   * @param params Filtros opcionales (startDate, endDate, teamId)
+   * @returns Array de day-offs con información del contratista y equipo
+   */
+  async getDayOffs(id: string, params?: GetClientDayOffsParams): Promise<ClientDayOff[]> {
+    try {
+      const response = await http.get<ClientDayOff[]>(`/clients/${id}/day-offs`, { params });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getDayOffs client:", {
         message: axiosError?.message || "Unknown error",
         response: axiosError?.response?.data || null,
         status: axiosError?.response?.status || null,
