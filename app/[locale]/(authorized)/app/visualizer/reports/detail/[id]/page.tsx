@@ -16,7 +16,7 @@ function ReportDetailContent() {
     );
   }
 
-  return <ReportDetailView contractorId={contractorId} basePath="admin" />;
+  return <ReportDetailView contractorId={contractorId} basePath="visualizer" />;
 }
 
 export default function ReportDetailPage() {
