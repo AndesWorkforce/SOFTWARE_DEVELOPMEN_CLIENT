@@ -24,10 +24,12 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FilterValues>({});
 
-  const handleViewCalendar = useCallback((client: Client) => {
-    // TODO: Implement calendar view navigation
-    console.log("View calendar for client:", client.id);
-  }, []);
+  const handleViewCalendar = useCallback(
+    (client: Client) => {
+      router.push(`/${locale}/app/visualizer/clients/${client.id}/calendar`);
+    },
+    [locale, router],
+  );
 
   const handleViewTeams = useCallback(
     (client: Client) => {
