@@ -165,17 +165,14 @@ export function FilterPanel({
       // Limpiar valores de filtros dependientes cuando cambia el filtro padre
       config.filters.forEach((filter) => {
         if (filter.dependsOn === key) {
-          // Si el filtro padre cambió y el valor del dependiente ya no es válido, limpiarlo
+          // Si el filtro padre cambió, siempre limpiar el filtro dependiente
           const dependencyValue = typeof value === "string" ? value : undefined;
           if (!dependencyValue || dependencyValue === "") {
             newValues[filter.key] = undefined;
           } else {
-            // Verificar si el valor actual del dependiente sigue siendo válido
-            const currentDependentValue = newValues[filter.key];
-            if (currentDependentValue) {
-              // Las opciones dependientes se actualizarán en el siguiente render
-              // Por ahora, solo limpiamos si el padre se deseleccionó
-            }
+            // El padre cambió a un nuevo valor, limpiar el dependiente
+            // El usuario deberá seleccionar un nuevo valor del dependiente basado en el nuevo padre
+            newValues[filter.key] = undefined;
           }
         }
       });
@@ -209,6 +206,10 @@ export function FilterPanel({
               handleFilterChange(filterConfig.key, { ...value, end: end || "" })
             }
             className="min-w-[220px]"
+            minDate={filterConfig.minDate}
+            maxDate={filterConfig.maxDate}
+            startDateMax={value.end || filterConfig.maxDate}
+            endDateMin={value.start || filterConfig.minDate}
           />
         );
       }

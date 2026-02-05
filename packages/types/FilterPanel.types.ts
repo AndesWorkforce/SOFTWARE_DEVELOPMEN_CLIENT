@@ -90,6 +90,16 @@ export interface FilterConfig {
    * Icono a mostrar junto al filtro (opcional)
    */
   icon?: React.ReactNode;
+
+  /**
+   * Fecha mínima permitida (para dateRange)
+   */
+  minDate?: string;
+
+  /**
+   * Fecha máxima permitida (para dateRange)
+   */
+  maxDate?: string;
 }
 
 /**

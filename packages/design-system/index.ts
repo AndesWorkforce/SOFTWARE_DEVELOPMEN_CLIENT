@@ -36,6 +36,7 @@ export * from "./components/TopWebsites";
 export * from "./components/SessionConnectivity";
 export * from "./components/FilterCarouselMobile";
 export * from "./components/GroupReportsView";
+export * from "./components/ReportDetailView";
 export * from "./flags/getCountryCode";
 export * from "../types/FilterPanel.types";
 export * from "../types/DataTable.types";

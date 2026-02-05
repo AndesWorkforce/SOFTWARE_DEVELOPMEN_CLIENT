@@ -373,7 +373,9 @@
       "email": "Correo Electrónico",
       "teams": "Equipos",
       "action": "Acción",
-      "view": "Ver"
+      "view": "Ver",
+      "edit": "Editar",
+      "delete": "Eliminar"
     },
     "modal": {
       "addTitle": "Agregar Cliente",
@@ -423,7 +425,9 @@
       "user": "Usuario",
       "email": "Correo",
       "role": "Rol",
-      "action": "Acción"
+      "action": "Acción",
+      "edit": "Editar",
+      "delete": "Eliminar"
     },
     "modal": {
       "title": "Agregar Usuario",
@@ -513,6 +517,7 @@
     "reports": {
       "title": "Reportes",
       "exportPdf": "Exportar PDF",
+      "reportGenerator": "Generador de Reportes",
       "viewReports": "Ver Reportes"
     },
     "clients": {

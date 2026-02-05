@@ -44,7 +44,7 @@ export default function RolesPage() {
           translationKey: "roles.table.firstName",
           dataPath: "firstName",
           type: "text",
-          width: "150px",
+          minWidth: "150px",
           align: "center",
         },
         {
@@ -53,7 +53,7 @@ export default function RolesPage() {
           translationKey: "roles.table.lastName",
           dataPath: "lastName",
           type: "text",
-          width: "150px",
+          minWidth: "150px",
           align: "center",
         },
         {
@@ -62,7 +62,7 @@ export default function RolesPage() {
           translationKey: "roles.table.email",
           dataPath: "email",
           type: "text",
-          width: "392px",
+          minWidth: "392px",
           align: "center",
         },
         {
@@ -71,7 +71,7 @@ export default function RolesPage() {
           translationKey: "roles.table.role",
           dataPath: (row) => ROLE_LABELS[row.role] || row.role,
           type: "text",
-          width: "200px",
+          minWidth: "200px",
           align: "center",
         },
         {
@@ -80,30 +80,32 @@ export default function RolesPage() {
           translationKey: "roles.table.action",
           dataPath: "id",
           type: "custom",
-          width: "150px",
+          minWidth: "150px",
           align: "left",
           render: (_value: unknown, row: User) => (
-            <div className="flex flex-col gap-1 items-start">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEdit(row);
-                }}
-                className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-                <span className="text-sm font-semibold">Edit</span>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(row);
-                }}
-                className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span className="text-sm font-semibold">Delete</span>
-              </button>
+            <div className="w-full flex justify-center">
+              <div className="flex flex-col gap-1 items-start">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit(row);
+                  }}
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline cursor-pointer"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span className="text-sm">{t("roles.table.edit")}</span>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(row);
+                  }}
+                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="text-sm">{t("roles.table.delete")}</span>
+                </button>
+              </div>
             </div>
           ),
         },
@@ -120,6 +122,10 @@ export default function RolesPage() {
           border: "1px solid rgba(166,166,166,0.5)",
           boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
           borderRadius: "10px",
+        },
+        cell: {
+          paddingTop: "4px",
+          paddingBottom: "4px",
         },
         mobileCard: {
           border: "1px solid rgba(166,166,166,0.5)",
@@ -157,20 +163,20 @@ export default function RolesPage() {
                     e.stopPropagation();
                     handleEdit(row);
                   }}
-                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline text-sm"
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline text-sm cursor-pointer"
                 >
                   <Pencil className="w-3.5 h-3.5" />
-                  <span className="font-semibold">Edit</span>
+                  <span>{t("roles.table.edit")}</span>
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDelete(row as User);
                   }}
-                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline text-sm"
+                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline text-sm cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span className="font-semibold">Delete</span>
+                  <span>{t("roles.table.delete")}</span>
                 </button>
               </span>
             ),
@@ -230,6 +236,7 @@ export default function RolesPage() {
                 gap: "10px",
                 borderRadius: "8px",
                 boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
+                cursor: "pointer",
               }}
               className="md:text-[16px] h-[35px] md:h-[40px]"
             >

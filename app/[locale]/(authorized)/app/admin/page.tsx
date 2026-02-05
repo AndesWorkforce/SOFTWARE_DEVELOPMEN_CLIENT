@@ -4,8 +4,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import { ChevronRight, Download, Calendar } from "lucide-react";
-import { DataTable, DashboardSkeleton } from "@/packages/design-system";
+import { ChevronRight, FileText } from "lucide-react";
+import { DataTable, DashboardSkeleton, Button } from "@/packages/design-system";
 import { usersService } from "@/packages/api/users/users.service";
 import { clientsService, type Client } from "@/packages/api/clients/clients.service";
 import {
@@ -55,29 +55,29 @@ export default function AdminPage() {
   const memoizedClientsConfig = useMemo(() => clientsTableConfig, []);
 
   // Configuración de la tabla de contractors
-  const memoizedContractorsConfig = useMemo(
-    () =>
-      getContractorsTableConfig(() => (
-        <button type="button" className="inline-flex items-center gap-1 text-black hover:underline">
-          <Calendar className="w-3.5 h-3.5" />
-          <span className="text-sm font-medium underline">{t("contractors.view")}</span>
-        </button>
-      )),
-    [],
-  );
+  const memoizedContractorsConfig = useMemo(() => getContractorsTableConfig(), []);
 
   if (loading) {
     return <DashboardSkeleton variant="admin" />;
   }
 
-  // Obtener fecha actual formateada
+  // Obtener fecha actual formateada según el locale
   const today = new Date();
-  const formattedDate = today.toLocaleDateString("en-US", {
+  const formattedDate = today.toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+
+  // Construir URL para el generador de reportes (misma lógica que en reports/page.tsx)
+  const buildExportUrl = () => {
+    const params = new URLSearchParams();
+    const todayStr = new Date().toISOString().split("T")[0];
+    params.set("from", todayStr);
+    params.set("to", todayStr);
+    return `/${locale}/app/admin/reports/group?${params.toString()}`;
+  };
 
   return (
     <div className="p-4 md:p-8 min-h-screen overflow-x-hidden" style={{ background: "#FFFFFF" }}>
@@ -146,18 +146,28 @@ export default function AdminPage() {
                     {formattedDate}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  className="bg-[#0097B2] text-white text-sm font-semibold px-5 py-2 rounded-lg shadow-[0px_4px_4px_rgba(166,166,166,0.25)] flex items-center gap-2 hover:bg-[#007a94] transition-colors"
-                >
-                  <Download className="w-4 h-4" />
-                  {t("reports.exportPdf")}
-                </button>
+                <Link href={buildExportUrl()}>
+                  <Button
+                    variant="primary"
+                    style={{
+                      background: "#0097B2",
+                      color: "#FFFFFF",
+                      fontSize: "14px",
+                      padding: "7px 21px",
+                      height: "40px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    <span>{t("reports.reportGenerator")}</span>
+                  </Button>
+                </Link>
               </div>
               <div className="pt-3 flex justify-center">
                 <Link
                   href={`/${locale}/app/admin/reports`}
-                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium"
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium cursor-pointer"
                 >
                   <span>{t("reports.viewReports")}</span>
                   <ChevronRight className="w-5 h-5" />
@@ -177,7 +187,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => router.push(`/${locale}/app/admin/clients`)}
-                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium"
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium cursor-pointer"
                 >
                   <span>{t("clients.viewClients")}</span>
                   <ChevronRight className="w-5 h-5" />
@@ -198,7 +208,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={() => router.push(`/${locale}/app/admin/contractors`)}
-                className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium"
+                className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium cursor-pointer"
               >
                 <span>{t("contractors.viewContractors")}</span>
                 <ChevronRight className="w-5 h-5" />

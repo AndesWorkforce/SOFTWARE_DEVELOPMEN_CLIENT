@@ -63,7 +63,7 @@ const ActivationKeyCell = ({
             onClick={handleCopy}
             disabled={isCopying}
             className={`text-[#0097B2] hover:opacity-70 transition-opacity ${
-              isCopying ? "cursor-wait opacity-50" : ""
+              isCopying ? "cursor-wait opacity-50" : "cursor-pointer"
             }`}
             title="Copy"
           >
@@ -129,7 +129,7 @@ export default function ContractorsPage() {
           render: (_value: unknown, row: Contractor) => (
             <button
               onClick={() => handleViewCalendar(row)}
-              className="inline-flex items-center gap-1.5 text-[#0097B2] hover:opacity-80 transition-opacity"
+              className="inline-flex items-center gap-1.5 text-[#0097B2] hover:opacity-80 transition-opacity cursor-pointer"
             >
               <Calendar className="w-5 h-5" />
               <span className="text-[16px] underline">{t("contractors.table.view")}</span>
@@ -218,7 +218,7 @@ export default function ContractorsPage() {
                     e.stopPropagation();
                     handleEdit(row);
                   }}
-                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline cursor-pointer"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   <span className="text-sm">{t("contractors.table.edit")}</span>
@@ -228,7 +228,7 @@ export default function ContractorsPage() {
                     e.stopPropagation();
                     handleDelete(row);
                   }}
-                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
+                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span className="text-sm">{t("contractors.table.delete")}</span>
@@ -270,7 +270,7 @@ export default function ContractorsPage() {
             render: (_value: unknown, row: Contractor) => (
               <button
                 type="button"
-                className="inline-flex items-center gap-1 text-[#0097B2]"
+                className="inline-flex items-center gap-1 text-[#0097B2] cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleViewCalendar(row);
@@ -332,7 +332,7 @@ export default function ContractorsPage() {
                     e.stopPropagation();
                     handleEdit(row);
                   }}
-                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline text-sm"
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline text-sm cursor-pointer"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   <span>{t("contractors.table.edit")}</span>
@@ -342,7 +342,7 @@ export default function ContractorsPage() {
                     e.stopPropagation();
                     handleDelete(row as Contractor);
                   }}
-                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline text-sm"
+                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline text-sm cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>{t("contractors.table.delete")}</span>
@@ -619,6 +619,7 @@ export default function ContractorsPage() {
                 gap: "10px",
                 borderRadius: "8px",
                 boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
+                cursor: "pointer",
               }}
               className="md:text-[15px] h-[35px] md:h-[40px]"
             >

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus, Pencil, Trash2, Calendar, Copy } from "lucide-react";
+import { Plus, Pencil, Trash2, Calendar, Copy } from "lucide-react";
 import { Button, DataTable, FilterPanel } from "@/packages/design-system";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import { clientsService } from "@/packages/api/clients/clients.service";
@@ -56,7 +56,7 @@ const ActivationKeyCell = ({
             onClick={handleCopy}
             disabled={isCopying}
             className={`text-[#0097B2] hover:opacity-70 transition-opacity ${
-              isCopying ? "cursor-wait opacity-50" : ""
+              isCopying ? "cursor-wait opacity-50" : "cursor-pointer"
             }`}
             title="Copy"
           >
@@ -151,7 +151,7 @@ export default function ClientContractorsPage() {
           render: (_value: unknown, row: Contractor) => (
             <button
               onClick={() => handleViewCalendar(row)}
-              className="inline-flex items-center gap-1.5 text-[#0097B2] hover:opacity-80 transition-opacity"
+              className="inline-flex items-center gap-1.5 text-[#0097B2] hover:opacity-80 transition-opacity cursor-pointer"
             >
               <Calendar className="w-5 h-5" />
               <span className="text-[16px] underline">{t("contractors.table.view")}</span>
@@ -240,7 +240,7 @@ export default function ClientContractorsPage() {
                     e.stopPropagation();
                     handleEdit(row);
                   }}
-                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline"
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline cursor-pointer"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   <span className="text-sm">{t("contractors.table.edit")}</span>
@@ -250,7 +250,7 @@ export default function ClientContractorsPage() {
                     e.stopPropagation();
                     handleDelete(row);
                   }}
-                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline"
+                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span className="text-sm">{t("contractors.table.delete")}</span>
@@ -292,7 +292,7 @@ export default function ClientContractorsPage() {
             render: (_value: unknown, row: Contractor) => (
               <button
                 type="button"
-                className="inline-flex items-center gap-1 text-[#0097B2]"
+                className="inline-flex items-center gap-1 text-[#0097B2] cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleViewCalendar(row);
@@ -354,7 +354,7 @@ export default function ClientContractorsPage() {
                     e.stopPropagation();
                     handleEdit(row);
                   }}
-                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline text-sm"
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline text-sm cursor-pointer"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   <span>{t("contractors.table.edit")}</span>
@@ -364,7 +364,7 @@ export default function ClientContractorsPage() {
                     e.stopPropagation();
                     handleDelete(row as Contractor);
                   }}
-                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline text-sm"
+                  className="inline-flex items-center gap-1 text-[#FF0004] hover:underline text-sm cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>{t("contractors.table.delete")}</span>
@@ -616,77 +616,32 @@ export default function ClientContractorsPage() {
   return (
     <div className="p-4 md:p-8 min-h-screen" style={{ background: "#FFFFFF" }}>
       <div className="max-w-full">
-        <div className="mb-6 md:mb-8 flex items-center justify-between gap-3 flex-wrap min-w-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              type="button"
-              onClick={() => router.push(`/${locale}/app/super-admin/clients`)}
-              className="shrink-0 w-[24px] h-[24px] flex items-center justify-center"
-              aria-label="Back"
+        <div className="mb-6 md:mb-8 flex items-center justify-between">
+          <h1 className="text-xl md:text-3xl font-bold" style={{ color: "#000000" }}>
+            {clientName || t("contractors.title")}
+          </h1>
+          <Link href={`/${locale}/app/super-admin/clients/${clientId}/contractors/add`}>
+            <Button
+              variant="primary"
+              style={{
+                background: "#0097B2",
+                color: "#FFFFFF",
+                fontSize: "15px",
+                fontWeight: 600,
+                padding: "7px 21px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                borderRadius: "8px",
+                boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
+                cursor: "pointer",
+              }}
+              className="md:text-[15px] h-[35px] md:h-[40px]"
             >
-              <ArrowLeft className="w-[24px] h-[24px] text-black" />
-            </button>
-            <h1
-              className="text-xl md:text-3xl font-bold min-w-0 truncate"
-              style={{ color: "#000000" }}
-            >
-              {clientName || ""}
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-[10px] shrink-0">
-            <Link
-              href={`/${locale}/app/super-admin/clients/${clientId}/teams/add`}
-              className="shrink-0"
-            >
-              <Button
-                variant="outline"
-                style={{
-                  background: "#FFFFFF",
-                  color: "#0097B2",
-                  border: "1px solid #B6B4B4",
-                  fontSize: "14px",
-                  padding: "7px 21px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                  borderRadius: "8px",
-                  boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
-                  width: "160px",
-                }}
-                className="h-[35px] md:h-[40px]"
-              >
-                <Plus className="w-4 h-4 text-[#0097B2]" />
-                <span className="font-semibold">{t("teams.createTeam") || "Create Team"}</span>
-              </Button>
-            </Link>
-
-            <Link
-              href={`/${locale}/app/super-admin/clients/${clientId}/contractors/add`}
-              className="shrink-0"
-            >
-              <Button
-                variant="primary"
-                style={{
-                  background: "#0097B2",
-                  color: "#FFFFFF",
-                  fontSize: "14px",
-                  padding: "7px 21px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  borderRadius: "8px",
-                  boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
-                }}
-                className="md:text-[16px] h-[35px] md:h-[40px]"
-              >
-                <Plus className="w-[14px] h-[14px] md:w-5 md:h-5" />
-
-                <span className="font-semibold">{t("contractors.addContractor")}</span>
-              </Button>
-            </Link>
-          </div>
+              <Plus className="w-[14px] h-[14px] md:w-5 md:h-5" />
+              <span className="font-semibold">{t("contractors.addContractor")}</span>
+            </Button>
+          </Link>
         </div>
 
         <FilterPanel

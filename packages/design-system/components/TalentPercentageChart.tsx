@@ -90,7 +90,7 @@ export function TalentPercentageChart({
               <button
                 key={p.key}
                 onClick={() => onPeriodChange(p.key)}
-                className={`flex h-[25px] items-center justify-center px-3 lg:px-[24px] py-[6px] rounded-[10px] text-[14px] lg:text-[16px] flex-1 ${
+                className={`flex h-[25px] items-center justify-center px-3 lg:px-[24px] py-[6px] rounded-[10px] text-[14px] lg:text-[16px] flex-1 cursor-pointer ${
                   period === p.key
                     ? "bg-[#e2e2e2] font-medium text-black"
                     : "font-normal text-black text-center"

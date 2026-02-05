@@ -123,7 +123,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
               <button
                 key={item.path}
                 onClick={() => router.push(item.path)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left cursor-pointer"
                 style={{
                   color: active ? "#0097B2" : "#000000",
                   background: active ? "#E6F7FA" : "transparent",
@@ -148,7 +148,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
           {hasMultipleRoles() && (
             <button
               onClick={handleChangeRole}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left mb-2"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left mb-2 cursor-pointer"
               style={{ color: "#000000" }}
               onMouseEnter={(e) => (e.currentTarget.style.background = "#F5F5F5")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
@@ -160,7 +160,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left cursor-pointer"
             style={{ color: "#000000" }}
             onMouseEnter={(e) => (e.currentTarget.style.background = "#F5F5F5")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
@@ -184,7 +184,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
                 <button
                   aria-label={item.name}
                   onClick={() => router.push(item.path)}
-                  className="p-2"
+                  className="p-2 cursor-pointer"
                   style={{ color: active ? "#0097B2" : "#000000" }}
                 >
                   {/* Clone icon with consistent size on mobile */}
@@ -202,7 +202,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
               <button
                 aria-label={t("changeRole")}
                 onClick={handleChangeRole}
-                className="p-2"
+                className="p-2 cursor-pointer"
                 style={{ color: "#000000" }}
               >
                 <span className="inline-flex w-6 h-6 items-center justify-center">
@@ -216,7 +216,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
             <button
               aria-label={t("logout")}
               onClick={handleLogout}
-              className="p-2"
+              className="p-2 cursor-pointer"
               style={{ color: "#000000" }}
             >
               <span className="inline-flex w-6 h-6 items-center justify-center">

@@ -231,7 +231,7 @@ export const Calendar = ({
         {showNavigation && (
           <button
             onClick={handlePreviousMonth}
-            className="absolute left-0 p-1.5 rounded-md hover:bg-gray-100 transition-colors"
+            className="absolute left-0 p-1.5 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
             aria-label="Previous month"
           >
             <ChevronLeft className="w-6 h-6 text-gray-600" />
@@ -241,7 +241,7 @@ export const Calendar = ({
         {showNavigation && (
           <button
             onClick={handleNextMonth}
-            className="absolute right-0 p-1.5 rounded-md hover:bg-gray-100 transition-colors"
+            className="absolute right-0 p-1.5 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
             aria-label="Next month"
           >
             <ChevronRight className="w-6 h-6 text-gray-600" />
@@ -306,7 +306,7 @@ export const Calendar = ({
                     {dateEvents.slice(0, 2).map((event) => (
                       <div
                         key={event.id}
-                        className="text-xs px-1.5 py-0.5 rounded truncate"
+                        className="text-xs px-1.5 py-0.5 rounded truncate cursor-pointer"
                         style={{
                           backgroundColor: event.color || "#0097B2",
                           color: "white",

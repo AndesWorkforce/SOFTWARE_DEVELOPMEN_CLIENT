@@ -7,5 +7,5 @@ export default function ReportDetailPage() {
   const params = useParams();
   const contractorId = params?.id as string;
 
-  return <ReportDetailView contractorId={contractorId} basePath="admin" />;
+  return <ReportDetailView contractorId={contractorId} basePath="super-admin" />;
 }

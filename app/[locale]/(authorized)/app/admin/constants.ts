@@ -11,7 +11,7 @@ export const clientsTableConfig: DataTableConfig<Client> = {
       translationKey: "clients.table.name",
       dataPath: "name",
       type: "text",
-      width: "200px",
+      minWidth: "200px",
       align: "center",
     },
     {
@@ -20,7 +20,7 @@ export const clientsTableConfig: DataTableConfig<Client> = {
       translationKey: "clients.table.email",
       dataPath: (row) => row.email || "N/A",
       type: "text",
-      width: "245px",
+      minWidth: "245px",
       align: "center",
     },
   ],
@@ -34,12 +34,19 @@ export const clientsTableConfig: DataTableConfig<Client> = {
       boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
       borderRadius: "10px",
     },
+    cell: {
+      paddingTop: "4px",
+      paddingBottom: "4px",
+    },
+    mobileCard: {
+      border: "1px solid rgba(166,166,166,0.5)",
+      boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
+      borderRadius: "10px",
+    },
   },
 };
 
-export const getContractorsTableConfig = (
-  renderCalendar: () => ReactNode,
-): DataTableConfig<Contractor> => ({
+export const getContractorsTableConfig = (): DataTableConfig<Contractor> => ({
   columns: [
     {
       key: "name",
@@ -47,7 +54,16 @@ export const getContractorsTableConfig = (
       translationKey: "contractors.table.user",
       dataPath: "name",
       type: "text",
-      width: "250px",
+      minWidth: "250px",
+      align: "center",
+    },
+    {
+      key: "client",
+      title: "Client",
+      translationKey: "contractors.table.client",
+      dataPath: (row) => row.client_name || "N/A",
+      type: "text",
+      minWidth: "240px",
       align: "center",
     },
     {
@@ -56,18 +72,8 @@ export const getContractorsTableConfig = (
       translationKey: "contractors.table.team",
       dataPath: (row) => row.team_name || "N/A",
       type: "text",
-      width: "240px",
+      minWidth: "240px",
       align: "center",
-    },
-    {
-      key: "calendar",
-      title: "Calendar",
-      translationKey: "contractors.table.calendar",
-      dataPath: "id",
-      type: "custom",
-      width: "110px",
-      align: "center",
-      render: renderCalendar,
     },
   ],
   rowKey: "id",
@@ -76,6 +82,15 @@ export const getContractorsTableConfig = (
   oddRowColor: "#FFFFFF",
   styles: {
     table: {
+      border: "1px solid rgba(166,166,166,0.5)",
+      boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
+      borderRadius: "10px",
+    },
+    cell: {
+      paddingTop: "4px",
+      paddingBottom: "4px",
+    },
+    mobileCard: {
       border: "1px solid rgba(166,166,166,0.5)",
       boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
       borderRadius: "10px",

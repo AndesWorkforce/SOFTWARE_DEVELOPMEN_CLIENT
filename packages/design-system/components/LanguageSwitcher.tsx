@@ -19,7 +19,7 @@ export function LanguageSwitcher() {
     <div className="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 p-1">
       <button
         onClick={() => switchLocale("en")}
-        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${
           currentLocale === "en" ? "bg-blue-600 text-white" : "text-gray-700 hover:bg-gray-100"
         }`}
         aria-label="Switch to English"
@@ -28,7 +28,7 @@ export function LanguageSwitcher() {
       </button>
       <button
         onClick={() => switchLocale("es")}
-        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer ${
           currentLocale === "es" ? "bg-blue-600 text-white" : "text-gray-700 hover:bg-gray-100"
         }`}
         aria-label="Cambiar a Español"
