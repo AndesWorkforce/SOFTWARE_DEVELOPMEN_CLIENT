@@ -1,6 +1,7 @@
 "use client";
 
-// Placeholder - Vista pendiente de implementación
+import { ReportsPage } from "@/packages/shared-views/reports";
+
 export default function VisualizerReportsPage() {
-  return null;
+  return <ReportsPage role="visualizer" />;
 }

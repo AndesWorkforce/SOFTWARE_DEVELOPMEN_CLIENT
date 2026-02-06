@@ -146,16 +146,18 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
   const [loading, setLoading] = useState(true);
 
   // Sincronizar estado local cuando cambian los searchParams (ej: navegación con botones del browser)
+  // Solo actualizar si los valores son diferentes para evitar loops
   useEffect(() => {
     const fromParam = searchParams?.get("from");
     const toParam = searchParams?.get("to");
 
-    if (fromParam) {
+    if (fromParam && fromParam.split("T")[0] !== startDate) {
       setStartDate(fromParam.split("T")[0]);
     }
-    if (toParam) {
+    if (toParam && toParam.split("T")[0] !== endDate) {
       setEndDate(toParam.split("T")[0]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const formatSecondsToTime = (seconds: number): string => {
@@ -343,7 +345,11 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
   );
 
   if (loading || !activity) {
-    return <div className="p-8">{t("loading")}</div>;
+    return (
+      <div className="min-h-screen bg-[#FFFFFF] p-8 flex items-center justify-center">
+        <div className="text-black">{t("loading")}</div>
+      </div>
+    );
   }
 
   return (
@@ -664,7 +670,6 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                   </div>
                 )}
               </div>
-
               {/* Top Websites - mismas dimensiones que Top Applications */}
               <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden">
                 <TopWebsites activity={activity} t={t} />

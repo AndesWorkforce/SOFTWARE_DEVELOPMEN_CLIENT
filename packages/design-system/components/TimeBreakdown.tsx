@@ -51,7 +51,7 @@ export const TimeBreakdown = ({ activity, t }: TimeBreakdownProps) => {
     >
       <div className="flex flex-col gap-[15px] min-w-0" style={{ width: "100%" }}>
         <h5
-          className="text-[16px] font-semibold leading-normal mb-0"
+          className="text-xl font-semibold leading-normal mb-0"
           style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
         >
           {t("modal.timeBreakdown") || "Time Breakdown"}
