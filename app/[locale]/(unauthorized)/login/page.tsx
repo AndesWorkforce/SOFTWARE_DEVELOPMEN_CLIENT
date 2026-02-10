@@ -43,6 +43,17 @@ export default function LoginPage() {
       // Store session cookie
       document.cookie = `session=${response.accessToken}; path=/; max-age=3600`;
 
+      // Si es un cliente, redirigir directamente a /app/client
+      // Verificamos userType explícitamente, o si no tiene role (clientes no tienen role)
+      const isClient =
+        response.user.userType === "client" ||
+        (!response.user.role && !response.user.extraRoles && response.user.userType !== "user");
+
+      if (isClient) {
+        router.push(`/${locale}/app/client`);
+        return;
+      }
+
       // Check if user has multiple roles (role + extraRoles)
       const allRoles: string[] = [];
       if (response.user.role) {

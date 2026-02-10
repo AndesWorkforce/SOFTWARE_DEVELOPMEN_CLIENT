@@ -16,19 +16,41 @@ export default function ClientLayout({
   const activeRole = getActiveRole(user);
 
   useEffect(() => {
-    if (_hasHydrated && user && activeRole !== "Visualizer") {
-      // Redirect to correct dashboard based on role
+    if (_hasHydrated && user) {
+      // Si es un cliente, permitir acceso
+      const isClient =
+        user.userType === "client" ||
+        activeRole === "Client" ||
+        (!user.role && !user.extraRoles && user.userType !== "user");
+
+      if (isClient) {
+        return; // No redirigir, permitir acceso
+      }
+
+      // Si no es cliente, redirigir según su rol
       if (activeRole === "Superadmin") {
         router.push(`/${params.locale}/app/super-admin`);
       } else if (activeRole === "TeamAdmin") {
         router.push(`/${params.locale}/app/admin`);
+      } else if (activeRole === "Visualizer") {
+        router.push(`/${params.locale}/app/visualizer`);
       } else {
-        router.push(`/${params.locale}/auth/login`);
+        router.push(`/${params.locale}/login`);
       }
     }
   }, [_hasHydrated, user, activeRole, router, params.locale]);
 
-  if (!_hasHydrated || !user || activeRole !== "Visualizer") {
+  if (!_hasHydrated || !user) {
+    return null;
+  }
+
+  // Solo permitir acceso si es cliente
+  const isClient =
+    user.userType === "client" ||
+    activeRole === "Client" ||
+    (!user.role && !user.extraRoles && user.userType !== "user");
+
+  if (!isClient) {
     return null;
   }
 

@@ -62,6 +62,8 @@ export const Sidebar = ({ role }: SidebarProps) => {
       name: t("clients"),
       path: `/${locale}/app/${role}/clients`,
       icon: <Users className="w-5 h-5" />,
+      // No mostrar para el rol "client"
+      roles: ["super-admin", "admin", "visualizer"],
     },
     {
       name: t("contractors"),

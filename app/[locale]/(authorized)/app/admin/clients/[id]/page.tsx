@@ -617,26 +617,13 @@ export default function ClientContractorsPage() {
     <div className="p-4 md:p-8 min-h-screen" style={{ background: "#FFFFFF" }}>
       <div className="max-w-full">
         <div className="mb-6 md:mb-8 flex items-center justify-between">
-          <h1 className="text-xl md:text-3xl font-bold" style={{ color: "#000000" }}>
+          <h1 className="text-xl md:text-3xl font-bold text-black">
             {clientName || t("contractors.title")}
           </h1>
           <Link href={`/${locale}/app/admin/clients/${clientId}/contractors/add`}>
             <Button
               variant="primary"
-              style={{
-                background: "#0097B2",
-                color: "#FFFFFF",
-                fontSize: "15px",
-                fontWeight: 600,
-                padding: "7px 21px",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                borderRadius: "8px",
-                boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
-                cursor: "pointer",
-              }}
-              className="md:text-[15px] h-[35px] md:h-[40px]"
+              className="md:text-[15px] h-[35px] md:h-[40px] bg-[#0097B2] text-white text-[15px] font-semibold px-[21px] py-[7px] flex items-center gap-[10px] rounded-[8px] shadow-[0px_4px_4px_rgba(166,166,166,0.25)] cursor-pointer"
             >
               <Plus className="w-[14px] h-[14px] md:w-5 md:h-5" />
               <span className="font-semibold">{t("contractors.addContractor")}</span>

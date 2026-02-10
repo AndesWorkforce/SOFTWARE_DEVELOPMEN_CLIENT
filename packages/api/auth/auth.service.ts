@@ -14,8 +14,12 @@ export interface AuthResponse {
     id: string;
     email: string;
     name: string;
-    role: string;
+    role?: string;
     extraRoles?: string[];
+    userType?: "user" | "client";
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
   };
 }
 

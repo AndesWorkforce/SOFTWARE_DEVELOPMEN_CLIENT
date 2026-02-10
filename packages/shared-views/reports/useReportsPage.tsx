@@ -10,6 +10,7 @@ import type { FilterPanelConfig, FilterValues } from "@/packages/types/FilterPan
 import type { DataTableConfig } from "@/packages/types/DataTable.types";
 import { useRoleRoutes, type Role } from "@/packages/role-utils";
 import { getRolePermissions, type RolePermissions } from "@/packages/role-utils";
+import { useAuthStore } from "@/packages/store";
 
 interface UseReportsPageReturn {
   t: ReturnType<typeof useTranslations<"reports">>;
@@ -32,7 +33,9 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
   const router = useRouter();
   const routes = useRoleRoutes(role);
   const permissions = getRolePermissions(role);
-
+  const { user, _hasHydrated } = useAuthStore();
+  const isClientUser = user?.userType === "client";
+  const currentClientId = isClientUser ? user.id : undefined;
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
@@ -146,22 +149,6 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
     };
   };
 
-  useEffect(() => {
-    loadFilterOptions();
-  }, []);
-
-  useEffect(() => {
-    loadData();
-  }, [
-    dateRange?.start,
-    dateRange?.end,
-    filters.name,
-    filters.country,
-    filters.clientId,
-    filters.teamId,
-    filters.jobPosition,
-  ]);
-
   const maxDate = useMemo(() => {
     return new Date().toISOString().split("T")[0];
   }, []);
@@ -215,8 +202,22 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
     [maxDate],
   );
 
-  const baseFiltersConfig: FilterPanelConfig = {
-    filters: [
+  const filtersConfig = useMemo(() => {
+    const selectPlaceholder = { value: "", label: "Select..." };
+
+    // Construir la lista base de filtros
+    const baseFilters: Array<{
+      key: string;
+      type: "dateRange" | "text" | "select";
+      label: string;
+      translationKey: string;
+      defaultValue?: { start: string; end: string };
+      minWidth?: string;
+      maxDate?: string;
+      placeholder?: string;
+      options?: Array<{ value: string; label: string }>;
+      dependsOn?: string;
+    }> = [
       {
         key: "dateRange",
         type: "dateRange",
@@ -243,19 +244,26 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
         translationKey: "reports.country",
         options: [],
       },
-      {
-        key: "clientId",
-        type: "select",
-        label: "Client",
-        translationKey: "reports.client",
-        options: [],
-      },
+      // El selector de cliente se oculta completamente para usuarios de tipo "client"
+      ...(!isClientUser
+        ? [
+            {
+              key: "clientId",
+              type: "select" as const,
+              label: "Client",
+              translationKey: "reports.client",
+              options: [],
+            },
+          ]
+        : []),
       {
         key: "teamId",
         type: "select",
         label: "Team",
         translationKey: "reports.team",
         options: [],
+        // Solo depender de clientId si no es un usuario cliente
+        dependsOn: isClientUser ? undefined : "clientId",
       },
       {
         key: "jobPosition",
@@ -263,45 +271,42 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
         label: "Job Position",
         translationKey: "reports.jobPosition",
         options: [],
+        dependsOn: "teamId",
       },
-    ],
-    layout: "row",
-    showClearButton: true,
-    clearButtonPosition: "end",
-  };
+    ];
 
-  const filtersConfig = useMemo(() => {
-    const selectPlaceholder = { value: "", label: "Select..." };
+    // Mapear los filtros y agregar las opciones dinámicas
+    const filtersWithOptions = baseFilters.map((filter) => {
+      if (filter.key === "country") {
+        return { ...filter, options: [selectPlaceholder, ...(filterOptions?.countries || [])] };
+      }
+      if (filter.key === "clientId") {
+        return { ...filter, options: [selectPlaceholder, ...(filterOptions?.clients || [])] };
+      }
+      if (filter.key === "teamId") {
+        return {
+          ...filter,
+          options: [selectPlaceholder, ...(filterOptions?.teams || [])],
+        };
+      }
+      if (filter.key === "jobPosition") {
+        return {
+          ...filter,
+          options: [selectPlaceholder, ...(filterOptions?.jobPositions || [])],
+        };
+      }
+      return filter;
+    });
 
     return {
-      ...baseFiltersConfig,
-      filters: baseFiltersConfig.filters.map((filter) => {
-        if (filter.key === "country") {
-          return { ...filter, options: [selectPlaceholder, ...(filterOptions?.countries || [])] };
-        }
-        if (filter.key === "clientId") {
-          return { ...filter, options: [selectPlaceholder, ...(filterOptions?.clients || [])] };
-        }
-        if (filter.key === "teamId") {
-          return {
-            ...filter,
-            options: [selectPlaceholder, ...(filterOptions?.teams || [])],
-            dependsOn: "clientId",
-          };
-        }
-        if (filter.key === "jobPosition") {
-          return {
-            ...filter,
-            options: [selectPlaceholder, ...(filterOptions?.jobPositions || [])],
-            dependsOn: "teamId",
-          };
-        }
-        return filter;
-      }),
+      filters: filtersWithOptions,
+      layout: "row" as const,
+      showClearButton: true,
+      clearButtonPosition: "end" as const,
     };
-  }, [filterOptions, baseFiltersConfig]);
+  }, [filterOptions, isClientUser, user, maxDate]);
 
-  const loadFilterOptions = async () => {
+  const loadFilterOptions = useCallback(async () => {
     try {
       const today = new Date();
       const thirtyDaysAgo = new Date(today);
@@ -314,6 +319,7 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
         from: fromDate,
         to: toDate,
         useCache: true,
+        ...(isClientUser && currentClientId ? { client_id: currentClientId } : {}),
       });
 
       const extractedOptions = extractFilterOptionsFromMetrics(allMetrics || []);
@@ -328,9 +334,9 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
         jobPositions: [],
       });
     }
-  };
+  }, [isClientUser, currentClientId]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -365,7 +371,14 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
 
       // No enviar name al backend, lo filtraremos en el frontend para búsqueda parcial
       if (country) adtFilters.country = country.trim();
-      if (clientId) adtFilters.client_id = clientId.trim();
+
+      // Si el usuario es un cliente, forzamos filtrado por su client_id
+      if (isClientUser && currentClientId) {
+        adtFilters.client_id = currentClientId.trim();
+      } else if (clientId) {
+        adtFilters.client_id = clientId.trim();
+      }
+
       if (teamId) adtFilters.team_id = teamId.trim();
       if (jobPosition) adtFilters.job_position = jobPosition.trim();
 
@@ -435,7 +448,17 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    dateRange?.start,
+    dateRange?.end,
+    filters.name,
+    filters.country,
+    filters.clientId,
+    filters.teamId,
+    filters.jobPosition,
+    isClientUser,
+    currentClientId,
+  ]);
 
   const handleClearFilters = () => {
     setFilters({
@@ -445,6 +468,20 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
       },
     });
   };
+
+  useEffect(() => {
+    if (_hasHydrated) {
+      // Solo cargar cuando el store esté hidratado
+      loadFilterOptions();
+    }
+  }, [loadFilterOptions, _hasHydrated]);
+
+  useEffect(() => {
+    if (_hasHydrated) {
+      // Solo cargar cuando el store esté hidratado
+      loadData();
+    }
+  }, [loadData, _hasHydrated]);
 
   const buildExportUrl = () => {
     const params: Record<string, string> = {};
@@ -460,7 +497,10 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
     if (filters.country && typeof filters.country === "string") {
       params.country = filters.country;
     }
-    if (filters.clientId && typeof filters.clientId === "string") {
+    // Si es cliente, forzamos clientId al del usuario, ignorando el filtro
+    if (isClientUser && currentClientId) {
+      params.clientId = currentClientId;
+    } else if (filters.clientId && typeof filters.clientId === "string") {
       params.clientId = filters.clientId;
     }
     if (filters.teamId && typeof filters.teamId === "string") {

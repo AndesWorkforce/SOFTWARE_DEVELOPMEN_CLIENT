@@ -6,9 +6,17 @@ export function getActiveRole(
   user: {
     role?: string;
     selectedRole?: string;
+    userType?: "user" | "client";
   } | null,
 ): string | undefined {
   if (!user) return undefined;
+
+  // Si es un cliente (tabla separada, sin campo role), lo tratamos como rol "Client"
+  if (user.userType === "client" || (!user.role && !user.userType)) {
+    return "Client";
+  }
+
+  // Para usuarios normales seguimos usando selectedRole/role
   return user.selectedRole || user.role;
 }
 
@@ -21,6 +29,7 @@ export function hasRole(
     role?: string;
     extraRoles?: string[];
     selectedRole?: string;
+    userType: "user" | "client";
   } | null,
   requiredRole: string,
 ): boolean {

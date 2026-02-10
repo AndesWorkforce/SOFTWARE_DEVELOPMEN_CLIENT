@@ -79,67 +79,60 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
             return (
               <div
                 key={session.session_id}
-                className={`${isEven ? "bg-[#E2E2E2]" : "bg-white"} transition-colors relative`}
-                style={{ minHeight: isExpanded ? "195px" : "69px" }}
+                className={`${isEven ? "bg-[#E2E2E2]" : "bg-white"} transition-colors relative ${
+                  isExpanded ? "min-h-[195px]" : "min-h-[69px]"
+                }`}
               >
                 <button
                   onClick={() => toggleSession(session.session_id)}
-                  className="w-full flex items-center justify-between relative"
-                  style={{ minHeight: isExpanded ? "195px" : "69px" }}
+                  className={`w-full flex items-center justify-between relative ${
+                    isExpanded ? "min-h-[195px]" : "min-h-[69px]"
+                  }`}
                 >
                   <div
-                    className="flex flex-col text-left min-w-0 flex-1"
-                    style={{
-                      maxWidth: "335px",
-                      paddingLeft: "12px",
-                      paddingRight: "40px",
-                      minHeight: isExpanded ? "195px" : "69px",
-                      position: isExpanded ? "relative" : "absolute",
-                      top: isExpanded ? "0" : "50%",
-                      transform: isExpanded ? "none" : "translateY(-50%)",
-                      justifyContent: isExpanded ? "center" : "center",
-                    }}
+                    className={`flex flex-col text-left min-w-0 flex-1 max-w-[335px] pl-3 pr-10 ${
+                      isExpanded
+                        ? "relative min-h-[195px] justify-center"
+                        : "absolute top-1/2 -translate-y-1/2 min-h-[69px] justify-center"
+                    }`}
                   >
                     {!isExpanded ? (
                       <>
                         <p className="text-[16px] font-semibold text-black mb-0 leading-[25px]">
-                          <span style={{ marginRight: "12px" }}>{index + 1}</span>
+                          <span className="mr-3">{index + 1}</span>
                         </p>
                         <p className="text-[16px] font-semibold text-black leading-[25px]">
-                          <span style={{ marginRight: "12px" }}>Start Time: </span>
+                          <span className="mr-3">Start Time: </span>
                           <span className="font-normal">{startTime}</span>
                         </p>
                       </>
                     ) : (
-                      <div
-                        className="flex flex-col gap-0 text-[16px] font-semibold text-black"
-                        style={{ justifyContent: "center", minHeight: "195px" }}
-                      >
+                      <div className="flex flex-col gap-0 text-[16px] font-semibold text-black justify-center min-h-[195px]">
                         <p className="mb-0 leading-[25px]">
-                          <span style={{ marginRight: "12px" }}>{index + 1}</span>
+                          <span className="mr-3">{index + 1}</span>
                         </p>
                         <p className="mb-0 leading-[25px]">
-                          <span style={{ marginRight: "12px" }}>Start Time: </span>
+                          <span className="mr-3">Start Time: </span>
                           <span className="font-normal">{startTime}</span>
                         </p>
                         <p className="mb-0 leading-[25px]">
-                          <span style={{ marginRight: "12px" }}>End Time: </span>
+                          <span className="mr-3">End Time: </span>
                           <span className="font-normal">{endTime}</span>
                         </p>
                         <p className="mb-0 leading-[25px]">
-                          <span style={{ marginRight: "12px" }}>Duration: </span>
+                          <span className="mr-3">Duration: </span>
                           <span className="font-normal">{duration}</span>
                         </p>
                         <p className="mb-0 leading-[25px]">
-                          <span style={{ marginRight: "12px" }}>Active Time: </span>
+                          <span className="mr-3">Active Time: </span>
                           <span className="font-normal">{activeTime}</span>
                         </p>
                         <p className="mb-0 leading-[25px]">
-                          <span style={{ marginRight: "12px" }}>Idle Time: </span>
+                          <span className="mr-3">Idle Time: </span>
                           <span className="font-normal">{idleTime}</span>
                         </p>
                         <p className="leading-[25px]">
-                          <span style={{ marginRight: "12px" }}>Productivity: </span>
+                          <span className="mr-3">Productivity: </span>
                           <span className="font-normal" style={{ color: productivityColor }}>
                             {productivity}
                           </span>
@@ -148,19 +141,14 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
                     )}
                   </div>
                   <div
-                    className="absolute right-[11px] flex items-center justify-center"
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      top: isExpanded ? "8.5px" : "50%",
-                      transform: isExpanded ? "none" : "translateY(-50%)",
-                    }}
+                    className={`absolute right-[11px] flex items-center justify-center w-5 h-5 ${
+                      isExpanded ? "top-[8.5px]" : "top-1/2 -translate-y-1/2"
+                    }`}
                   >
                     <ChevronDown
-                      className="w-5 h-5 text-black transition-transform"
-                      style={{
-                        transform: isExpanded ? "rotate(0deg)" : "rotate(-90deg)",
-                      }}
+                      className={`w-5 h-5 text-black transition-transform ${
+                        isExpanded ? "rotate-0" : "-rotate-90"
+                      }`}
                     />
                   </div>
                 </button>
