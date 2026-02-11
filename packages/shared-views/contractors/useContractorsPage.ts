@@ -11,6 +11,7 @@ import type { FilterPanelConfig, FilterValues } from "@/packages/types/FilterPan
 import type { SelectOption } from "@/packages/design-system";
 import { useRoleRoutes, type Role } from "@/packages/role-utils";
 import { getRolePermissions } from "@/packages/role-utils";
+import { useAuthStore } from "@/packages/store";
 
 interface FilterOptions {
   countries: SelectOption[];
@@ -25,7 +26,9 @@ export function useContractorsPage(role: Role) {
   const pathname = usePathname();
   const routes = useRoleRoutes(role);
   const permissions = getRolePermissions(role);
-
+  const { user, _hasHydrated } = useAuthStore();
+  const isClientUser = user?.userType === "client";
+  const currentClientId = isClientUser ? user.id : undefined;
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,13 +102,18 @@ export function useContractorsPage(role: Role) {
           translationKey: "contractors.filters.country",
           options: [makePlaceholder("country"), ...(filterOptions?.countries || [])],
         },
-        {
-          key: "clientId",
-          type: "select",
-          label: t("contractors.filters.client"),
-          translationKey: "contractors.filters.client",
-          options: [makePlaceholder("clientId"), ...(filterOptions?.clients || [])],
-        },
+        // El selector de cliente se oculta para usuarios de tipo "client"
+        ...(!isClientUser
+          ? [
+              {
+                key: "clientId",
+                type: "select" as const,
+                label: t("contractors.filters.client"),
+                translationKey: "contractors.filters.client",
+                options: [makePlaceholder("clientId"), ...(filterOptions?.clients || [])],
+              },
+            ]
+          : []),
         {
           key: "teamId",
           type: "select",
@@ -138,12 +146,22 @@ export function useContractorsPage(role: Role) {
     };
 
     return baseFiltersConfig;
-  }, [filterOptions, t]);
+  }, [filterOptions, t, isClientUser, user]);
 
   const loadFilterOptions = useCallback(async () => {
     try {
+      // Para clientes, sólo cargamos contratistas asociados a ese cliente
       const [allContractors, allClients, allTeams] = await Promise.all([
-        contractorsService.getAll(),
+        contractorsService.getAll(
+          isClientUser && currentClientId
+            ? {
+                client_id: currentClientId,
+                isActive: true,
+              }
+            : undefined,
+        ),
+        // Para clientes no necesitamos lista de otros clientes, pero mantenemos la llamada
+        // para no cambiar el contrato actual (si hiciera falta se puede optimizar luego).
         clientsService.getAll(),
         teamsService.getAll(),
       ]);
@@ -187,7 +205,7 @@ export function useContractorsPage(role: Role) {
         jobPositions: [],
       });
     }
-  }, []);
+  }, [isClientUser, currentClientId]);
 
   const apiFilters = useMemo(() => {
     const result: {
@@ -209,12 +227,27 @@ export function useContractorsPage(role: Role) {
 
     if (name) result.name = name.trim();
     if (country) result.country = country.trim();
-    if (clientId) result.client_id = clientId.trim();
+
+    if (isClientUser && currentClientId) {
+      result.client_id = currentClientId;
+    } else if (clientId) {
+      result.client_id = clientId.trim();
+    }
+
     if (teamId) result.team_id = teamId.trim();
     if (jobPosition) result.job_position = jobPosition.trim();
 
     return result;
-  }, [filters.name, filters.country, filters.clientId, filters.teamId, filters.jobPosition]);
+  }, [
+    filters.name,
+    filters.country,
+    filters.clientId,
+    filters.teamId,
+    filters.jobPosition,
+    isClientUser,
+    currentClientId,
+    user,
+  ]);
 
   const loadContractors = useCallback(async () => {
     try {
@@ -234,12 +267,18 @@ export function useContractorsPage(role: Role) {
   }, []);
 
   useEffect(() => {
-    loadFilterOptions();
-  }, [loadFilterOptions]);
+    if (_hasHydrated && user) {
+      // Solo cargar cuando el store esté hidratado Y el usuario esté disponible
+      loadFilterOptions();
+    }
+  }, [loadFilterOptions, _hasHydrated, user]);
 
   useEffect(() => {
-    loadContractors();
-  }, [loadContractors]);
+    if (_hasHydrated && user) {
+      // Solo cargar cuando el store esté hidratado Y el usuario esté disponible
+      loadContractors();
+    }
+  }, [loadContractors, _hasHydrated, user]);
 
   useEffect(() => {
     if (pathname === routes.contractors.list) {

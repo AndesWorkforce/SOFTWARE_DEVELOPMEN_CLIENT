@@ -120,12 +120,7 @@ export function DataTable<T = Record<string, unknown>>({
     const defaultColor = column.config?.percentage?.defaultColor;
     const color = getPercentageColor(value, thresholds, defaultColor);
     return (
-      <span
-        style={{
-          color,
-          fontWeight: 700,
-        }}
-      >
+      <span className="font-bold" style={{ color }}>
         {value}%
       </span>
     );
@@ -240,19 +235,17 @@ export function DataTable<T = Record<string, unknown>>({
                   return (
                     <th
                       key={column.key}
-                      className={`px-6 py-3 text-base font-semibold select-none ${
+                      className={`px-6 py-3 text-base font-semibold select-none text-black ${
                         column.align === "left"
                           ? "text-left"
                           : column.align === "right"
                             ? "text-right"
                             : "text-center"
-                      }`}
+                      } ${sortable ? "cursor-pointer" : "cursor-default"}`}
                       style={{
-                        color: "#000000",
                         width: column.width,
                         minWidth: column.minWidth,
                         textAlign: column.align || "center",
-                        cursor: sortable ? "pointer" : "default",
                       }}
                       onClick={() => sortable && toggleSort(column.key)}
                     >
@@ -293,7 +286,7 @@ export function DataTable<T = Record<string, unknown>>({
                     {visibleColumns.map((column) => (
                       <td
                         key={column.key}
-                        className={`px-6 py-4 whitespace-nowrap text-base ${
+                        className={`px-6 py-4 whitespace-nowrap text-base text-black ${
                           column.align === "left"
                             ? "text-left"
                             : column.align === "right"
@@ -301,7 +294,6 @@ export function DataTable<T = Record<string, unknown>>({
                               : "text-center"
                         }`}
                         style={{
-                          color: "#000000",
                           width: column.width,
                           minWidth: column.minWidth,
                           textAlign: column.align || "center",
@@ -370,10 +362,8 @@ export function DataTable<T = Record<string, unknown>>({
                 <div className="flex-1 space-y-1">
                   {mobileConfig.primaryFields.map((field) => (
                     <div key={field.key} className="text-sm">
-                      <span className="font-semibold" style={{ color: "#000000" }}>
-                        {field.label}:{" "}
-                      </span>
-                      <span style={{ color: "#000000" }}>
+                      <span className="font-semibold text-black">{field.label}: </span>
+                      <span className="text-black">
                         {field.render
                           ? field.render(getValue(row, field.dataPath), row)
                           : String(getValue(row, field.dataPath) ?? "")}
@@ -383,10 +373,8 @@ export function DataTable<T = Record<string, unknown>>({
                   {isExpanded &&
                     mobileConfig.expandedFields?.map((field) => (
                       <div key={field.key} className="text-sm">
-                        <span className="font-semibold" style={{ color: "#000000" }}>
-                          {field.label}:{" "}
-                        </span>
-                        <span style={{ color: "#000000" }}>
+                        <span className="font-semibold text-black">{field.label}: </span>
+                        <span className="text-black">
                           {field.render
                             ? field.render(getValue(row, field.dataPath), row)
                             : String(getValue(row, field.dataPath) ?? "")}
@@ -416,11 +404,7 @@ export function DataTable<T = Record<string, unknown>>({
 
   return (
     <div className={className}>
-      {title && (
-        <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6" style={{ color: "#000000" }}>
-          {title}
-        </h2>
-      )}
+      {title && <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-black">{title}</h2>}
 
       {effectiveLoading ? (
         config.loadingComponent || (
@@ -429,8 +413,8 @@ export function DataTable<T = Record<string, unknown>>({
           </div>
         )
       ) : data.length === 0 ? (
-        <div className="rounded-lg shadow-md p-12 text-center" style={{ background: "#FFFFFF" }}>
-          <p style={{ color: "#000000" }}>{config.emptyState?.message || "No data available"}</p>
+        <div className="rounded-lg shadow-md p-12 text-center bg-white">
+          <p className="text-black">{config.emptyState?.message || "No data available"}</p>
         </div>
       ) : (
         <>
@@ -447,7 +431,7 @@ export function DataTable<T = Record<string, unknown>>({
                 >
                   {t("pagination.previous", { defaultMessage: "Prev" })}
                 </button>
-                <span className="text-sm min-w-0 break-words" style={{ color: "#000000" }}>
+                <span className="text-sm min-w-0 break-words text-black">
                   {t("pagination.page", { defaultMessage: "Página" })} {page} / {totalPages}
                 </span>
                 <button
@@ -461,7 +445,7 @@ export function DataTable<T = Record<string, unknown>>({
 
               {config.pagination.showPageSizeSelector && (
                 <div className="flex flex-wrap items-center gap-2 w-full max-w-full min-w-0">
-                  <span className="text-sm" style={{ color: "#000000" }}>
+                  <span className="text-sm text-black">
                     {t("pagination.pageSize", { defaultMessage: "Items por página" })}
                   </span>
                   <select

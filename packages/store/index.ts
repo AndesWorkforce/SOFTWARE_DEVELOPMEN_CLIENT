@@ -15,6 +15,10 @@ export type AuthState = {
     role?: string;
     extraRoles?: string[];
     selectedRole?: string;
+    userType?: "user" | "client";
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
   } | null;
   _hasHydrated: boolean;
   setHasHydrated: (state: boolean) => void;
