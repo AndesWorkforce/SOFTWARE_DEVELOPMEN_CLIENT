@@ -168,6 +168,8 @@
       "cancel": "Cancelar",
       "generate": "Generar PDF",
       "generating": "Generando...",
+      "confirmTitle": "Generar Reporte",
+      "confirmSubtitle": "¿Deseas generar el reporte de productividad para el período seleccionado?",
       "errorDefault": "No se pudo generar el PDF. Intenta nuevamente.",
       "error": "Error al generar el PDF. Intenta nuevamente.",
       "fields": {
