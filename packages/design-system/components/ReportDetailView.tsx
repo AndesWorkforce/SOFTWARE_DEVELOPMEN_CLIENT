@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import ReactCountryFlag from "react-country-flag";
@@ -369,22 +370,27 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                 {t("reportDetail")}
               </h1>
             </div>
-            <Button
-              variant="primary"
-              style={{
-                background: "#9CA3AF",
-                color: "#FFFFFF",
-                fontSize: "14px",
-                padding: "7px 21px",
-                height: "35px",
-                fontWeight: 600,
-              }}
-              className="text-sm shrink-0 ml-2"
+            <Link
+              href={`/${locale}/app/${basePath}/reports/export?from=${startDate}&to=${endDate}&userId=${contractorId}`}
             >
-              <FileText className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">{t("exportPdf")}</span>
-              <span className="sm:hidden">PDF</span>
-            </Button>
+              <Button
+                variant="primary"
+                style={{
+                  background: "#0097B2",
+                  color: "#FFFFFF",
+                  fontSize: "14px",
+                  padding: "7px 21px",
+                  height: "35px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+                className="text-sm shrink-0 ml-2"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">{t("exportPdf")}</span>
+                <span className="sm:hidden">PDF</span>
+              </Button>
+            </Link>
           </div>
 
           {/* Contractor Info Card */}

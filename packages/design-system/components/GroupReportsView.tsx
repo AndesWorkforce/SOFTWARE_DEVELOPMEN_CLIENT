@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import ReactCountryFlag from "react-country-flag";
 import {
   ArrowLeft,
@@ -351,6 +353,7 @@ export function GroupReportsView({
 }) {
   const t = useTranslations("reports");
   const locale = useLocale();
+  const pathname = usePathname();
 
   const [startDate, setStartDate] = useState<string>(initialStartDate);
   const [endDate, setEndDate] = useState<string>(initialEndDate);
@@ -358,6 +361,19 @@ export function GroupReportsView({
   const [clientId, setClientId] = useState(initialClientId);
   const [teamId, setTeamId] = useState(initialTeamId);
   const [jobPosition, setJobPosition] = useState(initialJobPosition);
+
+  // Build export URL from current pathname (e.g. /en/app/admin/reports/group -> /en/app/admin/reports/export)
+  const exportUrl = useMemo(() => {
+    const reportsBase = pathname.replace(/\/group$/, "");
+    const params = new URLSearchParams();
+    params.set("from", startDate);
+    params.set("to", endDate);
+    if (country) params.set("country", country);
+    if (clientId) params.set("clientId", clientId);
+    if (teamId) params.set("teamId", teamId);
+    if (jobPosition) params.set("jobPosition", jobPosition);
+    return `${reportsBase}/export?${params.toString()}`;
+  }, [pathname, startDate, endDate, country, clientId, teamId, jobPosition]);
 
   const [metrics, setMetrics] = useState<RealtimeMetrics[]>([]);
   const [filterOptions, setFilterOptions] = useState<GroupFilterOptions | null>(null);
@@ -803,23 +819,26 @@ export function GroupReportsView({
               {t("previewReport")}
             </h1>
           </div>
-          <Button
-            variant="primary"
-            style={{
-              background: "#9CA3AF",
-              color: "#FFFFFF",
-              fontSize: "14px",
-              padding: "7px 21px",
-              height: "35px",
-              fontWeight: 600,
-              boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
-            }}
-            className="shrink-0 ml-2"
-          >
-            <FileText className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">{t("exportPdf")}</span>
-            <span className="sm:hidden">PDF</span>
-          </Button>
+          <Link href={exportUrl}>
+            <Button
+              variant="primary"
+              style={{
+                background: "#0097B2",
+                color: "#FFFFFF",
+                fontSize: "14px",
+                padding: "7px 21px",
+                height: "35px",
+                fontWeight: 600,
+                boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
+                cursor: "pointer",
+              }}
+              className="shrink-0 ml-2"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">{t("exportPdf")}</span>
+              <span className="sm:hidden">PDF</span>
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Layout */}
