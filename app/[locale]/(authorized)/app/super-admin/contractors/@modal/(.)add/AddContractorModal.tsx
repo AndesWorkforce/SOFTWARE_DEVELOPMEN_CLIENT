@@ -36,6 +36,7 @@ type AddContractorFormValues = {
   client_id: string;
   team_id: string;
   country: string;
+  job_schedule: string;
   work_schedule_start: string;
   work_schedule_end: string;
   lunch_start: string;
@@ -97,12 +98,23 @@ export function AddContractorModal({
         .string()
         .trim()
         .min(1, req(t("country") || "Country")),
+      job_schedule: z.string().optional().or(z.literal("")),
       work_schedule_start: z.string().optional().or(z.literal("")),
       work_schedule_end: z.string().optional().or(z.literal("")),
       lunch_start: z.string().optional().or(z.literal("")),
       lunch_end: z.string().optional().or(z.literal("")),
     });
   }, [t, tCommon]);
+
+  const jobScheduleOptions: SelectOption[] = useMemo(
+    () => [
+      { value: "", label: tCommon("formModal.selectPlaceholder") || "Select..." },
+      { value: "full_time", label: t("jobScheduleFullTime") || "Full time" },
+      { value: "part_time", label: t("jobSchedulePartTime") || "Part time" },
+      { value: "no_schedule", label: t("jobScheduleNoSchedule") || "No schedule" },
+    ],
+    [t, tCommon],
+  );
 
   const {
     register,
@@ -119,6 +131,7 @@ export function AddContractorModal({
       client_id: initialClientId || "",
       team_id: "",
       country: "",
+      job_schedule: "",
       work_schedule_start: "",
       work_schedule_end: "",
       lunch_start: "",
@@ -129,6 +142,8 @@ export function AddContractorModal({
 
   const selectedClientId = watch("client_id");
   const lunchStartValue = watch("lunch_start");
+  const jobSchedule = watch("job_schedule");
+  const hideScheduleFields = jobSchedule === "no_schedule";
   const timeRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Desestructuramos los refs de register para no sobreescribirlos
@@ -228,6 +243,10 @@ export function AddContractorModal({
 
           if (pendingPayload.team_id && pendingPayload.team_id.trim()) {
             payload.team_id = pendingPayload.team_id.trim();
+          }
+
+          if (pendingPayload.job_schedule && pendingPayload.job_schedule.trim()) {
+            payload.job_schedule = pendingPayload.job_schedule.trim();
           }
 
           await contractorsService.create(payload);
@@ -429,124 +448,146 @@ export function AddContractorModal({
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-[25px] items-start w-full">
-              <div className="w-full md:flex-1">
+            {/* Job Schedule - fila completa debajo de Equipo/País */}
+            <div className="flex flex-col items-start w-full">
+              <div className="w-full">
                 <FormField
-                  label={t("startTime") || "Start Time"}
-                  error={errors.work_schedule_start?.message}
+                  label={t("jobSchedule") || "Job Schedule"}
+                  error={errors.job_schedule?.message}
                 >
-                  <div className="relative w-full">
-                    <Input
-                      type="time"
-                      {...workScheduleStartRegister}
-                      ref={(el) => {
-                        workScheduleStartRef(el);
-                        timeRefs.current.work_schedule_start = el;
-                      }}
-                      className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
-                      style={getFormControlStyle(!!errors.work_schedule_start)}
-                      disabled={isLoadingData || isPending}
-                    />
-                    <div
-                      className={`absolute right-[15px] top-1/2 -translate-y-1/2 ${
-                        isLoadingData || isPending
-                          ? "cursor-not-allowed opacity-50"
-                          : "cursor-pointer"
-                      }`}
-                      onClick={() => handleTimeIconClick("work_schedule_start")}
-                    >
-                      <Clock className="md:w-6 md:h-6 w-5 h-5" />
-                    </div>
-                  </div>
-                </FormField>
-              </div>
-              <div className="w-full md:flex-1">
-                <FormField
-                  label={t("finishTime") || "Finish Time"}
-                  error={errors.work_schedule_end?.message}
-                >
-                  <div className="relative w-full">
-                    <Input
-                      type="time"
-                      {...workScheduleEndRegister}
-                      ref={(el) => {
-                        workScheduleEndRef(el);
-                        timeRefs.current.work_schedule_end = el;
-                      }}
-                      className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
-                      style={getFormControlStyle(!!errors.work_schedule_end)}
-                      disabled={isLoadingData || isPending}
-                    />
-                    <div
-                      className={`absolute right-[15px] top-1/2 -translate-y-1/2 ${
-                        isLoadingData || isPending
-                          ? "cursor-not-allowed opacity-50"
-                          : "cursor-pointer"
-                      }`}
-                      onClick={() => handleTimeIconClick("work_schedule_end")}
-                    >
-                      <Clock className="md:w-6 md:h-6 w-5 h-5" />
-                    </div>
-                  </div>
+                  <Select
+                    {...register("job_schedule")}
+                    options={jobScheduleOptions}
+                    className={FORM_SELECT_CLASS}
+                    style={getFormControlStyle(!!errors.job_schedule)}
+                    disabled={isLoadingData || isPending}
+                  />
                 </FormField>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-[25px] items-start w-full">
-              <div className="w-full md:flex-1">
-                <FormField
-                  label={t("startLunchTime") || "Start Lunch Time"}
-                  error={errors.lunch_start?.message}
-                >
-                  <div className="relative w-full">
-                    <Input
-                      type="time"
-                      {...lunchStartRegister}
-                      ref={(el) => {
-                        lunchStartRef(el);
-                        timeRefs.current.lunch_start = el;
-                      }}
-                      className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
-                      style={getFormControlStyle(!!errors.lunch_start)}
-                      disabled={isLoadingData || isPending}
-                    />
-                    <div
-                      className={`absolute right-[15px] top-1/2 -translate-y-1/2 ${
-                        isLoadingData || isPending
-                          ? "cursor-not-allowed opacity-50"
-                          : "cursor-pointer"
-                      }`}
-                      onClick={() => handleTimeIconClick("lunch_start")}
+            {!hideScheduleFields && (
+              <>
+                <div className="flex flex-col md:flex-row gap-[25px] items-start w-full">
+                  <div className="w-full md:flex-1">
+                    <FormField
+                      label={t("startTime") || "Start Time"}
+                      error={errors.work_schedule_start?.message}
                     >
-                      <Clock className="md:w-6 md:h-6 w-5 h-5" />
-                    </div>
+                      <div className="relative w-full">
+                        <Input
+                          type="time"
+                          {...workScheduleStartRegister}
+                          ref={(el) => {
+                            workScheduleStartRef(el);
+                            timeRefs.current.work_schedule_start = el;
+                          }}
+                          className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
+                          style={getFormControlStyle(!!errors.work_schedule_start)}
+                          disabled={isLoadingData || isPending}
+                        />
+                        <div
+                          className={`absolute right-[15px] top-1/2 -translate-y-1/2 ${
+                            isLoadingData || isPending
+                              ? "cursor-not-allowed opacity-50"
+                              : "cursor-pointer"
+                          }`}
+                          onClick={() => handleTimeIconClick("work_schedule_start")}
+                        >
+                          <Clock className="md:w-6 md:h-6 w-5 h-5" />
+                        </div>
+                      </div>
+                    </FormField>
                   </div>
-                </FormField>
-              </div>
-              <div className="w-full md:flex-1">
-                <FormField
-                  label={t("finishLunchTime") || "Lunch End Time"}
-                  error={errors.lunch_end?.message}
-                >
-                  <div className="relative w-full">
-                    <Input
-                      type="time"
-                      {...lunchEndRegister}
-                      ref={(el) => {
-                        lunchEndRef(el);
-                        timeRefs.current.lunch_end = el;
-                      }}
-                      className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
-                      style={getFormControlStyle(!!errors.lunch_end)}
-                      readOnly={true}
-                    />
-                    <div className="absolute right-[15px] top-1/2 -translate-y-1/2 cursor-not-allowed opacity-50">
-                      <Clock className="md:w-6 md:h-6 w-5 h-5" />
-                    </div>
+                  <div className="w-full md:flex-1">
+                    <FormField
+                      label={t("finishTime") || "Finish Time"}
+                      error={errors.work_schedule_end?.message}
+                    >
+                      <div className="relative w-full">
+                        <Input
+                          type="time"
+                          {...workScheduleEndRegister}
+                          ref={(el) => {
+                            workScheduleEndRef(el);
+                            timeRefs.current.work_schedule_end = el;
+                          }}
+                          className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
+                          style={getFormControlStyle(!!errors.work_schedule_end)}
+                          disabled={isLoadingData || isPending}
+                        />
+                        <div
+                          className={`absolute right-[15px] top-1/2 -translate-y-1/2 ${
+                            isLoadingData || isPending
+                              ? "cursor-not-allowed opacity-50"
+                              : "cursor-pointer"
+                          }`}
+                          onClick={() => handleTimeIconClick("work_schedule_end")}
+                        >
+                          <Clock className="md:w-6 md:h-6 w-5 h-5" />
+                        </div>
+                      </div>
+                    </FormField>
                   </div>
-                </FormField>
-              </div>
-            </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-[25px] items-start w-full">
+                  <div className="w-full md:flex-1">
+                    <FormField
+                      label={t("startLunchTime") || "Start Lunch Time"}
+                      error={errors.lunch_start?.message}
+                    >
+                      <div className="relative w-full">
+                        <Input
+                          type="time"
+                          {...lunchStartRegister}
+                          ref={(el) => {
+                            lunchStartRef(el);
+                            timeRefs.current.lunch_start = el;
+                          }}
+                          className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
+                          style={getFormControlStyle(!!errors.lunch_start)}
+                          disabled={isLoadingData || isPending}
+                        />
+                        <div
+                          className={`absolute right-[15px] top-1/2 -translate-y-1/2 ${
+                            isLoadingData || isPending
+                              ? "cursor-not-allowed opacity-50"
+                              : "cursor-pointer"
+                          }`}
+                          onClick={() => handleTimeIconClick("lunch_start")}
+                        >
+                          <Clock className="md:w-6 md:h-6 w-5 h-5" />
+                        </div>
+                      </div>
+                    </FormField>
+                  </div>
+                  <div className="w-full md:flex-1">
+                    <FormField
+                      label={t("finishLunchTime") || "Lunch End Time"}
+                      error={errors.lunch_end?.message}
+                    >
+                      <div className="relative w-full">
+                        <Input
+                          type="time"
+                          {...lunchEndRegister}
+                          ref={(el) => {
+                            lunchEndRef(el);
+                            timeRefs.current.lunch_end = el;
+                          }}
+                          className={`time-input-with-icon ${FORM_SELECT_CLASS}`}
+                          style={getFormControlStyle(!!errors.lunch_end)}
+                          readOnly={true}
+                        />
+                        <div className="absolute right-[15px] top-1/2 -translate-y-1/2 cursor-not-allowed opacity-50">
+                          <Clock className="md:w-6 md:h-6 w-5 h-5" />
+                        </div>
+                      </div>
+                    </FormField>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="flex flex-col md:flex-row gap-[10px] items-start w-full mt-[30px]">
