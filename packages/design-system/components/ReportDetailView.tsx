@@ -24,6 +24,7 @@ import {
   type ContractorSession,
   type HourlySessionDuration,
   type HourlyProductivity,
+  type ProductivitySummary,
 } from "@/packages/api/adt/adt.service";
 import type { UserActivity } from "@/packages/api/reports/reports.service";
 
@@ -59,6 +60,191 @@ const APP_TYPE_COLORS: Record<AppType, string> = {
 };
 
 const VALID_APP_TYPES = Object.keys(APP_TYPE_COLORS) as AppType[];
+
+/** Rango horario fijo para los gráficos de sesiones y productividad por hora (08:00–17:00). */
+const CHART_HOURS = { start: 8, end: 17 } as const;
+
+// Componente interno: barra de distribución de uso por tipo de app (reutilizada en mobile y desktop)
+const UsageDistributionBar = ({
+  distribution,
+  t,
+}: {
+  distribution: Array<{ type: AppType; seconds: number; percentage: number; color: string }>;
+  t: (key: string) => string;
+}) => {
+  if (distribution.length === 0) return null;
+  return (
+    <div className="mt-8 pt-4 border-t border-gray-100">
+      <p className="text-[12px] font-semibold mb-2 text-black">{t("usageDistribution")}</p>
+      <div className="h-2 w-full rounded-full flex overflow-hidden mb-4">
+        {distribution.map((item) => (
+          <div
+            key={item.type}
+            style={{
+              backgroundColor: item.color,
+              width: `${item.percentage}%`,
+              minWidth: item.percentage > 0 ? "2px" : "0",
+            }}
+            title={`${item.type}: ${item.percentage}%`}
+          />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-2">
+        {distribution.map((item) => (
+          <div key={item.type} className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: item.color }} />
+            <span className="text-[12px] font-medium text-black">
+              {item.type} ({item.percentage}%)
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const SessionConnectivitySection = ({
+  sessionConnectivityStats,
+  formatDurationFromSeconds,
+  hourlyData,
+  hourlyProductivityForChart,
+  hourlySessionDurationAgentLoading,
+  hourlyProductivityAgentLoading,
+  selectedAgentId,
+  t,
+  variant,
+}: {
+  sessionConnectivityStats: {
+    sessionCount: number;
+    avgDurationSeconds: number;
+    avgProductivity: number;
+  };
+  formatDurationFromSeconds: (seconds: number) => string;
+  hourlyData: Array<{ hour: string; productivity: number; duration: number }>;
+  hourlyProductivityForChart: HourlyProductivity[];
+  hourlySessionDurationAgentLoading: boolean;
+  hourlyProductivityAgentLoading: boolean;
+  selectedAgentId: string;
+  t: (key: string) => string;
+  variant: "mobile" | "desktop";
+}) => (
+  <div
+    className={
+      variant === "desktop"
+        ? "bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 flex flex-col gap-6 min-w-0"
+        : "bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 flex flex-col gap-6 min-w-0 overflow-hidden"
+    }
+  >
+    <h3 className="text-xl font-semibold text-black">{t("modal.sessionConnectivity")}</h3>
+    <div className="grid grid-cols-3 gap-3 w-full min-w-0">
+      <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-4 flex flex-col gap-1 min-w-0">
+        <p className="text-sm text-[#6D6D6D] font-normal">{t("modal.sessionCount")}</p>
+        <p className="text-xl font-bold text-black">{sessionConnectivityStats.sessionCount}</p>
+      </div>
+      <div className="bg-[#e8f4f6] border border-[rgba(166,166,166,0.3)] rounded-[5px] p-4 flex flex-col gap-1 min-w-0">
+        <p className="text-sm text-[#6D6D6D] font-normal">{t("modal.avgDuration")}</p>
+        <p className="text-xl font-bold text-black">
+          {formatDurationFromSeconds(sessionConnectivityStats.avgDurationSeconds)}
+        </p>
+      </div>
+      <div className="bg-[#7DA40A]/15 border border-[rgba(166,166,166,0.5)] rounded-[5px] p-4 flex flex-col gap-1 min-w-0">
+        <p className="text-sm text-[#6D6D6D] font-normal">{t("modal.avgProductivity")}</p>
+        <p className="text-xl font-bold text-black">
+          {sessionConnectivityStats.avgProductivity > 0
+            ? `${Math.round(sessionConnectivityStats.avgProductivity)}%`
+            : "0%"}
+        </p>
+      </div>
+    </div>
+    <div
+      className={
+        variant === "desktop"
+          ? "flex flex-col md:flex-row gap-5 w-full min-w-0"
+          : "flex flex-col gap-5 w-full min-w-0"
+      }
+    >
+      <div className="flex-1 min-w-0 w-full">
+        {hourlySessionDurationAgentLoading ? (
+          <div className="flex items-center justify-center py-8 text-gray-500">{t("loading")}</div>
+        ) : (
+          <ProductivityDurationChart key={selectedAgentId} hourlyData={hourlyData} />
+        )}
+      </div>
+      <div className="flex-1 min-w-0 w-full">
+        {hourlyProductivityAgentLoading ? (
+          <div className="flex items-center justify-center py-8 text-gray-500">{t("loading")}</div>
+        ) : (
+          <HourlyProductivityChart hourlyData={hourlyProductivityForChart} />
+        )}
+      </div>
+    </div>
+  </div>
+);
+
+// Sección resumen de sesiones por día (mobile: cards con SessionSummaryMobile; desktop: tabla con SessionSummaryTable)
+const SessionSummarySection = ({
+  sessionsByDayFiltered,
+  loading,
+  locale,
+  t,
+  variant,
+}: {
+  sessionsByDayFiltered: Array<{ session_day: string; sessions: ContractorSession[] }>;
+  loading: boolean;
+  locale: string;
+  t: (key: string) => string;
+  variant: "mobile" | "desktop";
+}) => {
+  if (loading) {
+    return (
+      <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 flex justify-center text-gray-500">
+        {t("loading")}
+      </div>
+    );
+  }
+  if (sessionsByDayFiltered.length === 0) {
+    return (
+      <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0">
+        <p className="text-base text-gray-500 text-center">{t("noSessionsAvailable")}</p>
+      </div>
+    );
+  }
+  if (variant === "mobile") {
+    return (
+      <>
+        {sessionsByDayFiltered.map((dayGroup) => (
+          <div
+            key={dayGroup.session_day}
+            className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden"
+          >
+            <SessionSummaryMobile sessions={dayGroup.sessions} date={dayGroup.session_day} />
+          </div>
+        ))}
+      </>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-5 min-w-0">
+      <h3 className="text-xl font-semibold text-black">{t("sessionSummary")}</h3>
+      {sessionsByDayFiltered.map((dayGroup) => (
+        <div
+          key={dayGroup.session_day}
+          className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 flex flex-col gap-6 min-w-0 overflow-hidden"
+        >
+          <div className="flex flex-col gap-1">
+            <p className="text-base font-medium text-black">
+              {new Date(dayGroup.session_day + "T12:00:00").toLocaleDateString(
+                locale === "es" ? "es-ES" : "en-US",
+                { month: "long", day: "numeric", year: "numeric" },
+              )}
+            </p>
+          </div>
+          <SessionSummaryTable sessions={dayGroup.sessions} date={dayGroup.session_day} />
+        </div>
+      ))}
+    </div>
+  );
+};
 
 // Componente interno para los selectores de fecha con estilo Figma
 const ReportDateSelector = ({
@@ -122,6 +308,8 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
   const searchParams = useSearchParams();
   const t = useTranslations("reports");
   const locale = useLocale();
+  const mobileDeviceSelectRef = useRef<HTMLSelectElement | null>(null);
+  const desktopDeviceSelectRef = useRef<HTMLSelectElement | null>(null);
 
   // Helper para obtener fecha por defecto
   const getDefaultDate = () => new Date().toISOString().split("T")[0];
@@ -137,13 +325,26 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
     return toParam ? toParam.split("T")[0] : getDefaultDate();
   });
 
-  const [activity, setActivity] = useState<UserActivity | null>(null);
+  const [productivitySummary, setProductivitySummary] = useState<ProductivitySummary | null>(null);
+  const [selectedAgentId, setSelectedAgentId] = useState<string>("consolidated");
   const [sessions, setSessions] = useState<ContractorSession[]>([]);
   const [sessionsByDay, setSessionsByDay] = useState<
     Array<{ session_day: string; sessions: ContractorSession[] }>
   >([]);
+  const [sessionsByDayByAgent, setSessionsByDayByAgent] = useState<
+    Record<string, Array<{ session_day: string; sessions: ContractorSession[] }>>
+  >({});
+  const [sessionsByDayAgentLoading, setSessionsByDayAgentLoading] = useState(false);
   const [hourlySessionDuration, setHourlySessionDuration] = useState<HourlySessionDuration[]>([]);
+  const [hourlySessionDurationByAgent, setHourlySessionDurationByAgent] = useState<
+    Record<string, HourlySessionDuration[]>
+  >({});
   const [hourlyProductivity, setHourlyProductivity] = useState<HourlyProductivity[]>([]);
+  const [hourlyProductivityByAgent, setHourlyProductivityByAgent] = useState<
+    Record<string, HourlyProductivity[]>
+  >({});
+  const [hourlyProductivityAgentLoading, setHourlyProductivityAgentLoading] = useState(false);
+  const [hourlySessionDurationAgentLoading, setHourlySessionDurationAgentLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Sincronizar estado local cuando cambian los searchParams (ej: navegación con botones del browser)
@@ -222,6 +423,41 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
     [t],
   );
 
+  // Métricas a mostrar: consolidado o el agente seleccionado (con datos de contractor del consolidado)
+  const activity = useMemo(() => {
+    if (!productivitySummary?.consolidated) return null;
+    const consolidated = productivitySummary.consolidated as RealtimeMetrics;
+    const displayMetrics: RealtimeMetrics =
+      selectedAgentId === "consolidated"
+        ? consolidated
+        : ({
+            ...consolidated,
+            ...productivitySummary.agents?.[selectedAgentId],
+          } as RealtimeMetrics);
+    return transformRealtimeMetricsToUserActivity(displayMetrics);
+  }, [productivitySummary, selectedAgentId, transformRealtimeMetricsToUserActivity]);
+
+  // Opciones del selector: Consolidado + un ítem por cada agente
+  const agentSelectorOptions = useMemo(() => {
+    const opts: { value: string; label: string }[] = [
+      { value: "consolidated", label: t("consolidatedView") },
+    ];
+    if (productivitySummary?.agents) {
+      Object.keys(productivitySummary.agents).forEach((agentId, i) => {
+        opts.push({
+          value: agentId,
+          label: t("agentLabel", { number: i + 1 }),
+        });
+      });
+    }
+    return opts;
+  }, [productivitySummary?.agents, t]);
+
+  const selectedAgentLabel = useMemo(() => {
+    const found = agentSelectorOptions.find((opt) => opt.value === selectedAgentId);
+    return found ? found.label : "";
+  }, [agentSelectorOptions, selectedAgentId]);
+
   // Cargar datos cuando cambian las fechas o el contractor
   useEffect(() => {
     const loadActivity = async () => {
@@ -232,27 +468,42 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
 
       try {
         setLoading(true);
-        const [
-          metric,
-          contractorSessions,
-          contractorSessionsByDay,
-          sessionDurationData,
-          hourlyProductivityData,
-        ] = await Promise.all([
-          adtService.getRealtimeMetrics(contractorId, undefined, true, startDate, endDate),
+        const [summary, contractorSessions, contractorSessionsByDay] = await Promise.all([
+          adtService.getProductivitySummary(contractorId, undefined, startDate, endDate),
           adtService.getContractorSessions(contractorId, startDate, endDate),
           adtService.getContractorSessionsByDay(contractorId, startDate, endDate),
-          adtService.getHourlySessionDuration(contractorId, startDate, endDate, 30, 8, 17),
-          adtService.getHourlyProductivity(contractorId, startDate, endDate, 30, 8, 18),
         ]);
 
-        if (metric) {
-          setActivity(transformRealtimeMetricsToUserActivity(metric));
+        const [sessionDurationData, hourlyProductivityData] = await Promise.all([
+          adtService.getHourlySessionDuration(
+            contractorId,
+            startDate,
+            endDate,
+            30,
+            CHART_HOURS.start,
+            CHART_HOURS.end,
+          ),
+          adtService.getHourlyProductivity(
+            contractorId,
+            startDate,
+            endDate,
+            30,
+            CHART_HOURS.start,
+            CHART_HOURS.end,
+          ),
+        ]);
+
+        if (summary?.consolidated) {
+          setProductivitySummary(summary);
+          setSelectedAgentId("consolidated");
         }
         setSessions(contractorSessions);
         setSessionsByDay(contractorSessionsByDay);
+        setSessionsByDayByAgent({});
         setHourlySessionDuration(sessionDurationData);
+        setHourlySessionDurationByAgent({});
         setHourlyProductivity(hourlyProductivityData);
+        setHourlyProductivityByAgent({});
       } catch (error) {
         console.error("Error loading activity details:", error);
       } finally {
@@ -263,14 +514,139 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
     loadActivity();
   }, [contractorId, startDate, endDate, transformRealtimeMetricsToUserActivity]);
 
+  useEffect(() => {
+    if (
+      selectedAgentId === "consolidated" ||
+      !contractorId ||
+      !startDate ||
+      !endDate ||
+      (sessionsByDayByAgent[selectedAgentId] !== undefined &&
+        hourlySessionDurationByAgent[selectedAgentId] !== undefined &&
+        hourlyProductivityByAgent[selectedAgentId] !== undefined)
+    ) {
+      return;
+    }
+    let cancelled = false;
+    setSessionsByDayAgentLoading(true);
+    setHourlySessionDurationAgentLoading(true);
+    setHourlyProductivityAgentLoading(true);
+
+    Promise.all([
+      adtService.getContractorSessionsByDay(contractorId, startDate, endDate, 30, selectedAgentId),
+      adtService.getHourlySessionDuration(
+        contractorId,
+        startDate,
+        endDate,
+        30,
+        CHART_HOURS.start,
+        CHART_HOURS.end,
+        selectedAgentId,
+      ),
+      adtService.getHourlyProductivity(
+        contractorId,
+        startDate,
+        endDate,
+        30,
+        CHART_HOURS.start,
+        CHART_HOURS.end,
+        selectedAgentId,
+      ),
+    ])
+      .then(([sessionsByDayData, sessionDurationData, productivityData]) => {
+        if (cancelled) return;
+        setSessionsByDayByAgent((prev) => ({ ...prev, [selectedAgentId]: sessionsByDayData }));
+        setHourlySessionDurationByAgent((prev) => ({
+          ...prev,
+          [selectedAgentId]: sessionDurationData,
+        }));
+        setHourlyProductivityByAgent((prev) => ({ ...prev, [selectedAgentId]: productivityData }));
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSessionsByDayByAgent((prev) => ({ ...prev, [selectedAgentId]: [] }));
+          setHourlySessionDurationByAgent((prev) => ({ ...prev, [selectedAgentId]: [] }));
+          setHourlyProductivityByAgent((prev) => ({ ...prev, [selectedAgentId]: [] }));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setSessionsByDayAgentLoading(false);
+          setHourlySessionDurationAgentLoading(false);
+          setHourlyProductivityAgentLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    contractorId,
+    startDate,
+    endDate,
+    selectedAgentId,
+    sessionsByDayByAgent,
+    hourlySessionDurationByAgent,
+    hourlyProductivityByAgent,
+  ]);
+
+  // Datos del gráfico de productividad por hora: consolidado o del agente seleccionado
+  const hourlyProductivityForChart = useMemo(() => {
+    if (selectedAgentId === "consolidated") {
+      return hourlyProductivity;
+    }
+    return hourlyProductivityByAgent[selectedAgentId] ?? [];
+  }, [selectedAgentId, hourlyProductivity, hourlyProductivityByAgent]);
+
+  // Datos de duración por hora: consolidado o del agente seleccionado
+  const hourlySessionDurationForChart = useMemo(() => {
+    if (selectedAgentId === "consolidated") {
+      return hourlySessionDuration;
+    }
+    return hourlySessionDurationByAgent[selectedAgentId] ?? [];
+  }, [selectedAgentId, hourlySessionDuration, hourlySessionDurationByAgent]);
+
   // Transformar datos de la API al formato esperado por el gráfico
   const hourlyData = useMemo(() => {
-    return hourlySessionDuration.map((h) => ({
+    return hourlySessionDurationForChart.map((h) => ({
       hour: h.hour_label,
       productivity: 0, // No se usa en el gráfico actual
       duration: Math.round((h.avg_duration_seconds / 3600) * 100) / 100, // Convertir segundos a horas (decimal)
     }));
-  }, [hourlySessionDuration]);
+  }, [hourlySessionDurationForChart]);
+
+  // Consolidado: sessionsByDay (backend una fila por sesión). Por agente: datos cargados desde backend por agentId.
+  const sessionsByDayFiltered = useMemo(() => {
+    if (selectedAgentId === "consolidated") return sessionsByDay;
+    return sessionsByDayByAgent[selectedAgentId] ?? [];
+  }, [selectedAgentId, sessionsByDay, sessionsByDayByAgent]);
+
+  // Métricas para Session & Connectivity: Session Count, Avg. Duration, Avg. Productivity (desde sesiones filtradas)
+  const sessionConnectivityStats = useMemo(() => {
+    const allSessions = sessionsByDayFiltered.flatMap((d) => d.sessions);
+    const count = allSessions.length;
+    if (count === 0) return { sessionCount: 0, avgDurationSeconds: 0, avgProductivity: 0 };
+    const totalSeconds = allSessions.reduce(
+      (sum, s) => sum + (Number((s as ContractorSession).total_seconds) || 0),
+      0,
+    );
+    const totalProductivity = allSessions.reduce(
+      (sum, s) => sum + (Number((s as ContractorSession).productivity_score) || 0),
+      0,
+    );
+    return {
+      sessionCount: count,
+      avgDurationSeconds: totalSeconds / count,
+      avgProductivity: totalProductivity / count,
+    };
+  }, [sessionsByDayFiltered]);
+
+  const formatDurationFromSeconds = (seconds: number) => {
+    if (seconds <= 0 || !Number.isFinite(seconds)) return "0h 0m";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.round((seconds % 3600) / 60);
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
+    if (h > 0) return `${h}h 0m`;
+    return `0h ${m}m`;
+  };
 
   // Calcular distribución de uso por tipo de app
   const usageDistribution = useMemo(() => {
@@ -303,14 +679,12 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
     return { distribution, totalSeconds };
   }, [activity?.metrics?.appUsage]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     router.push(`/${locale}/app/${basePath}/reports`);
-  };
+  }, [router, locale, basePath]);
 
-  // Obtener fecha máxima (hoy)
-  const maxDate = useMemo(() => {
-    return new Date().toISOString().split("T")[0];
-  }, []);
+  // Fecha máxima para el date picker (hoy); se recalcula cada render para sesiones largas
+  const maxDate = new Date().toISOString().split("T")[0];
 
   // Manejador para cambios de fecha - actualiza estado local y URL
   const handleStartDateChange = useCallback(
@@ -425,16 +799,31 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
 
           {/* Mobile Layout */}
           <div className="flex flex-col lg:hidden gap-5 w-full overflow-x-hidden">
-            {/* Device Selector - Full Width on Mobile */}
-            <div className="w-full bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] px-[15px] py-[10px] flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors h-[56px] min-w-0">
+            {/* Device / Agent Selector - Mobile */}
+            <div className="relative w-full bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] px-[15px] py-[10px] flex items-center justify-between h-[56px] min-w-0 cursor-pointer">
               <div className="flex items-center gap-[5px] min-w-0 flex-1">
                 <Laptop className="w-[25px] h-[25px] text-black shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] text-[#6D6D6D] mb-0 truncate">Current Device</p>
-                  <p className="text-[14px] font-medium text-black truncate">Agent VM-Dev-01</p>
+                  <p className="text-[10px] text-[#6D6D6D] mb-0 truncate">{t("currentDevice")}</p>
+                  <p className="text-[14px] font-medium text-black truncate">
+                    {selectedAgentLabel}
+                  </p>
                 </div>
               </div>
-              <ChevronDown className="w-6 h-6 text-black shrink-0 ml-2" />
+              <ChevronDown className="w-6 h-6 text-black shrink-0 ml-2 pointer-events-none" />
+              <select
+                ref={mobileDeviceSelectRef}
+                value={selectedAgentId}
+                onChange={(e) => setSelectedAgentId(e.target.value)}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                aria-label={t("currentDevice")}
+              >
+                {agentSelectorOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Date Pickers - Side by Side on Mobile */}
@@ -468,39 +857,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
             {/* Top Applications */}
             <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-[17px] md:p-5 min-w-0 overflow-hidden">
               <TopApplications activity={activity} t={t} />
-              {usageDistribution.distribution.length > 0 && (
-                <div className="mt-8 pt-4 border-t border-gray-100">
-                  <p className="text-[12px] font-semibold mb-2 text-black">
-                    {t("usageDistribution")}
-                  </p>
-                  <div className="h-2 w-full rounded-full flex overflow-hidden mb-4">
-                    {usageDistribution.distribution.map((item) => (
-                      <div
-                        key={item.type}
-                        style={{
-                          backgroundColor: item.color,
-                          width: `${item.percentage}%`,
-                          minWidth: item.percentage > 0 ? "2px" : "0",
-                        }}
-                        title={`${item.type}: ${item.percentage}%`}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-2">
-                    {usageDistribution.distribution.map((item) => (
-                      <div key={item.type} className="flex items-center gap-1.5">
-                        <div
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{ background: item.color }}
-                        />
-                        <span className="text-[12px] font-medium text-black">
-                          {item.type} ({item.percentage}%)
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <UsageDistributionBar distribution={usageDistribution.distribution} t={t} />
             </div>
 
             {/* Top Websites */}
@@ -514,33 +871,26 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
             </div>
 
             {/* Session & Connectivity */}
-            <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 flex flex-col gap-6 min-w-0 overflow-hidden">
-              <h3 className="text-xl font-semibold text-black">{t("modal.sessionConnectivity")}</h3>
-              <div className="flex flex-col gap-5 w-full min-w-0">
-                <div className="w-full min-w-0">
-                  <ProductivityDurationChart hourlyData={hourlyData} />
-                </div>
-                <div className="w-full min-w-0">
-                  <HourlyProductivityChart hourlyData={hourlyProductivity} />
-                </div>
-              </div>
-            </div>
+            <SessionConnectivitySection
+              sessionConnectivityStats={sessionConnectivityStats}
+              formatDurationFromSeconds={formatDurationFromSeconds}
+              hourlyData={hourlyData}
+              hourlyProductivityForChart={hourlyProductivityForChart}
+              hourlySessionDurationAgentLoading={hourlySessionDurationAgentLoading}
+              hourlyProductivityAgentLoading={hourlyProductivityAgentLoading}
+              selectedAgentId={selectedAgentId}
+              t={t}
+              variant="mobile"
+            />
 
-            {/* Session Summary - Mobile Version */}
-            {sessionsByDay.length > 0 ? (
-              sessionsByDay.map((dayGroup) => (
-                <div
-                  key={dayGroup.session_day}
-                  className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden"
-                >
-                  <SessionSummaryMobile sessions={dayGroup.sessions} date={dayGroup.session_day} />
-                </div>
-              ))
-            ) : (
-              <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0">
-                <p className="text-base text-gray-500 text-center">{t("noSessionsAvailable")}</p>
-              </div>
-            )}
+            {/* Session Summary - Mobile */}
+            <SessionSummarySection
+              sessionsByDayFiltered={sessionsByDayFiltered}
+              loading={sessionsByDayAgentLoading && selectedAgentId !== "consolidated"}
+              locale={locale}
+              t={t}
+              variant="mobile"
+            />
           </div>
 
           {/* Desktop Layout */}
@@ -565,15 +915,30 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                   min={startDate}
                   max={maxDate}
                 />
-                <div className="flex-1 bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors min-w-0">
+                <div className="relative flex-1 bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-3 flex items-center justify-between min-w-0 cursor-pointer">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <Laptop className="w-7 h-7 text-black shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-[12px] text-[#6D6D6D]">{t("currentDevice")}</p>
-                      <p className="text-base font-medium text-black truncate">Agent VM-Dev-01</p>
+                      <p className="text-base font-medium text-black truncate">
+                        {selectedAgentLabel}
+                      </p>
                     </div>
                   </div>
-                  <ChevronDown className="w-6 h-6 text-black shrink-0 ml-2" />
+                  <ChevronDown className="w-6 h-6 text-black shrink-0 ml-2 pointer-events-none" />
+                  <select
+                    ref={desktopDeviceSelectRef}
+                    value={selectedAgentId}
+                    onChange={(e) => setSelectedAgentId(e.target.value)}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    aria-label={t("currentDevice")}
+                  >
+                    {agentSelectorOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -583,51 +948,26 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
               </div>
 
               {/* Session & Connectivity */}
-              <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 flex flex-col gap-6 min-w-0">
-                <h3 className="text-xl font-semibold text-black">
-                  {t("modal.sessionConnectivity")}
-                </h3>
-                <div className="flex flex-col md:flex-row gap-5 w-full min-w-0">
-                  <div className="flex-1 min-w-0">
-                    <ProductivityDurationChart hourlyData={hourlyData} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <HourlyProductivityChart hourlyData={hourlyProductivity} />
-                  </div>
-                </div>
-              </div>
+              <SessionConnectivitySection
+                sessionConnectivityStats={sessionConnectivityStats}
+                formatDurationFromSeconds={formatDurationFromSeconds}
+                hourlyData={hourlyData}
+                hourlyProductivityForChart={hourlyProductivityForChart}
+                hourlySessionDurationAgentLoading={hourlySessionDurationAgentLoading}
+                hourlyProductivityAgentLoading={hourlyProductivityAgentLoading}
+                selectedAgentId={selectedAgentId}
+                t={t}
+                variant="desktop"
+              />
 
-              {/* Session Summary - Desktop Version */}
-              <div className="flex flex-col gap-5 min-w-0">
-                <h3 className="text-xl font-semibold text-black">{t("sessionSummary")}</h3>
-                {sessionsByDay.length > 0 ? (
-                  sessionsByDay.map((dayGroup) => (
-                    <div
-                      key={dayGroup.session_day}
-                      className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 flex flex-col gap-6 min-w-0 overflow-hidden"
-                    >
-                      <div className="flex flex-col gap-1">
-                        <p className="text-base font-medium text-black">
-                          {new Date(dayGroup.session_day + "T12:00:00").toLocaleDateString(
-                            locale === "es" ? "es-ES" : "en-US",
-                            { month: "long", day: "numeric", year: "numeric" },
-                          )}
-                        </p>
-                      </div>
-                      <SessionSummaryTable
-                        sessions={dayGroup.sessions}
-                        date={dayGroup.session_day}
-                      />
-                    </div>
-                  ))
-                ) : (
-                  <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5">
-                    <p className="text-base text-gray-500 text-center">
-                      {t("noSessionsAvailable")}
-                    </p>
-                  </div>
-                )}
-              </div>
+              {/* Session Summary - Desktop */}
+              <SessionSummarySection
+                sessionsByDayFiltered={sessionsByDayFiltered}
+                loading={sessionsByDayAgentLoading && selectedAgentId !== "consolidated"}
+                locale={locale}
+                t={t}
+                variant="desktop"
+              />
             </div>
 
             {/* Right Column */}
@@ -637,44 +977,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
               </div>
               <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden">
                 <TopApplications activity={activity} t={t} />
-
-                {usageDistribution.distribution.length > 0 && (
-                  <div className="mt-8 pt-4 border-t border-gray-100">
-                    <p className="text-[12px] font-semibold mb-2 text-black">
-                      {t("usageDistribution")}
-                    </p>
-
-                    {/* Barra de distribución dinámica */}
-                    <div className="h-2 w-full rounded-full flex overflow-hidden mb-4">
-                      {usageDistribution.distribution.map((item) => (
-                        <div
-                          key={item.type}
-                          style={{
-                            backgroundColor: item.color,
-                            width: `${item.percentage}%`,
-                            minWidth: item.percentage > 0 ? "2px" : "0", // Mínimo visible
-                          }}
-                          title={`${item.type}: ${item.percentage}%`}
-                        />
-                      ))}
-                    </div>
-
-                    {/* Leyenda dinámica */}
-                    <div className="flex flex-wrap gap-x-4 gap-y-2">
-                      {usageDistribution.distribution.map((item) => (
-                        <div key={item.type} className="flex items-center gap-1.5">
-                          <div
-                            className="w-2.5 h-2.5 rounded-full"
-                            style={{ background: item.color }}
-                          />
-                          <span className="text-[12px] font-medium text-black">
-                            {item.type} ({item.percentage}%)
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <UsageDistributionBar distribution={usageDistribution.distribution} t={t} />
               </div>
               {/* Top Websites - mismas dimensiones que Top Applications */}
               <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden">

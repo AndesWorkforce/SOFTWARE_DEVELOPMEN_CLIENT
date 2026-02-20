@@ -16,6 +16,7 @@ export interface BrowserUsage {
 export interface ContractorSession {
   session_id: string;
   contractor_id: string;
+  agent_id?: string | null;
   session_start: string; // "YYYY-MM-DD HH:mm:ss"
   session_end: string; // "YYYY-MM-DD HH:mm:ss"
   total_seconds: number;
@@ -106,4 +107,30 @@ export interface GroupedAvgDuration {
   group_name: string; // Nombre del cliente, equipo o contratista
   contractor_count: number; // Cantidad de contratistas en el grupo
   avg_duration_hours: number; // Duración promedio en horas
+}
+
+/**
+ * Periodo de cálculo de productividad consolidada.
+ * Mantiene compatibilidad con el backend (`adt.getProductivitySummary`).
+ */
+export interface ProductivityPeriod {
+  type: "day" | "range";
+  workday?: string;
+  from?: string;
+  to?: string;
+}
+
+/**
+ * Resumen de productividad consolidada (y opcionalmente por agente)
+ * para un contratista.
+ *
+ * - `consolidated` aplica la lógica multi-agente: beat activo si al menos
+ *   un agente está activo en ese timestamp.
+ * - `agents` solo se incluye cuando hay más de un agente.
+ */
+export interface ProductivitySummary {
+  contractor_id: string;
+  period: ProductivityPeriod;
+  consolidated: RealtimeMetrics;
+  agents?: Record<string, RealtimeMetrics>;
 }

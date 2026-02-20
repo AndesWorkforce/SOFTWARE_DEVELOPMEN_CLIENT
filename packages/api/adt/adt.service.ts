@@ -7,6 +7,7 @@ import type {
   HourlyProductivity,
   HourlySessionDuration,
   GroupedAvgDuration,
+  ProductivitySummary,
 } from "../../types/adt.types";
 
 // Re-export types for convenience
@@ -19,6 +20,7 @@ export type {
   HourlyProductivity,
   HourlySessionDuration,
   GroupedAvgDuration,
+  ProductivitySummary,
 } from "../../types/adt.types";
 
 export interface RealtimeMetricsFilters {
@@ -161,6 +163,37 @@ export class AdtService {
   }
 
   /**
+   * Obtiene el resumen de productividad (consolidada y por agente)
+   * para un contratista, usando el endpoint unificado de API Gateway.
+   *
+   * - Si el contratista tiene 1 solo agente, el backend NO incluye `agents`
+   *   y `consolidated` refleja exactamente las métricas de ese agente.
+   * - Si tiene varios agentes, `consolidated` aplica la lógica multi-agente
+   *   y `agents` contiene el detalle por agente.
+   */
+  async getProductivitySummary(
+    contractorId: string,
+    workday?: string,
+    from?: string,
+    to?: string,
+  ): Promise<ProductivitySummary> {
+    const params: Record<string, string> = {};
+
+    if (from && to) {
+      params.from = from;
+      params.to = to;
+    } else if (workday) {
+      params.workday = workday;
+    }
+
+    const response = await http.get<ProductivitySummary>(`/adt/productivity/${contractorId}`, {
+      params,
+    });
+
+    return response.data;
+  }
+
+  /**
    * Obtiene el porcentaje de talento activo vs inactivo en un período.
    * @param period 'day' (día actual), 'week' (última semana), 'month' (mes actual)
    * @param useCache Si usar caché (default: true)
@@ -252,15 +285,17 @@ export class AdtService {
 
   /**
    * Obtiene las sesiones de un contratista.
+   * Sin agentId: consolidado. Con agentId: solo sesiones de ese agente.
    * @param contractorId ID del contratista
    * @param from Fecha de inicio del rango en formato YYYY-MM-DD (opcional)
    * @param to Fecha de fin del rango en formato YYYY-MM-DD (opcional)
-   * @returns Array de sesiones del contratista
+   * @param agentId ID del agente (opcional)
    */
   async getContractorSessions(
     contractorId: string,
     from?: string,
     to?: string,
+    agentId?: string,
   ): Promise<ContractorSession[]> {
     try {
       const params: Record<string, string> = {};
@@ -272,16 +307,21 @@ export class AdtService {
         params.to = to;
       }
 
+      if (agentId) {
+        params.agentId = agentId;
+      }
+
       const response = await http.get<ContractorSession[]>(`/adt/sessions/${contractorId}`, {
         params,
       });
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError;
+      const data = axiosError?.response?.data as Record<string, unknown> | undefined;
       console.error("❌ Error en getContractorSessions:", {
-        message: axiosError?.message || "Unknown error",
-        response: axiosError?.response?.data || null,
-        status: axiosError?.response?.status || null,
+        message: axiosError?.message ?? data?.message ?? "Unknown error",
+        status: axiosError?.response?.status,
+        responseData: data != null ? JSON.stringify(data) : null,
       });
       return []; // Retornar array vacío en caso de error
     }
@@ -289,17 +329,19 @@ export class AdtService {
 
   /**
    * Obtiene las sesiones de un contratista agrupadas por día.
+   * Sin agentId: consolidado (una fila por sesión). Con agentId: solo sesiones de ese agente.
    * @param contractorId ID del contratista
    * @param from Fecha de inicio del rango en formato YYYY-MM-DD (opcional)
    * @param to Fecha de fin del rango en formato YYYY-MM-DD (opcional)
    * @param days Días hacia atrás (default: 30)
-   * @returns Array de objetos con session_day y sessions agrupadas por día
+   * @param agentId ID del agente (opcional). Si no se envía, devuelve vista consolidada.
    */
   async getContractorSessionsByDay(
     contractorId: string,
     from?: string,
     to?: string,
     days: number = 30,
+    agentId?: string,
   ): Promise<Array<{ session_day: string; sessions: ContractorSession[] }>> {
     try {
       const params: Record<string, string> = {};
@@ -313,6 +355,9 @@ export class AdtService {
       if (days) {
         params.days = days.toString();
       }
+      if (agentId) {
+        params.agentId = agentId;
+      }
 
       const response = await http.get<
         Array<{ session_day: string; sessions: ContractorSession[] }>
@@ -320,10 +365,11 @@ export class AdtService {
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError;
+      const data = axiosError?.response?.data as Record<string, unknown> | undefined;
       console.error("❌ Error en getContractorSessionsByDay:", {
-        message: axiosError?.message || "Unknown error",
-        response: axiosError?.response?.data || null,
-        status: axiosError?.response?.status || null,
+        message: axiosError?.message ?? data?.message ?? "Unknown error",
+        status: axiosError?.response?.status,
+        responseData: data != null ? JSON.stringify(data) : null,
       });
       return []; // Retornar array vacío en caso de error
     }
@@ -398,6 +444,7 @@ export class AdtService {
     days: number = 30,
     startHour: number = 8,
     endHour: number = 17,
+    agentId?: string,
   ): Promise<HourlySessionDuration[]> {
     try {
       const params: Record<string, string> = {
@@ -411,6 +458,9 @@ export class AdtService {
       }
       if (to) {
         params.to = to;
+      }
+      if (agentId) {
+        params.agentId = agentId;
       }
 
       const response = await http.get<HourlySessionDuration[]>(
@@ -432,6 +482,7 @@ export class AdtService {
   /**
    * Obtiene la productividad promedio por hora para un contratista.
    * Útil para gráficos con % de productividad por hora.
+   * Con agentId opcional devuelve solo ese agente; sin agentId, consolidado (todos los agentes).
    *
    * @param contractorId ID del contratista
    * @param from Fecha de inicio del rango en formato YYYY-MM-DD (opcional)
@@ -439,6 +490,7 @@ export class AdtService {
    * @param days Días hacia atrás (default: 30)
    * @param startHour Hora de inicio de jornada (default: 8)
    * @param endHour Hora de fin de jornada (default: 17)
+   * @param agentId ID del agente (opcional). Si se indica, solo productividad de ese agente.
    * @returns Array de productividad promedio por hora
    */
   async getHourlyProductivity(
@@ -448,6 +500,7 @@ export class AdtService {
     days: number = 30,
     startHour: number = 8,
     endHour: number = 17,
+    agentId?: string,
   ): Promise<HourlyProductivity[]> {
     try {
       const params: Record<string, string> = {
@@ -461,6 +514,9 @@ export class AdtService {
       }
       if (to) {
         params.to = to;
+      }
+      if (agentId) {
+        params.agentId = agentId;
       }
 
       const response = await http.get<HourlyProductivity[]>(

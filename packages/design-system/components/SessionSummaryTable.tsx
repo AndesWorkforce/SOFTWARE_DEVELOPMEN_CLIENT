@@ -46,6 +46,7 @@ export const SessionSummaryTable = ({ sessions }: SessionSummaryTableProps) => {
           </thead>
           <tbody>
             {sessions.map((session, index) => {
+              const rowKey = `${session.session_id}-${session.agent_id ?? ""}`;
               const startTime = session.session_start.split(" ")[1]?.substring(0, 5) || "00:00";
               const endTime = session.session_end.split(" ")[1]?.substring(0, 5) || "00:00";
               const duration = formatSecondsToTime(session.total_seconds);
@@ -54,7 +55,7 @@ export const SessionSummaryTable = ({ sessions }: SessionSummaryTableProps) => {
               const productivity = `${Math.round(session.productivity_score || 0)}%`;
 
               return (
-                <tr key={index} className={index % 2 === 1 ? "bg-[#E2E2E2]" : "bg-white"}>
+                <tr key={rowKey} className={index % 2 === 1 ? "bg-[#E2E2E2]" : "bg-white"}>
                   <td className="px-4 py-3 text-black font-semibold">{index + 1}</td>
                   <td className="px-4 py-3 text-black">{startTime}</td>
                   <td className="px-4 py-3 text-black">{endTime}</td>
