@@ -66,7 +66,8 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
       <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-[11px] py-[6px] w-full overflow-hidden">
         <div className="flex flex-col gap-0 w-full">
           {sessions.map((session, index) => {
-            const isExpanded = expandedSessions.has(session.session_id);
+            const rowKey = `${session.session_id}-${session.agent_id ?? ""}`;
+            const isExpanded = expandedSessions.has(rowKey);
             const isEven = index % 2 === 1;
             const startTime = session.session_start.split(" ")[1]?.substring(0, 5) || "00:00";
             const endTime = session.session_end.split(" ")[1]?.substring(0, 5) || "00:00";
@@ -78,13 +79,13 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
 
             return (
               <div
-                key={session.session_id}
+                key={rowKey}
                 className={`${isEven ? "bg-[#E2E2E2]" : "bg-white"} transition-colors relative ${
                   isExpanded ? "min-h-[195px]" : "min-h-[69px]"
                 }`}
               >
                 <button
-                  onClick={() => toggleSession(session.session_id)}
+                  onClick={() => toggleSession(rowKey)}
                   className={`w-full flex items-center justify-between relative ${
                     isExpanded ? "min-h-[195px]" : "min-h-[69px]"
                   }`}
