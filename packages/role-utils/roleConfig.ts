@@ -30,6 +30,13 @@ export const roleConfig: Record<Role, RolePermissions> = {
     showCalendar: true,
     showReports: true,
   },
+  client: {
+    canEdit: false,
+    canDelete: false,
+    canAdd: false,
+    showCalendar: false,
+    showReports: true,
+  },
 };
 
 export function getRolePermissions(role: Role): RolePermissions {
