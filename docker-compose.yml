@@ -1,0 +1,73 @@
+# =============================================================================
+# docker-compose.yml — local development & smoke-testing
+#
+# Three profiles map to each target environment:
+#   docker compose --profile dev     up --build
+#   docker compose --profile staging up --build
+#   docker compose --profile prod    up --build
+# =============================================================================
+
+x-build-common: &build-common
+  context: .
+  dockerfile: Dockerfile
+
+services:
+  # ---------------------------------------------------------------------------
+  # Development
+  # ---------------------------------------------------------------------------
+  andes-client-dev:
+    profiles: [dev]
+    build:
+      <<: *build-common
+      args:
+        NEXT_PUBLIC_ENV: development
+        NEXT_PUBLIC_API_BASE_URL_DEV: http://localhost:3001
+        NEXT_PUBLIC_API_BASE_URL_STAGING: https://api-staging.andesworkforce.com
+        NEXT_PUBLIC_API_BASE_URL_PROD: https://api-gateway.test.andes-workforce.com
+    image: andes-client:dev
+    container_name: andes-client-dev
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Staging
+  # ---------------------------------------------------------------------------
+  andes-client-staging:
+    profiles: [staging]
+    build:
+      <<: *build-common
+      args:
+        NEXT_PUBLIC_ENV: staging
+        NEXT_PUBLIC_API_BASE_URL_DEV: http://localhost:3001
+        NEXT_PUBLIC_API_BASE_URL_STAGING: https://api-staging.andesworkforce.com
+        NEXT_PUBLIC_API_BASE_URL_PROD: https://api-gateway.test.andes-workforce.com
+    image: andes-client:staging
+    container_name: andes-client-staging
+    ports:
+      - "3001:3000"
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Production
+  # ---------------------------------------------------------------------------
+  andes-client-prod:
+    profiles: [prod]
+    build:
+      <<: *build-common
+      args:
+        NEXT_PUBLIC_ENV: production
+        NEXT_PUBLIC_API_BASE_URL_DEV: http://localhost:3001
+        NEXT_PUBLIC_API_BASE_URL_STAGING: https://api-staging.andesworkforce.com
+        NEXT_PUBLIC_API_BASE_URL_PROD: https://api-gateway.test.andes-workforce.com
+    image: andes-client:prod
+    container_name: andes-client-prod
+    ports:
+      - "3002:3000"
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
