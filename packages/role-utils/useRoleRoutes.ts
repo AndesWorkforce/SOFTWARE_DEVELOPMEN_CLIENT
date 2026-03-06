@@ -1,6 +1,6 @@
 import { useLocale } from "next-intl";
 
-export type Role = "admin" | "super-admin" | "visualizer";
+export type Role = "admin" | "super-admin" | "visualizer" | "client";
 
 export interface RoleRoutes {
   base: string;

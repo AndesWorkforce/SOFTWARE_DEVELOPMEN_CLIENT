@@ -3,6 +3,6 @@
 import { ReportsPage } from "@/packages/shared-views/reports";
 
 export default function ClientReportsPage() {
-  // Reutilizamos la vista de reports del rol "visualizer" en modo solo lectura.
-  return <ReportsPage role="visualizer" />;
+  // Rol "client" para que los enlaces (ej. detalle) queden bajo /app/client/ y no redirijan a login.
+  return <ReportsPage role="client" />;
 }

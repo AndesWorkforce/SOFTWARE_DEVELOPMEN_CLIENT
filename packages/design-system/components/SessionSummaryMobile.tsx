@@ -27,19 +27,31 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
     setExpandedSessions(newExpanded);
   };
 
+  const uniqueSessions = useMemo(() => {
+    const seen = new Set<string>();
+    return sessions.filter((session) => {
+      const key = `${session.session_id}-${session.agent_id ?? ""}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [sessions]);
+
   const totals = useMemo(() => {
-    const count = sessions.length;
-    const totalSeconds = sessions.reduce((sum, s) => sum + s.total_seconds, 0);
+    const count = uniqueSessions.length;
+    const totalSeconds = uniqueSessions.reduce((sum, s) => sum + s.total_seconds, 0);
     const avgSeconds = count > 0 ? totalSeconds / count : 0;
     const avgProductivity =
-      count > 0 ? sessions.reduce((sum, s) => sum + (s.productivity_score || 0), 0) / count : 0;
+      count > 0
+        ? uniqueSessions.reduce((sum, s) => sum + (s.productivity_score || 0), 0) / count
+        : 0;
 
     return {
       count,
       avgDuration: formatSecondsToTime(avgSeconds),
       avgProductivity: `${Math.round(avgProductivity)}%`,
     };
-  }, [sessions]);
+  }, [uniqueSessions]);
 
   const formatDateForDisplay = (dateStr: string) => {
     try {
@@ -65,7 +77,7 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
       {/* Sessions List */}
       <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_rgba(166,166,166,0.25)] px-[11px] py-[6px] w-full overflow-hidden">
         <div className="flex flex-col gap-0 w-full">
-          {sessions.map((session, index) => {
+          {uniqueSessions.map((session, index) => {
             const rowKey = `${session.session_id}-${session.agent_id ?? ""}`;
             const isExpanded = expandedSessions.has(rowKey);
             const isEven = index % 2 === 1;
