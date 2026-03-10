@@ -367,10 +367,13 @@
     "stats": {
       "todayCapacity": "Capacidad Hoy",
       "todayAbsences": "Ausencias Hoy",
-      "activeContractors": "Contratistas Activos"
+      "activeContractors": "Contratistas Activos",
+      "fullTimeContractors": "Contratistas Full-Time",
+      "partTimeContractors": "Contratistas Part-Time"
     },
     "filters": {
-      "allTeams": "Todos los Equipos"
+      "allTeams": "Todos los Equipos",
+      "searchPlaceholder": "Buscar aquí..."
     }
   },
   "clients": {

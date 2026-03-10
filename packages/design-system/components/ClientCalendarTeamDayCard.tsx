@@ -2,21 +2,42 @@
 
 import { ArrowRight, Users } from "lucide-react";
 
+const TEAM_CARD_COLORS = [
+  "#3FDC7E1A",
+  "#6AD1FE1A",
+  "#5D89DF1A",
+  "#7B47E91A",
+  "#EE60E01A",
+  "#FA4B421A",
+  "#FE6A351A",
+  "#EECA341A",
+  "#64BDC61A",
+  "#2B72FB1A",
+] as const;
+
 export interface ClientCalendarTeamDayCardProps {
+  teamId: string;
   teamName: string;
-  activeCount: number;
-  absentCount: number;
+  date: Date;
+  activeCount?: number;
+  absentCount?: number;
   onClick?: () => void;
   className?: string;
+  variantIndex?: number;
 }
 
 export function ClientCalendarTeamDayCard({
+  teamId,
   teamName,
-  activeCount,
-  absentCount,
+  date,
+  activeCount = 0,
+  absentCount = 0,
   onClick,
   className = "",
+  variantIndex = 0,
 }: ClientCalendarTeamDayCardProps) {
+  const backgroundColor = TEAM_CARD_COLORS[variantIndex % TEAM_CARD_COLORS.length];
+
   return (
     <div
       role={onClick ? "button" : undefined}
@@ -32,7 +53,10 @@ export function ClientCalendarTeamDayCard({
             }
           : undefined
       }
-      className={`flex w-full flex-col items-start gap-[10px] rounded-[5px] bg-[rgba(63,220,126,0.1)] px-[7px] py-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] ${onClick ? "cursor-pointer" : ""} ${className}`}
+      className={`flex w-full flex-col items-start gap-[10px] rounded-[5px] px-[7px] py-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] ${
+        onClick ? "cursor-pointer" : ""
+      } ${className}`}
+      style={{ backgroundColor }}
     >
       <div className="flex h-[18px] w-full items-center justify-between">
         <span className="min-w-0 truncate text-[12px] font-medium leading-normal text-black">

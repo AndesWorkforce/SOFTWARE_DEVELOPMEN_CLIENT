@@ -17,7 +17,7 @@ export interface Contractor {
   created_at: string;
   updated_at: string;
   isActive?: boolean;
-  // Campos enriquecidos (pueden venir del backend o calcularse)
+  job_schedule?: "full_time" | "part_time" | "no_schedule" | null;
   client_name?: string;
   team_name?: string;
 }

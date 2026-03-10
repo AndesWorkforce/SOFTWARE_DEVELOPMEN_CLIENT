@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import type { ClientCalendarDayColumnTeam } from "./ClientCalendarDayColumn";
 import { ClientCalendarDayColumn } from "./ClientCalendarDayColumn";
+import type { Contractor } from "@/packages/api/contractors/contractors.service";
 
 const DAY_LABELS = [
   "Sunday",
@@ -18,15 +19,21 @@ const DAY_LABELS = [
 export interface ClientCalendarWeekGridProps {
   weekRange: { start: Date; end: Date };
   teams?: ClientCalendarDayColumnTeam[];
+  isAllTeams: boolean;
+  contractors?: Contractor[];
   onTeamClick?: (teamId: string) => void;
   className?: string;
+  teamDayStats?: Record<string, Record<string, { activeCount: number; absentCount: number }>>;
 }
 
 export function ClientCalendarWeekGrid({
   weekRange,
   teams = [],
+  isAllTeams,
+  contractors = [],
   onTeamClick,
   className = "",
+  teamDayStats,
 }: ClientCalendarWeekGridProps) {
   const today = useMemo(() => {
     const t = new Date();
@@ -56,16 +63,32 @@ export function ClientCalendarWeekGrid({
   return (
     <div className={`flex w-full flex-col ${className}`}>
       <div className="grid grid-cols-7 gap-[9px] sm:gap-4">
-        {days.map((day) => (
-          <ClientCalendarDayColumn
-            key={day.date.toISOString()}
-            dayLabel={day.label}
-            dayNumber={day.dayNumber}
-            isToday={day.isToday}
-            teams={teams}
-            onTeamClick={onTeamClick}
-          />
-        ))}
+        {days.map((day) => {
+          const isoDate = day.date.toISOString().slice(0, 10);
+
+          const teamsWithStats: ClientCalendarDayColumnTeam[] = teams.map((team) => {
+            const statsForDay = teamDayStats?.[team.id]?.[isoDate];
+            return {
+              ...team,
+              activeCount: statsForDay?.activeCount ?? 0,
+              absentCount: statsForDay?.absentCount ?? 0,
+            };
+          });
+
+          return (
+            <ClientCalendarDayColumn
+              key={day.date.toISOString()}
+              dayLabel={day.label}
+              dayNumber={day.dayNumber}
+              isToday={day.isToday}
+              dayDate={day.date}
+              isAllTeams={isAllTeams}
+              teams={teamsWithStats}
+              contractors={contractors}
+              onTeamClick={onTeamClick}
+            />
+          );
+        })}
       </div>
     </div>
   );
