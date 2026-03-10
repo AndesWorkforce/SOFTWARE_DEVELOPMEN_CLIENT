@@ -135,7 +135,34 @@
       "viewAll": "Ver Todos"
     },
     "loading": "Cargando...",
-    "noDataAvailable": "No hay datos disponibles"
+    "noDataAvailable": "No hay datos disponibles",
+    "contractorHistory": {
+      "title": "Historial",
+      "exportPdf": "Exportar PDF",
+      "workingDays": "Días Laborales",
+      "averageProductivity": "Productividad Promedio",
+      "totalAbsences": "Total Ausencias",
+      "absenceReport": "Reporte de Ausencias",
+      "applyFilters": "Aplicar filtros",
+      "date": "Fecha",
+      "datePlaceholder": "DD/MM/YYYY - DD/MM/YYYY",
+      "absenceType": "Tipo de ausencia",
+      "selectPlaceholder": "Seleccionar...",
+      "cleanFilters": "Limpiar filtros",
+      "table": {
+        "date": "Fecha",
+        "type": "Tipo",
+        "duration": "Duración",
+        "description": "Descripción"
+      },
+      "absenceTypes": {
+        "vacation": "Vacaciones",
+        "health": "Salud",
+        "license": "Licencia"
+      },
+      "loading": "Cargando...",
+      "noData": "No se encontraron ausencias"
+    }
   },
   "reports": {
     "title": "Reportes",
