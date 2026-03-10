@@ -44,5 +44,6 @@ export * from "./components/ClientCalendarGrid";
 export * from "./components/MobileCalendarList";
 export * from "./components/AbsenceDetailModal";
 export * from "./flags/getCountryCode";
+export * from "./jobPositions";
 export * from "../types/FilterPanel.types";
 export * from "../types/DataTable.types";

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Clock, CircleCheck } from "lucide-react";
-import { FormModal, Button } from "@/packages/design-system";
+import { FormModal, Button, COUNTRY_OPTIONS, JOB_POSITION_OPTIONS } from "@/packages/design-system";
 import type { FormModalConfig } from "@/packages/types/FormModal.types";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import { clientsService } from "@/packages/api/clients/clients.service";
@@ -41,18 +41,15 @@ export function EditContractorModal({
 
   const [clients, setClients] = useState<SelectOption[]>([]);
   const [teams, setTeams] = useState<(SelectOption & { clientId: string })[]>([]);
-  const [countries, setCountries] = useState<SelectOption[]>([]);
-  const [jobPositions, setJobPositions] = useState<SelectOption[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [contractor, allClients, allTeams, allContractors] = await Promise.all([
+        const [contractor, allClients, allTeams] = await Promise.all([
           contractorsService.getById(contractorId),
           clientsService.getAll(),
           teamsService.getAll(),
-          contractorsService.getAll(),
         ]);
 
         setInitialValues({
@@ -80,26 +77,6 @@ export function EditContractorModal({
           allTeams
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((team) => ({ value: team.id, label: team.name, clientId: team.client_id })),
-        );
-
-        const countriesSet = new Set<string>();
-        allContractors.forEach((c: Contractor) => {
-          if (c.country) countriesSet.add(c.country);
-        });
-        setCountries(
-          Array.from(countriesSet)
-            .sort()
-            .map((country) => ({ value: country, label: country })),
-        );
-
-        const jobPositionsSet = new Set<string>();
-        allContractors.forEach((c: Contractor) => {
-          if (c.job_position) jobPositionsSet.add(c.job_position);
-        });
-        setJobPositions(
-          Array.from(jobPositionsSet)
-            .sort()
-            .map((position) => ({ value: position, label: position })),
         );
 
         setIsReady(true);
@@ -159,7 +136,7 @@ export function EditContractorModal({
           type: "select",
           label: t("jobPosition") || "Job Position",
           translationKey: "contractors.modal.jobPosition",
-          options: jobPositions,
+          options: JOB_POSITION_OPTIONS,
         },
         {
           key: "client_id",
@@ -188,7 +165,7 @@ export function EditContractorModal({
           type: "select",
           label: t("country") || "Country",
           translationKey: "contractors.modal.country",
-          options: countries,
+          options: COUNTRY_OPTIONS,
         },
         {
           key: "work_schedule_start",
@@ -270,7 +247,7 @@ export function EditContractorModal({
         return payload;
       },
     }),
-    [t, clients, teams, countries, jobPositions, onClose],
+    [t, clients, teams, onClose],
   );
 
   // Enviar formulario -> mostrar modal de confirmación antes de guardar

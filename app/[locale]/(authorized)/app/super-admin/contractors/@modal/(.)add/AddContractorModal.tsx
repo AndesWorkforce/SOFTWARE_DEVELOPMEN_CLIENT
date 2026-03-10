@@ -5,7 +5,15 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, FormField, FormModalLayout, Input, Select } from "@/packages/design-system";
+import {
+  Button,
+  FormField,
+  FormModalLayout,
+  Input,
+  Select,
+  COUNTRY_OPTIONS,
+  JOB_POSITION_OPTIONS,
+} from "@/packages/design-system";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import { clientsService } from "@/packages/api/clients/clients.service";
 import { teamsService } from "@/packages/api/teams/teams.service";
@@ -67,8 +75,6 @@ export function AddContractorModal({
 
   const [clients, setClients] = useState<SelectOption[]>([]);
   const [teams, setTeams] = useState<(SelectOption & { clientId: string })[]>([]);
-  const [countries, setCountries] = useState<SelectOption[]>([]);
-  const [jobPositions, setJobPositions] = useState<SelectOption[]>([]);
   const [lockedClientOption, setLockedClientOption] = useState<SelectOption | null>(null);
 
   const schema = useMemo(() => {
@@ -281,10 +287,9 @@ export function AddContractorModal({
     const loadOptions = async () => {
       try {
         setIsLoadingData(true);
-        const [allClients, allTeams, allContractors] = await Promise.all([
+        const [allClients, allTeams] = await Promise.all([
           clientsService.getAll(),
           teamsService.getAll(),
-          contractorsService.getAll(),
         ]);
 
         setClients(
@@ -298,30 +303,10 @@ export function AddContractorModal({
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((team) => ({ value: team.id, label: team.name, clientId: team.client_id })),
         );
-
-        const countriesSet = new Set<string>();
-        const jobPositionsSet = new Set<string>();
-        allContractors.forEach((c) => {
-          if (c.country) countriesSet.add(c.country);
-          if (c.job_position) jobPositionsSet.add(c.job_position);
-        });
-
-        setCountries(
-          Array.from(countriesSet)
-            .sort()
-            .map((country) => ({ value: country, label: country })),
-        );
-        setJobPositions(
-          Array.from(jobPositionsSet)
-            .sort()
-            .map((position) => ({ value: position, label: position })),
-        );
       } catch (error) {
         console.error("Error loading AddContractor options:", error);
         setClients([]);
         setTeams([]);
-        setCountries([]);
-        setJobPositions([]);
       } finally {
         setIsLoadingData(false);
       }
@@ -379,7 +364,7 @@ export function AddContractorModal({
                     {...register("job_position")}
                     options={[
                       { value: "", label: tCommon("formModal.selectPlaceholder") || "Select..." },
-                      ...jobPositions,
+                      ...JOB_POSITION_OPTIONS,
                     ]}
                     className={FORM_SELECT_CLASS}
                     style={getFormControlStyle(!!errors.job_position)}
@@ -438,7 +423,7 @@ export function AddContractorModal({
                     {...register("country")}
                     options={[
                       { value: "", label: tCommon("formModal.selectPlaceholder") || "Select..." },
-                      ...countries,
+                      ...COUNTRY_OPTIONS,
                     ]}
                     className={FORM_SELECT_CLASS}
                     style={getFormControlStyle(!!errors.country)}
