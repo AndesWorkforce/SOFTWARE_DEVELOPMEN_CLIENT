@@ -135,7 +135,34 @@
       "viewAll": "View All"
     },
     "loading": "Loading...",
-    "noDataAvailable": "No data available"
+    "noDataAvailable": "No data available",
+    "contractorHistory": {
+      "title": "History",
+      "exportPdf": "Export PDF",
+      "workingDays": "Working Days",
+      "averageProductivity": "Average Productivity",
+      "totalAbsences": "Total Absences",
+      "absenceReport": "Absence Report",
+      "applyFilters": "Apply filters",
+      "date": "Date",
+      "datePlaceholder": "DD/MM/YYYY - DD/MM/YYYY",
+      "absenceType": "Absence type",
+      "selectPlaceholder": "Select...",
+      "cleanFilters": "Clean filters",
+      "table": {
+        "date": "Date",
+        "type": "Type",
+        "duration": "Duration",
+        "description": "Description"
+      },
+      "absenceTypes": {
+        "vacation": "Vacation",
+        "health": "Health",
+        "license": "License"
+      },
+      "loading": "Loading...",
+      "noData": "No absences found"
+    }
   },
   "reports": {
     "title": "Reports",
