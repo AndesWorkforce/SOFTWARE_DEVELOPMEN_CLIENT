@@ -1,14 +1,17 @@
 "use client";
 
+import { ClientCalendar } from "@/packages/design-system/components/ClientCalendar";
+import { useClientCalendar } from "@/packages/shared-views/clients";
+import { useAuthStore } from "@/packages/store";
+
 export default function ClientPage() {
+  const { user } = useAuthStore();
+  const clientId = user?.id || "";
+  const { clientName, cards, teams } = useClientCalendar(clientId);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="text-center max-w-xl px-4">
-        <h1 className="text-2xl font-bold text-black mb-4">Panel de Cliente</h1>
-        <p className="text-gray-600">
-          Usá el menú lateral para navegar a las secciones de Contractors o Reports.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8">
+      <ClientCalendar clientId={clientId} clientName={clientName} cards={cards} teams={teams} />
     </div>
   );
 }

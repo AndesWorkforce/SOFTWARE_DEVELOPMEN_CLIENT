@@ -211,6 +211,42 @@ export class ContractorsService {
     }
   }
 
+  async getByClientIdWithDayOffToday(clientId: string): Promise<Contractor[]> {
+    try {
+      const response = await http.get<Contractor[]>(
+        `/contractors/client/${clientId}/day-offs-today`,
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getByClientIdWithDayOffToday contractors:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+
+      throw error;
+    }
+  }
+
+  async getByClientIdWithoutDayOffToday(clientId: string): Promise<Contractor[]> {
+    try {
+      const response = await http.get<Contractor[]>(
+        `/contractors/client/${clientId}/without-day-offs-today`,
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getByClientIdWithoutDayOffToday contractors:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+
+      throw error;
+    }
+  }
+
   /**
    * Obtiene contractors por ID de equipo
    * @param teamId ID del equipo
@@ -223,6 +259,56 @@ export class ContractorsService {
     } catch (error) {
       const axiosError = error as AxiosError;
       console.error("❌ Error en getByTeamId contractors:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+
+      throw error;
+    }
+  }
+
+  async getTeamDayOffStatsOnDate(
+    teamId: string,
+    date: string,
+  ): Promise<{ teamId: string; date: string; activeCount: number; absentCount: number }> {
+    try {
+      const response = await http.get<{
+        teamId: string;
+        date: string;
+        activeCount: number;
+        absentCount: number;
+      }>(`/contractors/team/${teamId}/day-off-stats`, {
+        params: { date },
+      });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getTeamDayOffStatsOnDate contractors:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+
+      throw error;
+    }
+  }
+
+  async getClientTeamsDayOffStatsInRange(
+    clientId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<Array<{ teamId: string; date: string; activeCount: number; absentCount: number }>> {
+    try {
+      const response = await http.get<
+        Array<{ teamId: string; date: string; activeCount: number; absentCount: number }>
+      >(`/contractors/client/${clientId}/teams-day-off-stats`, {
+        params: { start: startDate, end: endDate },
+      });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getClientTeamsDayOffStatsInRange contractors:", {
         message: axiosError?.message || "Unknown error",
         response: axiosError?.response?.data || null,
         status: axiosError?.response?.status || null,

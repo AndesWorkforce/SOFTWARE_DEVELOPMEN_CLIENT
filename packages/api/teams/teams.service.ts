@@ -31,6 +31,27 @@ export class TeamsService {
   }
 
   /**
+   * @param clientId ID del cliente
+   */
+  async getByClientId(clientId: string): Promise<Team[]> {
+    try {
+      const response = await http.get<Team[]>("/teams", {
+        params: { clientId },
+      });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getByClientId teams:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+
+      throw error;
+    }
+  }
+
+  /**
    * Obtiene un equipo por ID
    * @param id ID del equipo
    * @returns Equipo
