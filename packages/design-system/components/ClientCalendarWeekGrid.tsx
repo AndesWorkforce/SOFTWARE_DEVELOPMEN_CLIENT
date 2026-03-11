@@ -24,6 +24,7 @@ export interface ClientCalendarWeekGridProps {
   onTeamClick?: (teamId: string) => void;
   className?: string;
   teamDayStats?: Record<string, Record<string, { activeCount: number; absentCount: number }>>;
+  jobPositionFilter?: string;
 }
 
 export function ClientCalendarWeekGrid({
@@ -34,6 +35,7 @@ export function ClientCalendarWeekGrid({
   onTeamClick,
   className = "",
   teamDayStats,
+  jobPositionFilter = "all",
 }: ClientCalendarWeekGridProps) {
   const today = useMemo(() => {
     const t = new Date();
@@ -86,6 +88,7 @@ export function ClientCalendarWeekGrid({
               teams={teamsWithStats}
               contractors={contractors}
               onTeamClick={onTeamClick}
+              jobPositionFilter={jobPositionFilter}
             />
           );
         })}

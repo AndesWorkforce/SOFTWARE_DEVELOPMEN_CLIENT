@@ -2,11 +2,13 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { Users } from "lucide-react";
 
 import { ClientCalendarCardData, ClientCalendarCardDataProps } from "./ClientCalendarCardData";
 import { ClientCalendarWeekGrid } from "./ClientCalendarWeekGrid";
 import { ContractorSearch } from "./ContractorSearch";
 import { WeekRangePicker } from "./WeekRangePicker";
+import { ClientCalendarFilters } from "./ClientCalendarFilters";
 import {
   contractorsService,
   type Contractor,
@@ -36,6 +38,8 @@ export function ClientCalendar({
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [jobPositionFilter, setJobPositionFilter] = useState<string>("all");
+  const [absenceTypeFilter, setAbsenceTypeFilter] = useState<string>("all");
   const defaultWeek = useMemo(() => {
     const d = new Date();
     const day = d.getDay();
@@ -70,11 +74,28 @@ export function ClientCalendar({
     Record<string, Record<string, { activeCount: number; absentCount: number }>>
   >({});
 
+  const jobPositionOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          selectedTeamContractors
+            .map((c) => c.job_schedule)
+            .filter(
+              (value): value is Exclude<Contractor["job_schedule"], null | undefined> =>
+                value === "full_time" || value === "part_time" || value === "no_schedule",
+            ),
+        ),
+      ),
+    [selectedTeamContractors],
+  );
+
   useEffect(() => {
     const loadTeamStats = async () => {
       if (!selectedTeamId) {
         setTeamStats(null);
         setSelectedTeamContractors([]);
+        setJobPositionFilter("all");
+        setAbsenceTypeFilter("all");
         return;
       }
 
@@ -107,6 +128,8 @@ export function ClientCalendar({
           partTime,
           total,
         });
+        setJobPositionFilter("all");
+        setAbsenceTypeFilter("all");
       } catch (error) {
         console.error("❌ Error cargando stats de equipo en ClientCalendar:", error);
         setTeamStats(null);
@@ -116,6 +139,13 @@ export function ClientCalendar({
 
     loadTeamStats();
   }, [selectedTeamId]);
+
+  const handleTeamClickFromGrid = (teamId: string) => {
+    const teamIndex = teams.findIndex((team) => team.id === teamId);
+    if (teamIndex >= 0) {
+      setSelectedIndex(teamIndex + 1);
+    }
+  };
 
   // Cargar stats agregadas por semana para TODOS los equipos del cliente
   useEffect(() => {
@@ -233,14 +263,43 @@ export function ClientCalendar({
         })}
       </div>
 
-      <div className="flex flex-col gap-[10px] sm:flex-row sm:items-center">
-        <ContractorSearch
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder={tCalendar("filters.searchPlaceholder")}
-          className="sm:max-w-[311px]"
-        />
-        <WeekRangePicker value={weekRange} onChange={setWeekRange} />
+      <div className="flex flex-col gap-[10px] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-[10px] sm:flex-row sm:items-center">
+          <ContractorSearch
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder={tCalendar("filters.searchPlaceholder")}
+            className="sm:max-w-[311px]"
+          />
+          <WeekRangePicker value={weekRange} onChange={setWeekRange} />
+        </div>
+        {selectedTeamId ? (
+          <ClientCalendarFilters
+            jobPositionOptions={jobPositionOptions}
+            selectedJobPosition={jobPositionFilter}
+            onJobPositionChange={setJobPositionFilter}
+            selectedAbsenceType={absenceTypeFilter}
+            onAbsenceTypeChange={setAbsenceTypeFilter}
+          />
+        ) : (
+          <div className="mt-2 flex flex-col items-end text-right text-[#4B4B4B] sm:mt-0">
+            <span className="mb-1 text-[13px] font-medium">Activity Type</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <div className="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-[#E5F6FF]">
+                  <Users className="h-4 w-4 text-[#0097B2]" />
+                </div>
+                <span className="text-[15px] font-medium text-[#0097B2]">Active Contractors</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-[#FFE4E6]">
+                  <Users className="h-4 w-4 text-[#FE6A35]" />
+                </div>
+                <span className="text-[15px] font-medium text-[#FE6A35]">Absent Contractors</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <ClientCalendarWeekGrid
@@ -249,6 +308,8 @@ export function ClientCalendar({
         isAllTeams={!selectedTeamId}
         contractors={selectedTeamContractors}
         teamDayStats={teamDayStats}
+        onTeamClick={handleTeamClickFromGrid}
+        jobPositionFilter={jobPositionFilter}
       />
     </section>
   );

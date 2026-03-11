@@ -373,7 +373,14 @@
     },
     "filters": {
       "allTeams": "Todos los Equipos",
-      "searchPlaceholder": "Buscar aquí..."
+      "searchPlaceholder": "Buscar aquí...",
+      "timeWorkLabel": "Tipo de Jornada",
+      "timeWorkAll": "Todos",
+      "absenceTypeLabel": "Tipo de Ausencia",
+      "absenceTypeAll": "Todos",
+      "absenceTypeLicense": "Licencia",
+      "absenceTypeVacation": "Vacaciones",
+      "absenceTypeHealth": "Salud"
     }
   },
   "clients": {
