@@ -53,19 +53,24 @@ export const ContractorCalendarModal = ({
     : undefined;
 
   // Convertir días libres a eventos del calendario
-  const dayOffEvents: CalendarEvent[] = dayOffs.map((dayOff) => {
-    // Extraer la fecha sin considerar la zona horaria
-    const dateStr = dayOff.date.split("T")[0]; // "2026-01-10"
-    const [year, month, day] = dateStr.split("-").map(Number);
+  const dayOffEvents: CalendarEvent[] = dayOffs.flatMap((dayOff) => {
+    if (!dayOff.dates || dayOff.dates.length === 0) {
+      return [];
+    }
 
-    return {
-      id: dayOff.id,
-      date: new Date(year, month - 1, day), // month - 1 porque JavaScript cuenta los meses desde 0
-      title: "Day Off",
-      description: dayOff.reason,
-      color: "#FF6B6B",
-      type: "holiday",
-    };
+    return dayOff.dates.map((isoDate) => {
+      const dateStr = isoDate.split("T")[0]; // "2026-01-10"
+      const [year, month, day] = dateStr.split("-").map(Number);
+
+      return {
+        id: `${dayOff.id}-${dateStr}`,
+        date: new Date(year, month - 1, day), // month - 1 porque JavaScript cuenta los meses desde 0
+        title: "Day Off",
+        description: dayOff.reason,
+        color: "#FF6B6B",
+        type: "holiday",
+      } as CalendarEvent;
+    });
   });
 
   // TODO: Cargar otros eventos del contractor desde la API (trabajo, reuniones, etc.)

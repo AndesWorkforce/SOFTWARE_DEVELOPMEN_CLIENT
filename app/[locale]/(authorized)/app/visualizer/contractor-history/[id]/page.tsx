@@ -49,10 +49,11 @@ export default function ContractorHistoryPage() {
   }, [contractorId]);
 
   const filteredDayOffs = dateFilter
-    ? dayOffs.filter(
-        (d) =>
-          d.date.includes(dateFilter) || d.reason.toLowerCase().includes(dateFilter.toLowerCase()),
-      )
+    ? dayOffs.filter((d) => {
+        const matchesReason = d.reason.toLowerCase().includes(dateFilter.toLowerCase());
+        const matchesDate = d.dates?.some((iso) => iso.includes(dateFilter)) ?? false;
+        return matchesReason || matchesDate;
+      })
     : dayOffs;
 
   const handleCleanFilters = () => {
@@ -208,7 +209,7 @@ export default function ContractorHistoryPage() {
                     }}
                   >
                     <span className="text-[14px] text-black self-center">
-                      {formatDate(dayOff.date)}
+                      {dayOff.dates && dayOff.dates.length > 0 ? formatDate(dayOff.dates[0]) : "-"}
                     </span>
                     <span className="text-[14px] text-[#6d6d6d] self-center">{dayOff.reason}</span>
                   </div>
