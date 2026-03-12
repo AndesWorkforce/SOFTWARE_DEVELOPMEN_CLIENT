@@ -106,8 +106,8 @@ export const Modal = ({
 
         {/* Content */}
         <div
-          className={`px-6 py-4 overflow-y-auto flex-1 ${contentClassName}`}
-          style={{ overflowX: "hidden", ...contentStyle }}
+          className={`px-6 py-4 flex-1 ${contentClassName}`}
+          style={{ overflow: "hidden", ...contentStyle }}
         >
           {children}
         </div>

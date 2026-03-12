@@ -37,6 +37,7 @@ export interface ContractorDayOff {
   contractor_id: string;
   dates: string[];
   reason: string;
+  type: string;
   created_at: string;
 }
 
@@ -47,6 +48,7 @@ export interface CreateContractorDayOffDto {
   contractor_id: string;
   dates: string[];
   reason: string;
+  type: string;
 }
 
 /**
@@ -55,6 +57,7 @@ export interface CreateContractorDayOffDto {
 export interface UpdateContractorDayOffDto {
   dates?: string[];
   reason?: string;
+  type?: string;
 }
 
 /**

@@ -420,7 +420,6 @@ export class ContractorsService {
     try {
       const response = await http.post<ContractorDayOff>(`/contractors/${contractorId}/day-offs`, {
         ...dayOffData,
-        contractor_id: contractorId,
       });
       return response.data;
     } catch (error) {
