@@ -123,6 +123,9 @@
     "absences": "Ausencias",
     "activeContractors": "Contratistas Activos",
     "recentAlerts": "Alertas Recientes",
+    "weekDaysOff": "Ausencias de la Semana",
+    "lastDaysOff": "Últimas Ausencias Registradas",
+    "noTeam": "Sin Equipo",
     "filters": {
       "all": "Todos",
       "highProductivity": "Alta Productividad",

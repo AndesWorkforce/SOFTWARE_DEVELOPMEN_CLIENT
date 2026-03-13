@@ -123,6 +123,9 @@
     "absences": "Absences",
     "activeContractors": "Active Contractors",
     "recentAlerts": "Recent Alerts",
+    "weekDaysOff": "Days Off This Week",
+    "lastDaysOff": "Last Registered Absences",
+    "noTeam": "No Team",
     "filters": {
       "all": "All",
       "highProductivity": "High Productivity",
