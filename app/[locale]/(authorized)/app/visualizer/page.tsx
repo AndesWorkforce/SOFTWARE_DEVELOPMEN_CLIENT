@@ -197,9 +197,10 @@ export default function VisualizerPage() {
                                   })}
                                 </p>
                               </div>
+                              x
                             </div>
 
-                            {/* Botón View History */}
+                            {/* Bsuotón View History */}
                             <Link
                               href={`/${locale}/app/visualizer/contractor-history/${dayOff.contractor_id}?name=${encodeURIComponent(dayOff.contractor_name)}`}
                               className="bg-white border border-[rgba(166,166,166,0.25)] rounded-[5px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] px-[20px] py-[6px] h-[38px] flex items-center justify-center xl:justify-between w-full xl:w-[165px] xl:shrink-0 hover:bg-gray-50 transition-colors"
