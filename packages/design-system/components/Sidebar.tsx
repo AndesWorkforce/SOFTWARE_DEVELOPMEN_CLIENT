@@ -3,7 +3,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useAuthStore } from "@/packages/store";
 import { ReactNode } from "react";
-import { LayoutDashboard, FileText, Users, LogOut, User, RefreshCw } from "lucide-react";
+import { LayoutDashboard, FileText, Users, LogOut, User, RefreshCw, Bot } from "lucide-react";
 import { hasRole } from "@/packages/utils/role.utils";
 
 interface NavItem {
@@ -80,6 +80,12 @@ export const Sidebar = ({ role }: SidebarProps) => {
       path: `/${locale}/app/${role}/roles`,
       icon: <User className="w-5 h-5" />,
       roles: ["super-admin"], // Solo para super-admin
+    },
+    {
+      name: t("agents"),
+      path: `/${locale}/app/${role}/agents`,
+      icon: <Bot className="w-5 h-5" />,
+      roles: ["super-admin", "admin"],
     },
   ];
 

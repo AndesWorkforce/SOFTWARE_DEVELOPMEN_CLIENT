@@ -305,8 +305,44 @@
     "contractors": "Contratistas",
     "clients": "Clientes",
     "roles": "Roles",
+    "agents": "Agentes",
     "changeRole": "Cambiar de Rol",
     "logout": "Cerrar Sesión"
+  },
+  "agents": {
+    "title": "Gestión de Agentes",
+    "tabs": {
+      "unlinked": "Agentes Sin Vincular",
+      "applications": "Aplicaciones Disponibles"
+    },
+    "table": {
+      "hostname": "Hostname",
+      "activationKey": "Clave de Activación",
+      "type": "Tipo",
+      "status": "Estado",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "createdAt": "Creado el",
+      "action": "Acción"
+    },
+    "link": {
+      "button": "Vincular a Contratista",
+      "title": "Vincular Agente a Contratista",
+      "agentLabel": "Agente",
+      "selectContractor": "Contratista",
+      "selectContractorPlaceholder": "Selecciona un contratista...",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "errorMessage": "Error al vincular el agente. Intenta de nuevo."
+    },
+    "appsTable": {
+      "name": "Nombre de Aplicación",
+      "type": "Tipo",
+      "category": "Categoría",
+      "weight": "Peso"
+    },
+    "noAgents": "No se encontraron agentes sin vincular",
+    "noApps": "No se encontraron aplicaciones"
   },
   "contractors": {
     "title": "Contratistas",
