@@ -22,6 +22,7 @@ export interface ClientCalendarDayColumnProps {
   contractors?: Contractor[];
   onTeamClick?: (teamId: string) => void;
   className?: string;
+  jobPositionFilter?: string;
 }
 
 export function ClientCalendarDayColumn({
@@ -34,6 +35,7 @@ export function ClientCalendarDayColumn({
   contractors = [],
   onTeamClick,
   className = "",
+  jobPositionFilter = "all",
 }: ClientCalendarDayColumnProps) {
   const dayOfWeek = dayDate.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
@@ -62,14 +64,22 @@ export function ClientCalendarDayColumn({
                     onClick={onTeamClick ? () => onTeamClick(team.id) : undefined}
                   />
                 ))
-              : contractors.map((contractor) => (
-                  <ClientCalendarContractorDayCard
-                    key={contractor.id}
-                    name={contractor.name}
-                    jobPosition={contractor.job_position}
-                    jobSchedule={contractor.job_schedule}
-                  />
-                )))}
+              : contractors
+                  .filter((contractor) =>
+                    jobPositionFilter === "all"
+                      ? true
+                      : contractor.job_schedule === jobPositionFilter,
+                  )
+                  .map((contractor) => (
+                    <ClientCalendarContractorDayCard
+                      key={contractor.id}
+                      name={contractor.name}
+                      jobPosition={contractor.job_position}
+                      jobSchedule={contractor.job_schedule}
+                      workScheduleStart={contractor.work_schedule_start}
+                      workScheduleEnd={contractor.work_schedule_end}
+                    />
+                  )))}
         </div>
       </div>
     </div>

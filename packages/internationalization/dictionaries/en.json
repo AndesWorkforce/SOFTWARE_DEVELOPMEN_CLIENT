@@ -439,7 +439,14 @@
     },
     "filters": {
       "allTeams": "All Teams",
-      "searchPlaceholder": "Search here..."
+      "searchPlaceholder": "Search here...",
+      "timeWorkLabel": "Time Work",
+      "timeWorkAll": "All",
+      "absenceTypeLabel": "Absence Type",
+      "absenceTypeAll": "All",
+      "absenceTypeLicense": "License",
+      "absenceTypeVacation": "Vacation",
+      "absenceTypeHealth": "Health"
     }
   },
   "clients": {
