@@ -77,7 +77,11 @@ jobs:
       # ── 6. Webhook → Portainer redeploy ─────────────────────────────────────
       - name: Trigger Portainer stack redeploy
         run: |
+          if [ -z "${{ secrets.PORTAINER_WEBHOOK_URL }}" ]; then
+            echo "::error::PORTAINER_WEBHOOK_URL no está configurado. Ve a Settings → Secrets and variables → Actions y añade el secret con la URL del webhook del stack en Portainer."
+            exit 1
+          fi
           curl -f -v -4 -X POST \
-          -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
-          --connect-timeout 10 \
-          "${{ secrets.PORTAINER_WEBHOOK_URL }}"
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+            --connect-timeout 10 \
+            "${{ secrets.PORTAINER_WEBHOOK_URL }}"
