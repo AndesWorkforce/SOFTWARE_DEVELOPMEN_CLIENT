@@ -1,24 +1,14 @@
 # =============================================================================
-# docker-compose.yml — local development & Portainer/Swarm
+
+# docker-compose.yml — solo para Portainer / Swarm
 #
-# Local (con perfiles):
-#   docker compose --profile dev     up --build
-#   docker compose --profile staging up --build
-#   docker compose --profile prod    up --build
-#
-# Portainer: desplegar el stack sin perfil; se usa el servicio software-developmen-client
-# con imagen GHCR y redes traefik-public + default (como USER_MS).
+# Usar este archivo en Portainer al crear/actualizar el stack.
+# Docker Swarm no admite "profiles"; los servicios de desarrollo local están
+# en docker-compose.local.yml
 # =============================================================================
 version: "3.8"
 
-x-build-common: &build-common
-  context: .
-  dockerfile: Dockerfile
-
 services:
-  # ---------------------------------------------------------------------------
-  # Portainer / Swarm — imagen GHCR, misma red que USER_MS (traefik-public + default)
-  # ---------------------------------------------------------------------------
   software-developmen-client:
     image: ghcr.io/andesworkforce/software_developmen_client:latest
     networks:
@@ -29,6 +19,15 @@ services:
       placement:
         constraints:
           - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.http.routers.software-developmen-client.rule=Host(`pulse-andes-workforce.com`)"
+        - "traefik.http.routers.software-developmen-client.entrypoints=websecure"
+        - "traefik.http.routers.software-developmen-client.tls=true"
+        - "traefik.http.routers.software-developmen-client.tls.certresolver=letsencrypt"
+        - "traefik.http.services.software-developmen-client.loadbalancer.server.port=3000"
+
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -41,65 +40,6 @@ services:
       NODE_ENV: production
       PORT: "${PORT:-3000}"
 
-  # ---------------------------------------------------------------------------
-  # Development (local)
-  # ---------------------------------------------------------------------------
-  andes-client-dev:
-    profiles: [dev]
-    build:
-      <<: *build-common
-      args:
-        NEXT_PUBLIC_ENV: development
-        NEXT_PUBLIC_API_BASE_URL_DEV: http://localhost:3001
-        NEXT_PUBLIC_API_BASE_URL_STAGING: https://api-staging.andesworkforce.com
-        NEXT_PUBLIC_API_BASE_URL_PROD: https://api-gateway.test.andes-workforce.com
-    image: andes-client:dev
-    container_name: andes-client-dev
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: production
-    restart: unless-stopped
-
-  # ---------------------------------------------------------------------------
-  # Staging
-  # ---------------------------------------------------------------------------
-  andes-client-staging:
-    profiles: [staging]
-    build:
-      <<: *build-common
-      args:
-        NEXT_PUBLIC_ENV: staging
-        NEXT_PUBLIC_API_BASE_URL_DEV: http://localhost:3001
-        NEXT_PUBLIC_API_BASE_URL_STAGING: https://api-staging.andesworkforce.com
-        NEXT_PUBLIC_API_BASE_URL_PROD: https://api-gateway.test.andes-workforce.com
-    image: andes-client:staging
-    container_name: andes-client-staging
-    ports:
-      - "3001:3000"
-    environment:
-      NODE_ENV: production
-    restart: unless-stopped
-
-  # ---------------------------------------------------------------------------
-  # Production
-  # ---------------------------------------------------------------------------
-  andes-client-prod:
-    profiles: [prod]
-    build:
-      <<: *build-common
-      args:
-        NEXT_PUBLIC_ENV: production
-        NEXT_PUBLIC_API_BASE_URL_DEV: http://localhost:3001
-        NEXT_PUBLIC_API_BASE_URL_STAGING: https://api-staging.andesworkforce.com
-        NEXT_PUBLIC_API_BASE_URL_PROD: https://api-gateway.test.andes-workforce.com
-    image: andes-client:prod
-    container_name: andes-client-prod
-    ports:
-      - "3002:3000"
-    environment:
-      NODE_ENV: production
-    restart: unless-stopped
 
 networks:
   default:
