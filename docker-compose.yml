@@ -1,11 +1,15 @@
 # =============================================================================
-# docker-compose.yml — local development & smoke-testing
+# docker-compose.yml — local development & Portainer/Swarm
 #
-# Three profiles map to each target environment:
+# Local (con perfiles):
 #   docker compose --profile dev     up --build
 #   docker compose --profile staging up --build
 #   docker compose --profile prod    up --build
+#
+# Portainer: desplegar el stack sin perfil; se usa el servicio software-developmen-client
+# con imagen GHCR y redes traefik-public + default (como USER_MS).
 # =============================================================================
+version: "3.8"
 
 x-build-common: &build-common
   context: .
@@ -13,7 +17,32 @@ x-build-common: &build-common
 
 services:
   # ---------------------------------------------------------------------------
-  # Development
+  # Portainer / Swarm — imagen GHCR, misma red que USER_MS (traefik-public + default)
+  # ---------------------------------------------------------------------------
+  software-developmen-client:
+    image: ghcr.io/andesworkforce/software_developmen_client:latest
+    networks:
+      - traefik-public
+      - default
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+    environment:
+      NODE_ENV: production
+      PORT: "${PORT:-3000}"
+
+  # ---------------------------------------------------------------------------
+  # Development (local)
   # ---------------------------------------------------------------------------
   andes-client-dev:
     profiles: [dev]
@@ -71,3 +100,10 @@ services:
     environment:
       NODE_ENV: production
     restart: unless-stopped
+
+networks:
+  default:
+    name: andes-software-developmen-client-net
+    driver: overlay
+  traefik-public:
+    external: true
