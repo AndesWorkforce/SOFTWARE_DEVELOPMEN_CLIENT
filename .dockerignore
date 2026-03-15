@@ -1,0 +1,59 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Next.js build output
+.next
+out
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Environment files (injected at build time via --build-arg)
+.env
+.env.*
+!.env.example
+
+# Docs & markdown
+README.md
+*.md
+docs/
+
+# CI/CD configs
+.github
+.gitlab-ci.yml
+
+# Editor / IDE
+.vscode
+.idea
+*.suo
+*.user
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Docker files (no need to copy into the image)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test artifacts
+coverage
+.nyc_output
+
+# Linting / formatting
+.eslintcache
+.prettiercache
+
+# TypeScript cache
+*.tsbuildinfo

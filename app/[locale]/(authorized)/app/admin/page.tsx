@@ -1,3 +1,222 @@
+"use client";
+
+import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { ChevronRight, FileText } from "lucide-react";
+import { DataTable, DashboardSkeleton, Button } from "@/packages/design-system";
+import { usersService } from "@/packages/api/users/users.service";
+import { clientsService, type Client } from "@/packages/api/clients/clients.service";
+import {
+  contractorsService,
+  type Contractor,
+} from "@/packages/api/contractors/contractors.service";
+import { clientsTableConfig, getContractorsTableConfig } from "./constants";
+
 export default function AdminPage() {
-  return <h1>Admin Page - Authorized Users Only</h1>;
+  const locale = useLocale();
+  const router = useRouter();
+  const t = useTranslations("admin");
+
+  const [stats, setStats] = useState<{
+    totalClients: number;
+    totalContractors: number;
+    totalTeams: number;
+  } | null>(null);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [contractors, setContractors] = useState<Contractor[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar datos
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [statsData, clientsData, contractorsData] = await Promise.all([
+          usersService.getStats(),
+          clientsService.getAll(),
+          contractorsService.getAll(),
+        ]);
+
+        setStats(statsData);
+        setClients(clientsData.slice(0, 6)); // Solo 6 clientes para el preview
+        setContractors(contractorsData.slice(0, 10)); // Solo 10 contractors para el preview
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // Configuración de la tabla de clientes
+  const memoizedClientsConfig = useMemo(() => clientsTableConfig, []);
+
+  // Configuración de la tabla de contractors
+  const memoizedContractorsConfig = useMemo(() => getContractorsTableConfig(), []);
+
+  if (loading) {
+    return <DashboardSkeleton variant="admin" />;
+  }
+
+  // Obtener fecha actual formateada según el locale
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  // Construir URL para el generador de reportes (misma lógica que en reports/page.tsx)
+  const buildExportUrl = () => {
+    const params = new URLSearchParams();
+    const todayStr = new Date().toISOString().split("T")[0];
+    params.set("from", todayStr);
+    params.set("to", todayStr);
+    return `/${locale}/app/admin/reports/group?${params.toString()}`;
+  };
+
+  return (
+    <div className="p-4 md:p-8 min-h-screen overflow-x-hidden" style={{ background: "#FFFFFF" }}>
+      <div className="max-w-full overflow-x-hidden">
+        {/* Título */}
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-semibold" style={{ color: "#000000" }}>
+            {t("title")}
+          </h1>
+        </div>
+
+        {/* Tarjetas de estadísticas */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div
+            className="bg-white border border-[rgba(166,166,166,0.25)] rounded-lg shadow-[0px_4px_4px_rgba(166,166,166,0.25)] p-4 flex flex-col items-center justify-center"
+            style={{ height: "100px" }}
+          >
+            <p className="text-base font-medium text-center mb-2" style={{ color: "#0097B2" }}>
+              {t("stats.clients")}
+            </p>
+            <p className="text-3xl font-semibold text-center" style={{ color: "#000000" }}>
+              {stats?.totalClients || 0}
+            </p>
+          </div>
+
+          <div
+            className="bg-white border border-[rgba(166,166,166,0.25)] rounded-lg shadow-[0px_4px_4px_rgba(166,166,166,0.25)] p-4 flex flex-col items-center justify-center"
+            style={{ height: "100px" }}
+          >
+            <p className="text-base font-medium text-center mb-2" style={{ color: "#0097B2" }}>
+              {t("stats.contractors")}
+            </p>
+            <p className="text-3xl font-semibold text-center" style={{ color: "#000000" }}>
+              {stats?.totalContractors || 0}
+            </p>
+          </div>
+
+          <div
+            className="bg-white border border-[rgba(166,166,166,0.25)] rounded-lg shadow-[0px_4px_4px_rgba(166,166,166,0.25)] p-4 flex flex-col items-center justify-center"
+            style={{ height: "100px" }}
+          >
+            <p className="text-base font-medium text-center mb-2" style={{ color: "#0097B2" }}>
+              {t("stats.teams")}
+            </p>
+            <p className="text-3xl font-semibold text-center" style={{ color: "#000000" }}>
+              {stats?.totalTeams || 0}
+            </p>
+          </div>
+        </div>
+
+        {/* Grid: Columna izquierda (Reports + Clients) | Columna derecha (Contractors) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Columna izquierda: Reports + Clients */}
+          <div className="flex flex-col gap-6">
+            {/* Card de Reports */}
+            <div
+              className="bg-white border border-[rgba(166,166,166,0.5)] rounded-lg shadow-[0px_4px_4px_rgba(166,166,166,0.25)] p-6 flex flex-col justify-between"
+              style={{ height: "153px" }}
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <p className="text-xl font-semibold mb-1" style={{ color: "#000000" }}>
+                    {t("reports.title")}
+                  </p>
+                  <p className="text-base" style={{ color: "#666666" }}>
+                    {formattedDate}
+                  </p>
+                </div>
+                <Link href={buildExportUrl()}>
+                  <Button
+                    variant="primary"
+                    style={{
+                      background: "#0097B2",
+                      color: "#FFFFFF",
+                      fontSize: "14px",
+                      padding: "7px 21px",
+                      height: "40px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    <span>{t("reports.reportGenerator")}</span>
+                  </Button>
+                </Link>
+              </div>
+              <div className="pt-3 flex justify-center">
+                <Link
+                  href={`/${locale}/app/admin/reports`}
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium cursor-pointer"
+                >
+                  <span>{t("reports.viewReports")}</span>
+                  <ChevronRight className="w-5 h-5" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Card de Clients */}
+            <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-lg shadow-[0px_4px_4px_rgba(166,166,166,0.25)] p-6">
+              <p className="text-xl font-semibold mb-4" style={{ color: "#000000" }}>
+                {t("clients.title")}
+              </p>
+              <div className="mb-4" style={{ maxHeight: "350px", overflow: "hidden" }}>
+                <DataTable config={memoizedClientsConfig} data={clients} />
+              </div>
+              <div className="pt-3 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => router.push(`/${locale}/app/admin/clients`)}
+                  className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium cursor-pointer"
+                >
+                  <span>{t("clients.viewClients")}</span>
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Columna derecha: Card de Contractors */}
+          <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-lg shadow-[0px_4px_4px_rgba(166,166,166,0.25)] p-6">
+            <p className="text-xl font-semibold mb-4" style={{ color: "#000000" }}>
+              {t("contractors.title")}
+            </p>
+            <div className="mb-4" style={{ maxHeight: "548px", overflow: "hidden" }}>
+              <DataTable config={memoizedContractorsConfig} data={contractors} />
+            </div>
+            <div className="pt-3 flex justify-center">
+              <button
+                type="button"
+                onClick={() => router.push(`/${locale}/app/admin/contractors`)}
+                className="inline-flex items-center gap-1 text-[#0097B2] hover:underline font-medium cursor-pointer"
+              >
+                <span>{t("contractors.viewContractors")}</span>
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
