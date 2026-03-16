@@ -49,6 +49,8 @@ export function FormModalLayout({
         style={{
           width: "100%",
           maxWidth: "338px",
+          marginLeft: "auto",
+          marginRight: "auto",
           ...(contentPadding && { padding: contentPadding }),
           ...modalStyle,
         }}
