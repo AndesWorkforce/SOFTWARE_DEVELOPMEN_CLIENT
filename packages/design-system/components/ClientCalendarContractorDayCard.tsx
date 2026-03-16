@@ -1,6 +1,6 @@
 "use client";
 
-import { BriefcaseBusiness, Clock } from "lucide-react";
+import { BriefcaseBusiness, Clock, FileUser, TreePalm, Cross } from "lucide-react";
 
 export interface ClientCalendarContractorDayCardProps {
   name: string;
@@ -8,6 +8,7 @@ export interface ClientCalendarContractorDayCardProps {
   jobSchedule?: "full_time" | "part_time" | "no_schedule" | null;
   workScheduleStart?: string | null;
   workScheduleEnd?: string | null;
+  dayOffType?: "Health" | "Vacation" | "License" | null;
 }
 
 export function ClientCalendarContractorDayCard({
@@ -16,12 +17,34 @@ export function ClientCalendarContractorDayCard({
   jobSchedule,
   workScheduleStart,
   workScheduleEnd,
+  dayOffType,
 }: ClientCalendarContractorDayCardProps) {
   const isFullTime = jobSchedule === "full_time";
   const isPartTime = jobSchedule === "part_time";
 
-  const backgroundColor = isFullTime ? "#CFFAFE" : isPartTime ? "#F3E8FF" : "#FFFFFF";
-  const textColor = isFullTime ? "#0E7490" : isPartTime ? "#7E22CE" : "#000000";
+  let backgroundColor = "#FFFFFF";
+  let textColor = "#000000";
+  let Icon = BriefcaseBusiness;
+
+  if (dayOffType === "Health") {
+    backgroundColor = "#FEE2E2";
+    textColor = "#991B1B";
+    Icon = Cross;
+  } else if (dayOffType === "Vacation") {
+    backgroundColor = "#DCFCE7";
+    textColor = "#166534";
+    Icon = TreePalm;
+  } else if (dayOffType === "License") {
+    backgroundColor = "#DBEAFE";
+    textColor = "#1E40AF";
+    Icon = FileUser;
+  } else if (isFullTime) {
+    backgroundColor = "#CFFAFE";
+    textColor = "#0E7490";
+  } else if (isPartTime) {
+    backgroundColor = "#F3E8FF";
+    textColor = "#7E22CE";
+  }
 
   const scheduleLabel =
     workScheduleStart && workScheduleEnd ? `${workScheduleStart} - ${workScheduleEnd}` : "-";
@@ -33,7 +56,7 @@ export function ClientCalendarContractorDayCard({
     >
       {/* Vista por defecto */}
       <div className="flex w-full items-center gap-[8px] group-hover:hidden">
-        <BriefcaseBusiness className="h-4 w-4 shrink-0" />
+        <Icon className="h-4 w-4 shrink-0" />
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-[12px] font-medium leading-normal">{name}</span>
           <span className="truncate text-[10px] font-normal leading-normal">{jobPosition}</span>

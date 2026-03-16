@@ -73,6 +73,9 @@ export function ClientCalendar({
   const [teamDayStats, setTeamDayStats] = useState<
     Record<string, Record<string, { activeCount: number; absentCount: number }>>
   >({});
+  const [teamDayOffs, setTeamDayOffs] = useState<
+    Array<{ contractorId: string; date: string; type: "License" | "Vacation" | "Health" }>
+  >([]);
 
   const jobPositionOptions = useMemo(
     () =>
@@ -189,6 +192,43 @@ export function ClientCalendar({
 
     loadWeeklyTeamStats();
   }, [clientId, weekRange.start, weekRange.end, teams]);
+
+  useEffect(() => {
+    const loadTeamWeekDayOffs = async () => {
+      if (!selectedTeamId) {
+        setTeamDayOffs([]);
+        return;
+      }
+
+      try {
+        const startIso = weekRange.start.toISOString().slice(0, 10);
+        const endIso = weekRange.end.toISOString().slice(0, 10);
+
+        const data = await contractorsService.getTeamDayOffsInRange(
+          selectedTeamId,
+          startIso,
+          endIso,
+        );
+        setTeamDayOffs(data);
+      } catch (error) {
+        console.error("❌ Error cargando day offs semanales de equipo en ClientCalendar:", error);
+        setTeamDayOffs([]);
+      }
+    };
+
+    loadTeamWeekDayOffs();
+  }, [selectedTeamId, weekRange.start, weekRange.end]);
+
+  const dayOffByContractorAndDate = useMemo(() => {
+    const map: Record<string, Record<string, "License" | "Vacation" | "Health">> = {};
+    for (const item of teamDayOffs) {
+      if (!map[item.contractorId]) {
+        map[item.contractorId] = {};
+      }
+      map[item.contractorId][item.date] = item.type;
+    }
+    return map;
+  }, [teamDayOffs]);
 
   const displayCards: ClientCalendarCardDataProps[] = useMemo(() => {
     if (!selectedTeamId || !teamStats) {
@@ -310,6 +350,15 @@ export function ClientCalendar({
         teamDayStats={teamDayStats}
         onTeamClick={handleTeamClickFromGrid}
         jobPositionFilter={jobPositionFilter}
+        absenceTypeFilter={absenceTypeFilter}
+        getContractorDayOffType={
+          selectedTeamId
+            ? (contractor, dayDate) => {
+                const iso = dayDate.toISOString().slice(0, 10);
+                return dayOffByContractorAndDate[contractor.id]?.[iso] ?? null;
+              }
+            : undefined
+        }
       />
     </section>
   );

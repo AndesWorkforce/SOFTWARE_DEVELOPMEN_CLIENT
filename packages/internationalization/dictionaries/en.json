@@ -123,6 +123,9 @@
     "absences": "Absences",
     "activeContractors": "Active Contractors",
     "recentAlerts": "Recent Alerts",
+    "weekDaysOff": "Days Off This Week",
+    "lastDaysOff": "Last Registered Absences",
+    "noTeam": "No Team",
     "filters": {
       "all": "All",
       "highProductivity": "High Productivity",
@@ -302,8 +305,44 @@
     "contractors": "Contractors",
     "clients": "Clients",
     "roles": "Roles",
+    "agents": "Agents",
     "changeRole": "Role Change",
     "logout": "Logout"
+  },
+  "agents": {
+    "title": "Agents Management",
+    "tabs": {
+      "unlinked": "Unlinked Agents",
+      "applications": "Available Applications"
+    },
+    "table": {
+      "hostname": "Hostname",
+      "activationKey": "Activation Key",
+      "type": "Type",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "createdAt": "Created At",
+      "action": "Action"
+    },
+    "link": {
+      "button": "Link to Contractor",
+      "title": "Link Agent to Contractor",
+      "agentLabel": "Agent",
+      "selectContractor": "Contractor",
+      "selectContractorPlaceholder": "Select a contractor...",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "errorMessage": "Failed to link agent. Please try again."
+    },
+    "appsTable": {
+      "name": "Application Name",
+      "type": "Type",
+      "category": "Category",
+      "weight": "Weight"
+    },
+    "noAgents": "No unlinked agents found",
+    "noApps": "No applications found"
   },
   "contractors": {
     "title": "Contractors",

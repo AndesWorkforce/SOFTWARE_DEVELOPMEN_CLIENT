@@ -23,6 +23,11 @@ export interface ClientCalendarDayColumnProps {
   onTeamClick?: (teamId: string) => void;
   className?: string;
   jobPositionFilter?: string;
+  absenceTypeFilter?: string;
+  getContractorDayOffType?: (
+    contractor: Contractor,
+    dayDate: Date,
+  ) => "Health" | "Vacation" | "License" | null;
 }
 
 export function ClientCalendarDayColumn({
@@ -36,6 +41,8 @@ export function ClientCalendarDayColumn({
   onTeamClick,
   className = "",
   jobPositionFilter = "all",
+  absenceTypeFilter = "all",
+  getContractorDayOffType,
 }: ClientCalendarDayColumnProps) {
   const dayOfWeek = dayDate.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
@@ -65,12 +72,25 @@ export function ClientCalendarDayColumn({
                   />
                 ))
               : contractors
-                  .filter((contractor) =>
-                    jobPositionFilter === "all"
-                      ? true
-                      : contractor.job_schedule === jobPositionFilter,
-                  )
-                  .map((contractor) => (
+                  .map((contractor) => {
+                    const contractorDayOffType =
+                      getContractorDayOffType?.(contractor, dayDate) ?? null;
+                    return { contractor, contractorDayOffType };
+                  })
+                  .filter(({ contractor, contractorDayOffType }) => {
+                    const matchesSchedule =
+                      jobPositionFilter === "all"
+                        ? true
+                        : contractor.job_schedule === jobPositionFilter;
+
+                    const matchesAbsence =
+                      absenceTypeFilter === "all"
+                        ? true
+                        : contractorDayOffType === absenceTypeFilter;
+
+                    return matchesSchedule && matchesAbsence;
+                  })
+                  .map(({ contractor, contractorDayOffType }) => (
                     <ClientCalendarContractorDayCard
                       key={contractor.id}
                       name={contractor.name}
@@ -78,6 +98,7 @@ export function ClientCalendarDayColumn({
                       jobSchedule={contractor.job_schedule}
                       workScheduleStart={contractor.work_schedule_start}
                       workScheduleEnd={contractor.work_schedule_end}
+                      dayOffType={contractorDayOffType}
                     />
                   )))}
         </div>

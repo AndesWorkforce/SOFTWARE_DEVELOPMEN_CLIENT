@@ -318,6 +318,32 @@ export class ContractorsService {
     }
   }
 
+  async getTeamDayOffsInRange(
+    teamId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<
+    Array<{ contractorId: string; date: string; type: "License" | "Vacation" | "Health" }>
+  > {
+    try {
+      const response = await http.get<
+        Array<{ contractorId: string; date: string; type: "License" | "Vacation" | "Health" }>
+      >(`/contractors/team/${teamId}/day-offs-in-range`, {
+        params: { start: startDate, end: endDate },
+      });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getTeamDayOffsInRange contractors:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+
+      throw error;
+    }
+  }
+
   /**
    * Obtiene un contractor por clave de activación
    * @param activationKey Clave de activación
