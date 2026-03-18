@@ -6,11 +6,10 @@ import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 import { authService } from "@/packages/api/auth/auth.service";
 import { useAuthStore } from "@/packages/store";
-import { Button } from "@/packages/design-system";
 
 // Importar imágenes
-import loginAndesImage from "@/packages/design-system/images/login-andes.png";
-import andesLogo from "@/packages/design-system/images/andes logo login.png";
+import loginAndesImage from "@/packages/design-system/images/andes image login.png";
+import andesLogo from "@/packages/design-system/images/logo pulse 1.png";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -146,7 +145,7 @@ export default function LoginPage() {
         <div className="w-full max-w-[494px] flex flex-col items-center gap-[50px]">
           {/* Logo y título */}
           <div className="flex flex-col items-center gap-[75px]">
-            <div className="relative w-[216px] h-[72px] flex-shrink-0">
+            <div className="relative w-[200px] h-[97px] flex-shrink-0">
               <Image
                 src={andesLogo}
                 alt="Andes Workforce Logo"
@@ -155,7 +154,7 @@ export default function LoginPage() {
                 priority
               />
             </div>
-            <h1 className="text-[24px] font-bold text-black text-center leading-normal">
+            <h1 className="text-[24px] font-bold text-[#007489] text-center leading-normal">
               {t("login.title")}
             </h1>
           </div>
@@ -172,7 +171,7 @@ export default function LoginPage() {
             <div className="flex flex-col items-start w-full">
               <label
                 htmlFor="email"
-                className="text-[16px] font-normal text-black leading-normal mb-0"
+                className="text-[16px] font-normal text-[#0f172a] leading-normal mb-0"
               >
                 {t("login.email")}
               </label>
@@ -183,7 +182,7 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full h-[55px] bg-white border border-[#b6b4b4] rounded-[10px] px-4 text-[16px] text-black focus:outline-none focus:ring-2 focus:ring-[#0097b2] focus:border-[#0097b2]"
+                className="w-full h-[55px] bg-white border border-[#64748b] border-[0.2px] rounded-[10px] px-4 text-[16px] text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#007489] focus:border-[#007489]"
                 placeholder={t("login.emailPlaceholder")}
               />
             </div>
@@ -192,7 +191,7 @@ export default function LoginPage() {
             <div className="flex flex-col items-start w-full">
               <label
                 htmlFor="password"
-                className="text-[16px] font-normal text-black leading-normal mb-0"
+                className="text-[16px] font-normal text-[#0f172a] leading-normal mb-0"
               >
                 {t("login.password")}
               </label>
@@ -204,13 +203,13 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full h-[55px] bg-white border border-[#b6b4b4] rounded-[10px] px-4 pr-[50px] text-[16px] text-black focus:outline-none focus:ring-2 focus:ring-[#0097b2] focus:border-[#0097b2]"
+                  className="w-full h-[55px] bg-white border border-[#64748b] border-[0.2px] rounded-[10px] px-4 pr-[50px] text-[16px] text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#007489] focus:border-[#007489]"
                   placeholder={t("login.passwordPlaceholder")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-[19px] top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-black hover:opacity-70 transition-opacity"
+                  className="absolute right-[19px] top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-[#64748b] hover:opacity-70 transition-opacity"
                   aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
                   {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
@@ -222,10 +221,18 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-[55px] bg-[#0097b2] text-white text-[16px] font-bold rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full h-[55px] bg-[#007489] text-white text-[16px] font-bold rounded-[10px] shadow-[0px_4px_4px_0px_rgba(100,116,139,0.25)] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {loading ? t("login.submitting") : t("login.submit")}
             </button>
+
+            {/* Forgot password */}
+            <div className="flex flex-col items-center text-[16px] leading-[30px] text-center text-[#0f172a]">
+              <span className="font-medium">Forgot password?</span>
+              <a href="#" className="font-semibold text-[#007489] underline">
+                Click here
+              </a>
+            </div>
           </form>
         </div>
       </div>

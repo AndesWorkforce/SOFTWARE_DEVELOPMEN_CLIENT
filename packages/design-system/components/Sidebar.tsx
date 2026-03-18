@@ -4,7 +4,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useAuthStore } from "@/packages/store";
 import { ReactNode } from "react";
 import { LayoutDashboard, FileText, Users, LogOut, User, RefreshCw, Bot } from "lucide-react";
-import { hasRole } from "@/packages/utils/role.utils";
+import Image from "next/image";
+import pulseLogo from "@/packages/design-system/images/logo pulse 1.png";
 
 interface NavItem {
   name: string;
@@ -112,76 +113,79 @@ export const Sidebar = ({ role }: SidebarProps) => {
   return (
     <>
       {/* Desktop/Tablet sidebar (left) */}
-      <aside
-        className="hidden md:flex md:flex-col w-60 h-screen fixed left-0 top-0"
-        style={{ background: "#FFFFFF", borderRight: "1px solid #E5E5E5" }}
-      >
+      <aside className="hidden md:flex md:flex-col w-[237px] h-screen fixed left-0 top-0 bg-white px-[30px] py-[40px] shadow-[2px_0_8px_rgba(0,0,0,0.06)]">
         {/* Logo */}
-        <div className="p-6">
-          <div className="flex items-center justify-center">
-            <img src="/logo_andes_home.png" alt="ANDES WORKFORCE" className="h-12 w-auto" />
+        <div className="flex items-start justify-start mb-[25px]">
+          <div className="relative w-[130px] h-[63px] flex-shrink-0">
+            <Image
+              src={pulseLogo}
+              alt="PULSE by Andes Workforce"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-1">
+        <nav className="flex-1 flex flex-col gap-[20px] mt-[25px]">
           {navItems.map((item) => {
             const active = isActive(item.path);
             return (
               <button
                 key={item.path}
                 onClick={() => router.push(item.path)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left cursor-pointer"
+                className="w-full flex items-center gap-[10px] p-[10px] rounded-[10px] transition-colors text-left cursor-pointer"
                 style={{
-                  color: active ? "#0097B2" : "#000000",
-                  background: active ? "#E6F7FA" : "transparent",
+                  background: active ? "rgba(0,151,178,0.1)" : "transparent",
+                  color: active ? "#007489" : "#64748b",
                 }}
                 onMouseEnter={(e) => {
-                  if (!active) e.currentTarget.style.background = "#F5F5F5";
+                  if (!active) e.currentTarget.style.background = "rgba(0,151,178,0.05)";
                 }}
                 onMouseLeave={(e) => {
                   if (!active) e.currentTarget.style.background = "transparent";
                 }}
               >
-                {item.icon}
-                <span className="text-sm font-medium">{item.name}</span>
+                <span className="w-5 h-5 flex-shrink-0">{item.icon}</span>
+                <span
+                  className={`text-[14px] leading-normal ${active ? "font-bold" : "font-normal"}`}
+                >
+                  {item.name}
+                </span>
               </button>
             );
           })}
         </nav>
 
         {/* Change Role & Logout */}
-        <div className="p-4" style={{ borderTop: "1px solid #E5E5E5" }}>
-          {/* Change Role button - only show if user has multiple roles */}
+        <div className="flex flex-col gap-[10px]">
           {hasMultipleRoles() && (
             <button
               onClick={handleChangeRole}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left mb-2 cursor-pointer"
-              style={{ color: "#000000" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#F5F5F5")}
+              className="w-full flex items-center gap-[10px] p-[10px] rounded-[10px] transition-colors text-left cursor-pointer text-[#0f172a] text-[14px] font-normal"
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <RefreshCw className="w-5 h-5" />
-              <span className="text-sm font-medium">{t("changeRole")}</span>
+              <RefreshCw className="w-5 h-5 flex-shrink-0" />
+              <span>{t("changeRole")}</span>
             </button>
           )}
-          {/* Logout */}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left cursor-pointer"
-            style={{ color: "#000000" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#F5F5F5")}
+            className="w-full flex items-center gap-[10px] p-[10px] rounded-[10px] transition-colors text-left cursor-pointer text-[#0f172a] text-[14px] font-normal"
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.04)")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
-            <LogOut className="w-5 h-5" />
-            <span className="text-sm font-medium">{t("logout")}</span>
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <span>{t("logout")}</span>
           </button>
         </div>
       </aside>
 
       {/* Mobile bottom nav (icons only) */}
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white border-t border-[#E5E5E5] z-50"
+        className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white border-t border-[#64748b] z-50"
         aria-label="Bottom Navigation"
       >
         <ul className="h-full flex items-center justify-around">
@@ -193,25 +197,22 @@ export const Sidebar = ({ role }: SidebarProps) => {
                   aria-label={item.name}
                   onClick={() => router.push(item.path)}
                   className="p-2 cursor-pointer"
-                  style={{ color: active ? "#0097B2" : "#000000" }}
+                  style={{ color: active ? "#007489" : "#64748b" }}
                 >
-                  {/* Clone icon with consistent size on mobile */}
                   <span className="inline-flex w-6 h-6 items-center justify-center">
-                    {/* icons already sized w-5 h-5; wrapper ensures tap area */}
                     {item.icon}
                   </span>
                 </button>
               </li>
             );
           })}
-          {/* Change Role icon - only show if user has multiple roles */}
           {hasMultipleRoles() && (
             <li>
               <button
                 aria-label={t("changeRole")}
                 onClick={handleChangeRole}
                 className="p-2 cursor-pointer"
-                style={{ color: "#000000" }}
+                style={{ color: "#0f172a" }}
               >
                 <span className="inline-flex w-6 h-6 items-center justify-center">
                   <RefreshCw className="w-5 h-5" />
@@ -219,13 +220,12 @@ export const Sidebar = ({ role }: SidebarProps) => {
               </button>
             </li>
           )}
-          {/* Logout icon */}
           <li>
             <button
               aria-label={t("logout")}
               onClick={handleLogout}
               className="p-2 cursor-pointer"
-              style={{ color: "#000000" }}
+              style={{ color: "#0f172a" }}
             >
               <span className="inline-flex w-6 h-6 items-center justify-center">
                 <LogOut className="w-5 h-5" />
