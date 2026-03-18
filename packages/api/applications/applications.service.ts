@@ -43,6 +43,39 @@ export class ApplicationsService {
       );
     }
   }
+
+  async assignToContractor(
+    contractorId: string,
+    app_ids: string[],
+  ): Promise<{ message: string; assigned: number }> {
+    try {
+      const response = await http.post<{ message: string; assigned: number }>(
+        `/apps/contractor/${contractorId}/assign`,
+        { app_ids },
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new Error(
+        (axiosError.response?.data as { message?: string })?.message ??
+          "Failed to assign applications to contractor",
+      );
+    }
+  }
+
+  async removeFromContractor(contractorId: string, app_ids: string[]): Promise<void> {
+    try {
+      await http.delete(`/apps/contractor/${contractorId}/remove`, {
+        data: { app_ids },
+      });
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new Error(
+        (axiosError.response?.data as { message?: string })?.message ??
+          "Failed to remove applications from contractor",
+      );
+    }
+  }
 }
 
 export const applicationsService = new ApplicationsService();
