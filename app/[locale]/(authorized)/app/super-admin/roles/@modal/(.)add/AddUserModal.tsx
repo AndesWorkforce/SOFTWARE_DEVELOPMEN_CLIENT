@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, FormField, FormModalLayout, Input, Select } from "@/packages/design-system";
+import { Button, FormField, FormModalLayout, Input } from "@/packages/design-system";
 import { usersService } from "@/packages/api/users/users.service";
 import { CircleCheck } from "lucide-react";
 
@@ -17,7 +17,7 @@ import {
   FORM_SELECT_CLASS,
 } from "@/packages/types/formUi.constants";
 import { invalidEmailMessage, requiredMessage } from "@/packages/types/formValidation.helpers";
-import { ROLE_OPTIONS } from "@/packages/types/users.types";
+import { ROLE_LABELS, ROLES, type Role } from "@/packages/types/users.types";
 
 interface AddUserModalProps {
   onClose: () => void;
@@ -28,7 +28,7 @@ type AddUserFormValues = {
   lastName: string;
   email: string;
   password: string;
-  role: string;
+  roles: Role[];
 };
 
 export function AddUserModal({ onClose }: AddUserModalProps) {
@@ -66,10 +66,7 @@ export function AddUserModal({ onClose }: AddUserModalProps) {
           tCommon("formValidation.minLength", { min: 6 }) ||
             "Password must be at least 6 characters",
         ),
-      role: z
-        .string()
-        .trim()
-        .min(1, req(t("role") || "Role")),
+      roles: z.array(z.enum(ROLES)).min(1, req(t("role") || "Role")),
     });
   }, [t, tCommon]);
 
@@ -86,11 +83,11 @@ export function AddUserModal({ onClose }: AddUserModalProps) {
       lastName: "",
       email: "",
       password: "",
-      role: "",
+      roles: [],
     },
   });
 
-  const roleValue = watch("role");
+  const rolesValue = watch("roles");
 
   const onSubmit = (data: AddUserFormValues) => {
     setPendingPayload(data);
@@ -105,7 +102,15 @@ export function AddUserModal({ onClose }: AddUserModalProps) {
     startTransition(() => {
       (async () => {
         try {
-          await usersService.create(pendingPayload);
+          const [role, ...extraRoles] = pendingPayload.roles;
+          await usersService.create({
+            firstName: pendingPayload.firstName,
+            lastName: pendingPayload.lastName,
+            email: pendingPayload.email,
+            password: pendingPayload.password,
+            role,
+            extraRoles,
+          });
           setShowConfirm(false);
           setPendingPayload(null);
           setShowSuccess(true);
@@ -210,17 +215,41 @@ export function AddUserModal({ onClose }: AddUserModalProps) {
 
             <div className="flex flex-col md:flex-row gap-[25px] items-start w-full">
               <div className="w-full md:flex-1">
-                <FormField label={t("role") || "Role"} error={errors.role?.message} required>
-                  <Select
-                    {...register("role")}
-                    options={[
-                      { value: "", label: tCommon("formModal.selectPlaceholder") || "Select..." },
-                      ...ROLE_OPTIONS,
-                    ]}
+                <FormField label={t("role") || "Role"} error={errors.roles?.message} required>
+                  <div
                     className={FORM_SELECT_CLASS}
-                    style={getFormControlStyle(!!errors.role)}
-                    disabled={isPending}
-                  />
+                    style={{
+                      ...getFormControlStyle(!!errors.roles),
+                      padding: "12px 14px",
+                      height: "auto",
+                    }}
+                  >
+                    <div className="flex flex-col gap-2">
+                      {ROLES.map((r) => {
+                        const checked = rolesValue?.includes(r) ?? false;
+                        const label = ROLE_LABELS[r] || r;
+                        return (
+                          <label
+                            key={r}
+                            className="flex items-center gap-3 cursor-pointer select-none"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              disabled={isPending}
+                              onChange={(e) => {
+                                const next = new Set<Role>(rolesValue || []);
+                                if (e.target.checked) next.add(r);
+                                else next.delete(r);
+                                setValue("roles", Array.from(next), { shouldValidate: true });
+                              }}
+                            />
+                            <span className="text-[14px] text-[#1E1E1E]">{label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </FormField>
               </div>
             </div>
