@@ -69,7 +69,12 @@ export default function RolesPage() {
           key: "role",
           title: "Role",
           translationKey: "roles.table.role",
-          dataPath: (row) => ROLE_LABELS[row.role] || row.role,
+          dataPath: (row) => {
+            const main = ROLE_LABELS[row.role] || row.role;
+            const extras = (row.extraRoles || []).filter(Boolean).map((r) => ROLE_LABELS[r] || r);
+
+            return [main, ...extras].join(", ");
+          },
           type: "text",
           minWidth: "200px",
           align: "center",
@@ -150,7 +155,12 @@ export default function RolesPage() {
           {
             key: "role",
             label: t("roles.table.role"),
-            dataPath: (row) => ROLE_LABELS[row.role] || row.role,
+            dataPath: (row) => {
+              const main = ROLE_LABELS[row.role] || row.role;
+              const extras = (row.extraRoles || []).filter(Boolean).map((r) => ROLE_LABELS[r] || r);
+
+              return [main, ...extras].join(", ");
+            },
           },
           {
             key: "actions",

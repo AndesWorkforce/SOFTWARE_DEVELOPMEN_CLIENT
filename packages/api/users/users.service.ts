@@ -8,6 +8,7 @@ export interface User {
   lastName: string;
   email: string;
   role: "Superadmin" | "TeamAdmin" | "Visualizer";
+  extraRoles?: Array<"Superadmin" | "TeamAdmin" | "Visualizer">;
   created_at?: string;
   updated_at?: string;
 }
@@ -18,6 +19,7 @@ interface BackendUser {
   name: string;
   email: string;
   role: "Superadmin" | "TeamAdmin" | "Visualizer";
+  extraRoles?: Array<"Superadmin" | "TeamAdmin" | "Visualizer">;
   created_at?: string;
   updated_at?: string;
 }
@@ -27,14 +29,16 @@ export interface CreateUserPayload {
   lastName: string;
   email: string;
   password: string;
-  role: string;
+  role: "Superadmin" | "TeamAdmin" | "Visualizer";
+  extraRoles?: Array<"Superadmin" | "TeamAdmin" | "Visualizer">;
 }
 
 export interface UpdateUserPayload {
   firstName?: string;
   lastName?: string;
   email?: string;
-  role?: string;
+  role?: "Superadmin" | "TeamAdmin" | "Visualizer";
+  extraRoles?: Array<"Superadmin" | "TeamAdmin" | "Visualizer">;
   password?: string;
 }
 
@@ -72,6 +76,7 @@ function transformBackendUser(backendUser: BackendUser): User {
     lastName,
     email: backendUser.email,
     role: backendUser.role,
+    extraRoles: backendUser.extraRoles,
     created_at: backendUser.created_at,
     updated_at: backendUser.updated_at,
   };
@@ -96,6 +101,10 @@ function transformToBackendPayload(
 
   if ("role" in payload) {
     backendPayload.role = payload.role;
+  }
+
+  if ("extraRoles" in payload && payload.extraRoles !== undefined) {
+    backendPayload.extraRoles = payload.extraRoles;
   }
 
   if ("password" in payload) {
