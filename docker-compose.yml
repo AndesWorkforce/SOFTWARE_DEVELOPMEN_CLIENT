@@ -22,7 +22,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
-        - "traefik.http.routers.software-developmen-client.rule=Host(`pulse-andes-workforce.com`)"
+        - "traefik.http.routers.software-developmen-client.rule=Host(`www.pulse-aw.com`)"
         - "traefik.http.routers.software-developmen-client.entrypoints=websecure"
         - "traefik.http.routers.software-developmen-client.tls=true"
         - "traefik.http.routers.software-developmen-client.tls.certresolver=letsencrypt"
