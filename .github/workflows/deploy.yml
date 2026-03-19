@@ -70,7 +70,7 @@ jobs:
             NEXT_PUBLIC_ENV=production
             NEXT_PUBLIC_API_BASE_URL_DEV=http://localhost:3001
             NEXT_PUBLIC_API_BASE_URL_STAGING=https://api-staging.andesworkforce.com
-            NEXT_PUBLIC_API_BASE_URL_PROD=https://api-gateway-ms.andes-workforce.com
+            NEXT_PUBLIC_API_BASE_URL_PROD=https://api.www.pulse-aw.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -85,4 +85,3 @@ jobs:
             -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
             --connect-timeout 10 \
             "${{ secrets.PORTAINER_WEBHOOK_URL }}"
-
