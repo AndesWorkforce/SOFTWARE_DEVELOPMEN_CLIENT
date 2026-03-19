@@ -36,7 +36,7 @@ FROM base AS builder
 ARG NEXT_PUBLIC_ENV=development
 ARG NEXT_PUBLIC_API_BASE_URL_DEV=http://localhost:3001
 ARG NEXT_PUBLIC_API_BASE_URL_STAGING=https://api-staging.andesworkforce.com
-ARG NEXT_PUBLIC_API_BASE_URL_PROD=https://api-gateway.test.andes-workforce.com
+ARG NEXT_PUBLIC_API_BASE_URL_PROD=https://api.www.pulse-aw.com
 
 # Expose as environment variables so Next.js picks them up during `next build`
 ENV NEXT_PUBLIC_ENV=$NEXT_PUBLIC_ENV
