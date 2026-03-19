@@ -70,7 +70,7 @@ jobs:
             NEXT_PUBLIC_ENV=production
             NEXT_PUBLIC_API_BASE_URL_DEV=http://localhost:3001
             NEXT_PUBLIC_API_BASE_URL_STAGING=https://api-staging.andesworkforce.com
-            NEXT_PUBLIC_API_BASE_URL_PROD=https://api.www.pulse-aw.com
+            NEXT_PUBLIC_API_BASE_URL_PROD=https://api.pulse-aw.com
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
