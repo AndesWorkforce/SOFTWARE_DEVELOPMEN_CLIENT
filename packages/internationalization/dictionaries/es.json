@@ -313,7 +313,9 @@
     "title": "Gestión de Agentes",
     "tabs": {
       "unlinked": "Agentes Sin Vincular",
-      "applications": "Aplicaciones Disponibles"
+      "applications": "Aplicaciones Disponibles",
+      "assign": "Asignación de Apps",
+      "domains": "Asignación de URLs"
     },
     "table": {
       "hostname": "Hostname",
@@ -342,7 +344,65 @@
       "weight": "Peso"
     },
     "noAgents": "No se encontraron agentes sin vincular",
-    "noApps": "No se encontraron aplicaciones"
+    "noApps": "No se encontraron aplicaciones",
+    "fetchError": "Error al cargar los agentes. Intenta de nuevo.",
+    "retry": "Reintentar"
+  },
+  "appAssignment": {
+    "title": "Asignación de Aplicaciones",
+    "subtitle": "Selecciona un contratista para ver y gestionar sus aplicaciones asignadas",
+    "selectContractor": "Seleccionar Contratista",
+    "searchContractor": "Buscar contratista...",
+    "searchApp": "Buscar aplicación...",
+    "selected": "Seleccionado(s)",
+    "loading": "Cargando",
+    "apps": "app(s)",
+    "selectAll": "Seleccionar todo",
+    "clearSelection": "Limpiar selección",
+    "availableTitle": "Aplicaciones Disponibles",
+    "assignedTitle": "Aplicaciones Asignadas",
+    "selectContractorFirst": "Selecciona un contratista para gestionar aplicaciones",
+    "noAvailable": "No hay aplicaciones disponibles para asignar",
+    "noAssigned": "Aún no hay aplicaciones asignadas",
+    "assignButton": "Asignar {count} app(s)",
+    "removeApp": "Eliminar aplicación",
+    "assignSuccess": "{count} aplicación(es) asignada(s) correctamente",
+    "removeSuccess": "Aplicación eliminada correctamente",
+    "assignError": "Error al asignar las aplicaciones",
+    "removeError": "Error al eliminar la aplicación",
+    "table": {
+      "name": "Nombre de Aplicación",
+      "type": "Tipo",
+      "category": "Categoría"
+    }
+  },
+  "domainAssignment": {
+    "title": "Asignación de URLs",
+    "subtitle": "Selecciona un contratista para ver y gestionar sus URLs asignadas",
+    "selectContractor": "Seleccionar Contratista",
+    "searchContractor": "Buscar contratista...",
+    "searchDomain": "Buscar URL...",
+    "selected": "Seleccionado(s)",
+    "loading": "Cargando",
+    "urls": "URL(s)",
+    "selectAll": "Seleccionar todo",
+    "clearSelection": "Limpiar selección",
+    "availableTitle": "URLs Disponibles",
+    "assignedTitle": "URLs Asignadas",
+    "selectContractorFirst": "Selecciona un contratista para gestionar URLs",
+    "noAvailable": "No hay URLs disponibles para asignar",
+    "noAssigned": "Aún no hay URLs asignadas",
+    "assignButton": "Asignar {count} URL(s)",
+    "removeDomain": "Eliminar URL",
+    "assignSuccess": "{count} URL(s) asignada(s) correctamente",
+    "removeSuccess": "URL eliminada correctamente",
+    "assignError": "Error al asignar las URLs",
+    "removeError": "Error al eliminar la URL",
+    "table": {
+      "name": "URL / Dominio",
+      "type": "Tipo",
+      "category": "Categoría"
+    }
   },
   "contractors": {
     "title": "Contratistas",
@@ -390,6 +450,13 @@
       "jobScheduleNoSchedule": "Sin horario fijo",
       "startTime": "Hora de Inicio",
       "finishTime": "Hora de Finalización",
+      "date": "Fecha",
+      "typeLicense": "Tipo de Licencia",
+      "startDate": "Fecha de Inicio",
+      "finishDate": "Fecha de Fin",
+      "addLicense": "Agregar Licencia",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Escribe la descripción aquí...",
       "startLunchTime": "Hora de Inicio de Almuerzo",
       "finishLunchTime": "Hora de Finalización de Almuerzo",
       "optional": "Opcional",
@@ -416,13 +483,22 @@
       "editConfirmCancel": "Cancelar",
       "editSuccessTitle": "Cambios guardados correctamente",
       "editSuccessContinue": "Continuar",
+      "editSuccessMessage": "La ausencia ha sido actualizada.",
       "deleteConfirmTitle": "¿Estás seguro?",
       "deleteConfirmSubtitle": "Esta acción no se puede deshacer. Todos los valores asociados a este usuario se perderán.",
       "deleteConfirmDelete": "Eliminar",
       "deleteConfirmCancel": "Cancelar",
       "errorDeleting": "Error al eliminar el contratista. Por favor, intenta de nuevo.",
       "deleteSuccessTitle": "Contratista eliminado correctamente",
-      "deleteSuccessContinue": "Continuar"
+      "deleteSuccessContinue": "Continuar",
+      "confirmTitle": "¿Agregar licencia?",
+      "confirmSubtitle": "¿Estás seguro de que quieres agregar esta licencia?",
+      "confirmYes": "Sí",
+      "confirmNo": "No",
+      "successTitle": "Licencia agregada correctamente",
+      "successContinue": "Continuar",
+      "successMessage": "La ausencia ha sido agregada al calendario.",
+      "adding": "Agregando licencia..."
     }
   },
   "calendar": {
@@ -437,6 +513,13 @@
       "fullTimeContractors": "Contratistas Full-Time",
       "partTimeContractors": "Contratistas Part-Time"
     },
+    "addAbsence": "Agregar Ausencia",
+    "editAbsence": "Editar Ausencia",
+    "deleteAbsenceConfirmTitle": "¿Eliminar ausencia?",
+    "deleteAbsenceConfirmSubtitle": "Esta acción no se puede deshacer. La ausencia se eliminará del calendario.",
+    "deleteAbsenceSuccessTitle": "Ausencia eliminada correctamente",
+    "deleteAbsenceSuccessMessage": "La ausencia ha sido eliminada del calendario.",
+    "deleteAbsenceDeleting": "Eliminando...",
     "filters": {
       "allTeams": "Todos los Equipos",
       "searchPlaceholder": "Buscar aquí...",

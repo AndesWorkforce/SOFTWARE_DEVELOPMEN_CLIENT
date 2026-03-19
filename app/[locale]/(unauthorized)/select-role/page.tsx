@@ -6,7 +6,7 @@ import { useLocale } from "next-intl";
 import { LogOut } from "lucide-react";
 import { useAuthStore } from "@/packages/store";
 import Image from "next/image";
-import andesLogo from "@/packages/design-system/images/andes logo login.png";
+import andesLogo from "@/packages/design-system/images/logo pulse 1.png";
 
 export default function SelectRolePage() {
   const router = useRouter();
@@ -123,7 +123,7 @@ export default function SelectRolePage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-6">
           <div className="shrink-0">
-            <div className="relative w-[216px] h-[72px] flex-shrink-0">
+            <div className="relative w-[200px] h-[97px] flex-shrink-0">
               <Image
                 src={andesLogo}
                 alt="Andes Workforce Logo"

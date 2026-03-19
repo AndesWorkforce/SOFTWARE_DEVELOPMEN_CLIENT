@@ -135,6 +135,21 @@ export class ClientsService {
       throw error;
     }
   }
+
+  async getAllDayOffs(params?: { startDate?: string; endDate?: string }): Promise<ClientDayOff[]> {
+    try {
+      const response = await http.get<ClientDayOff[]>(`/clients/day-offs`, { params });
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getAllDayOffs:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      throw error;
+    }
+  }
 }
 
 export const clientsService = new ClientsService();

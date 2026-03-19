@@ -25,6 +25,11 @@ export interface ClientCalendarWeekGridProps {
   className?: string;
   teamDayStats?: Record<string, Record<string, { activeCount: number; absentCount: number }>>;
   jobPositionFilter?: string;
+  absenceTypeFilter?: string;
+  getContractorDayOffType?: (
+    contractor: Contractor,
+    dayDate: Date,
+  ) => "Health" | "Vacation" | "License" | null;
 }
 
 export function ClientCalendarWeekGrid({
@@ -36,6 +41,8 @@ export function ClientCalendarWeekGrid({
   className = "",
   teamDayStats,
   jobPositionFilter = "all",
+  absenceTypeFilter = "all",
+  getContractorDayOffType,
 }: ClientCalendarWeekGridProps) {
   const today = useMemo(() => {
     const t = new Date();
@@ -89,6 +96,8 @@ export function ClientCalendarWeekGrid({
               contractors={contractors}
               onTeamClick={onTeamClick}
               jobPositionFilter={jobPositionFilter}
+              absenceTypeFilter={absenceTypeFilter}
+              getContractorDayOffType={getContractorDayOffType}
             />
           );
         })}

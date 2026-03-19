@@ -26,6 +26,8 @@ import {
   type HourlyProductivity,
   type ProductivitySummary,
 } from "@/packages/api/adt/adt.service";
+import { contractorsService } from "@/packages/api/contractors/contractors.service";
+import type { Contractor } from "@/packages/types/contractors.types";
 import type { UserActivity } from "@/packages/api/reports/reports.service";
 
 // Tipos de aplicaciones (sincronizado con AppType del backend)
@@ -61,8 +63,91 @@ const APP_TYPE_COLORS: Record<AppType, string> = {
 
 const VALID_APP_TYPES = Object.keys(APP_TYPE_COLORS) as AppType[];
 
-/** Rango horario fijo para los gráficos de sesiones y productividad por hora (08:00–17:00). */
-const CHART_HOURS = { start: 8, end: 17 } as const;
+const DEFAULT_CHART_HOURS = { start: 8, end: 17 } as const;
+
+function parseHourFromTime(value: string | null | undefined): number | null {
+  if (!value) return null;
+  // Espera "HH:MM" (o "H:MM"). Si viniera con segundos, igual funciona.
+  const match = value.trim().match(/^(\d{1,2})\s*:\s*(\d{2})(?::\d{2})?$/);
+  if (!match) return null;
+  const h = Number(match[1]);
+  if (!Number.isFinite(h) || h < 0 || h > 23) return null;
+  return h;
+}
+
+function getChartHoursFromContractor(contractor?: Contractor | null): {
+  start: number;
+  end: number;
+} {
+  const start = parseHourFromTime(contractor?.work_schedule_start);
+  const end = parseHourFromTime(contractor?.work_schedule_end);
+
+  const resolvedStart = start ?? DEFAULT_CHART_HOURS.start;
+  const resolvedEnd = end ?? DEFAULT_CHART_HOURS.end;
+
+  // Si viene invertido o inválido, fallback seguro.
+  if (resolvedEnd < resolvedStart) return { ...DEFAULT_CHART_HOURS };
+
+  return { start: resolvedStart, end: resolvedEnd };
+}
+
+function toHourLabel(hour: number): string {
+  return `${hour.toString().padStart(2, "0")}:00`;
+}
+
+function fillHourlySessionDurationRange(
+  data: HourlySessionDuration[],
+  startHour: number,
+  endHour: number,
+): HourlySessionDuration[] {
+  const byHour = new Map<number, HourlySessionDuration>();
+  for (const d of data) byHour.set(d.hour, d);
+
+  const filled: HourlySessionDuration[] = [];
+  for (let h = startHour; h <= endHour; h++) {
+    const existing = byHour.get(h);
+    if (existing) {
+      filled.push(existing);
+    } else {
+      filled.push({
+        hour: h,
+        hour_label: toHourLabel(h),
+        days_with_data: 0,
+        avg_duration_seconds: 0,
+      });
+    }
+  }
+  return filled;
+}
+
+function fillHourlyProductivityRange(
+  data: HourlyProductivity[],
+  startHour: number,
+  endHour: number,
+): HourlyProductivity[] {
+  const byHour = new Map<number, HourlyProductivity>();
+  for (const d of data) byHour.set(d.hour, d);
+
+  const filled: HourlyProductivity[] = [];
+  for (let h = startHour; h <= endHour; h++) {
+    const existing = byHour.get(h);
+    if (existing) {
+      filled.push(existing);
+    } else {
+      filled.push({
+        hour: h,
+        hour_label: toHourLabel(h),
+        days_with_data: 0,
+        avg_productivity_score: 0,
+        avg_active_percentage: 0,
+        avg_keyboard_mouse_score: 0,
+        avg_app_score: 0,
+        avg_browser_score: 0,
+      });
+    }
+  }
+  return filled;
+}
 
 // Componente interno: barra de distribución de uso por tipo de app (reutilizada en mobile y desktop)
 const UsageDistributionBar = ({
@@ -345,6 +430,9 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
   >({});
   const [hourlyProductivityAgentLoading, setHourlyProductivityAgentLoading] = useState(false);
   const [hourlySessionDurationAgentLoading, setHourlySessionDurationAgentLoading] = useState(false);
+  const [chartHours, setChartHours] = useState<{ start: number; end: number }>({
+    ...DEFAULT_CHART_HOURS,
+  });
   const [loading, setLoading] = useState(true);
 
   // Sincronizar estado local cuando cambian los searchParams (ej: navegación con botones del browser)
@@ -468,11 +556,16 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
 
       try {
         setLoading(true);
-        const [summary, contractorSessions, contractorSessionsByDay] = await Promise.all([
-          adtService.getProductivitySummary(contractorId, undefined, startDate, endDate),
-          adtService.getContractorSessions(contractorId, startDate, endDate),
-          adtService.getContractorSessionsByDay(contractorId, startDate, endDate),
-        ]);
+        const [contractor, summary, contractorSessions, contractorSessionsByDay] =
+          await Promise.all([
+            contractorsService.getById(contractorId).catch(() => null),
+            adtService.getProductivitySummary(contractorId, undefined, startDate, endDate),
+            adtService.getContractorSessions(contractorId, startDate, endDate),
+            adtService.getContractorSessionsByDay(contractorId, startDate, endDate),
+          ]);
+
+        const nextChartHours = getChartHoursFromContractor(contractor);
+        setChartHours(nextChartHours);
 
         const [sessionDurationData, hourlyProductivityData] = await Promise.all([
           adtService.getHourlySessionDuration(
@@ -480,16 +573,16 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
             startDate,
             endDate,
             30,
-            CHART_HOURS.start,
-            CHART_HOURS.end,
+            nextChartHours.start,
+            nextChartHours.end,
           ),
           adtService.getHourlyProductivity(
             contractorId,
             startDate,
             endDate,
             30,
-            CHART_HOURS.start,
-            CHART_HOURS.end,
+            nextChartHours.start,
+            nextChartHours.end,
           ),
         ]);
 
@@ -500,9 +593,21 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
         setSessions(contractorSessions);
         setSessionsByDay(contractorSessionsByDay);
         setSessionsByDayByAgent({});
-        setHourlySessionDuration(sessionDurationData);
+        setHourlySessionDuration(
+          fillHourlySessionDurationRange(
+            sessionDurationData,
+            nextChartHours.start,
+            nextChartHours.end,
+          ),
+        );
         setHourlySessionDurationByAgent({});
-        setHourlyProductivity(hourlyProductivityData);
+        setHourlyProductivity(
+          fillHourlyProductivityRange(
+            hourlyProductivityData,
+            nextChartHours.start,
+            nextChartHours.end,
+          ),
+        );
         setHourlyProductivityByAgent({});
       } catch (error) {
         console.error("Error loading activity details:", error);
@@ -538,8 +643,8 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
         startDate,
         endDate,
         30,
-        CHART_HOURS.start,
-        CHART_HOURS.end,
+        chartHours.start,
+        chartHours.end,
         selectedAgentId,
       ),
       adtService.getHourlyProductivity(
@@ -547,8 +652,8 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
         startDate,
         endDate,
         30,
-        CHART_HOURS.start,
-        CHART_HOURS.end,
+        chartHours.start,
+        chartHours.end,
         selectedAgentId,
       ),
     ])
@@ -557,9 +662,20 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
         setSessionsByDayByAgent((prev) => ({ ...prev, [selectedAgentId]: sessionsByDayData }));
         setHourlySessionDurationByAgent((prev) => ({
           ...prev,
-          [selectedAgentId]: sessionDurationData,
+          [selectedAgentId]: fillHourlySessionDurationRange(
+            sessionDurationData,
+            chartHours.start,
+            chartHours.end,
+          ),
         }));
-        setHourlyProductivityByAgent((prev) => ({ ...prev, [selectedAgentId]: productivityData }));
+        setHourlyProductivityByAgent((prev) => ({
+          ...prev,
+          [selectedAgentId]: fillHourlyProductivityRange(
+            productivityData,
+            chartHours.start,
+            chartHours.end,
+          ),
+        }));
       })
       .catch(() => {
         if (!cancelled) {
@@ -583,6 +699,8 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
     startDate,
     endDate,
     selectedAgentId,
+    chartHours.start,
+    chartHours.end,
     sessionsByDayByAgent,
     hourlySessionDurationByAgent,
     hourlyProductivityByAgent,

@@ -47,12 +47,14 @@ export default function VisualizerPage() {
 
         setWeekRange({ start: startDate, end: endDate });
 
+        const fetchWeekDayOffs = clientId
+          ? clientsService.getDayOffs(clientId, { startDate, endDate })
+          : clientsService.getAllDayOffs({ startDate, endDate });
+
         const [rankingBest, rankingWorst, weekResult] = await Promise.allSettled([
           adtService.getTopRanking("month", "best"),
           adtService.getTopRanking("month", "worst"),
-          clientId
-            ? clientsService.getDayOffs(clientId, { startDate, endDate })
-            : Promise.resolve([] as ClientDayOff[]),
+          fetchWeekDayOffs,
         ]);
 
         setTopRankings(rankingBest.status === "fulfilled" ? rankingBest.value : []);
@@ -64,10 +66,12 @@ export default function VisualizerPage() {
         if (weekDayOffsResult.length > 0) {
           setDayOffMode("week");
           setWeekDayOffs(weekDayOffsResult);
-        } else if (clientId) {
+        } else {
           // Fallback: fetch latest absences without date filter
           try {
-            const allDayOffs = await clientsService.getDayOffs(clientId);
+            const allDayOffs = clientId
+              ? await clientsService.getDayOffs(clientId)
+              : await clientsService.getAllDayOffs();
             const sorted = [...allDayOffs].sort(
               (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
             );
@@ -76,9 +80,6 @@ export default function VisualizerPage() {
           } catch {
             setWeekDayOffs([]);
           }
-        } else {
-          setDayOffMode("week");
-          setWeekDayOffs([]);
         }
       } catch {
         setTopRankings([]);
