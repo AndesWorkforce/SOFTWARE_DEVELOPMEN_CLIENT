@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Clock, Utensils } from "lucide-react";
+import { DayOffBadge } from "./DayOffBadge";
 
 export interface CalendarEvent {
   id: string;
@@ -10,6 +11,14 @@ export interface CalendarEvent {
   description?: string;
   color?: string;
   type?: "work" | "meeting" | "holiday" | "other";
+  /**
+   * Tipo de day off asociado (solo para eventos de ausencia)
+   */
+  dayOffType?: "License" | "Vacation" | "Health";
+  /**
+   * ID del day off en backend (para editar/eliminar)
+   */
+  dayOffId?: string;
 }
 
 export interface WorkSchedule {
@@ -36,6 +45,14 @@ export interface CalendarProps {
    * Callback cuando se hace click en un evento
    */
   onEventClick?: (event: CalendarEvent) => void;
+  /**
+   * Callback cuando se hace click en editar (ícono lápiz del day off)
+   */
+  onEventEdit?: (event: CalendarEvent) => void;
+  /**
+   * Callback cuando se hace click en eliminar (ícono papelera del day off)
+   */
+  onEventDelete?: (event: CalendarEvent) => void;
   /**
    * Fecha mínima seleccionable
    */
@@ -83,6 +100,8 @@ export const Calendar = ({
   selectedDate,
   onDateSelect,
   onEventClick,
+  onEventEdit,
+  onEventDelete,
   minDate,
   maxDate,
   locale = "en-US",
@@ -303,23 +322,49 @@ export const Calendar = ({
                 {/* Lista de eventos del día */}
                 {showEventIndicators && dateEvents.length > 0 && (
                   <div className="flex flex-col gap-1 overflow-hidden">
-                    {dateEvents.slice(0, 2).map((event) => (
-                      <div
-                        key={event.id}
-                        className="text-xs px-1.5 py-0.5 rounded truncate cursor-pointer"
-                        style={{
-                          backgroundColor: event.color || "#0097B2",
-                          color: "white",
-                        }}
-                        title={event.title}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEventClick?.(event);
-                        }}
-                      >
-                        {event.title}
-                      </div>
-                    ))}
+                    {dateEvents.slice(0, 2).map((event) => {
+                      const handleEventClick = (e: React.MouseEvent<HTMLDivElement>) => {
+                        e.stopPropagation();
+                        onEventClick?.(event);
+                      };
+
+                      if (event.dayOffType) {
+                        return (
+                          <DayOffBadge
+                            key={event.id}
+                            type={event.dayOffType}
+                            label={event.title}
+                            onClick={handleEventClick}
+                            onEdit={(e) => {
+                              e.stopPropagation();
+                              onEventEdit?.(event);
+                            }}
+                            onDelete={(e) => {
+                              e.stopPropagation();
+                              onEventDelete?.(event);
+                            }}
+                          />
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={event.id}
+                          className="text-xs px-1.5 py-0.5 rounded truncate cursor-pointer"
+                          style={{
+                            backgroundColor: event.color || "#0097B2",
+                            color: "white",
+                          }}
+                          title={event.title}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEventClick?.(event);
+                          }}
+                        >
+                          {event.title}
+                        </div>
+                      );
+                    })}
                     {dateEvents.length > 2 && (
                       <span className="text-[10px] text-gray-600 px-1.5">
                         +{dateEvents.length - 2} more

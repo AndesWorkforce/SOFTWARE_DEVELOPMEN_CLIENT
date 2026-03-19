@@ -6,9 +6,9 @@ import { CircleCheck } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, FormField, FormModalLayout, Input, Select } from "@/packages/design-system";
+import { Button, FormField, FormModalLayout, Input } from "@/packages/design-system";
 import { usersService } from "@/packages/api/users/users.service";
-import { ROLE_OPTIONS } from "@/packages/types/users.types";
+import { ROLE_LABELS, ROLES, type Role } from "@/packages/types/users.types";
 import {
   FORM_CONTROL_CLASS,
   getFormControlStyle,
@@ -28,7 +28,7 @@ type EditUserFormValues = {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  roles: Role[];
 };
 
 export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps) {
@@ -39,7 +39,7 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
     firstName: "",
     lastName: "",
     email: "",
-    role: "",
+    roles: [],
   });
   const [isReady, setIsReady] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -64,7 +64,7 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
         .trim()
         .min(1, req(t("email") || "Email"))
         .email(invalidEmail),
-      role: z.string().min(1, req(t("role") || "Role")),
+      roles: z.array(z.enum(ROLES)).min(1, req(t("role") || "Role")),
     });
   }, [t, tCommon]);
 
@@ -73,6 +73,7 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<EditUserFormValues>({
     resolver: zodResolver(schema),
@@ -80,20 +81,28 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
     mode: "onSubmit",
   });
 
+  const rolesValue = watch("roles");
+
   useEffect(() => {
     // Reset state when userId changes
     setIsReady(false);
-    setInitialValues({ firstName: "", lastName: "", email: "", role: "" });
-    reset({ firstName: "", lastName: "", email: "", role: "" });
+    setInitialValues({ firstName: "", lastName: "", email: "", roles: [] });
+    reset({ firstName: "", lastName: "", email: "", roles: [] });
 
     const loadUser = async () => {
       try {
         const user = await usersService.getById(userId);
+        const roles = Array.from(
+          new Set<Role>([
+            user.role as Role,
+            ...(((user as unknown as { extraRoles?: Role[] }).extraRoles || []) as Role[]),
+          ]),
+        );
         const nextValues: EditUserFormValues = {
           firstName: user.firstName || "",
           lastName: user.lastName || "",
           email: user.email || "",
-          role: user.role || "",
+          roles,
         };
         setInitialValues(nextValues);
         reset(nextValues);
@@ -119,11 +128,13 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
     setShowConfirm(false);
     startTransition(async () => {
       try {
+        const [role, ...extraRoles] = pendingValues.roles;
         await usersService.update(userId, {
           firstName: pendingValues.firstName,
           lastName: pendingValues.lastName,
           email: pendingValues.email,
-          role: pendingValues.role,
+          role,
+          extraRoles,
         });
 
         if (onUpdated) {
@@ -217,16 +228,40 @@ export function EditUserModal({ userId, onClose, onUpdated }: EditUserModalProps
                 />
               </FormField>
 
-              <FormField label={t("role") || "Role"} required error={errors.role?.message}>
-                <Select
-                  {...register("role")}
-                  options={[
-                    { value: "", label: t("rolePlaceholder") || "Select role" },
-                    ...ROLE_OPTIONS,
-                  ]}
+              <FormField label={t("role") || "Role"} required error={errors.roles?.message}>
+                <div
                   className={FORM_SELECT_CLASS}
-                  style={getFormControlStyle(!!errors.role)}
-                />
+                  style={{
+                    ...getFormControlStyle(!!errors.roles),
+                    padding: "12px 14px",
+                    height: "auto",
+                  }}
+                >
+                  <div className="flex flex-col gap-2">
+                    {ROLES.map((r) => {
+                      const checked = rolesValue?.includes(r) ?? false;
+                      const label = ROLE_LABELS[r] || r;
+                      return (
+                        <label
+                          key={r}
+                          className="flex items-center gap-3 cursor-pointer select-none"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={(e) => {
+                              const next = new Set<Role>((rolesValue || []) as Role[]);
+                              if (e.target.checked) next.add(r);
+                              else next.delete(r);
+                              setValue("roles", Array.from(next), { shouldValidate: true });
+                            }}
+                          />
+                          <span className="text-[14px] text-[#1E1E1E]">{label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
               </FormField>
             </div>
 

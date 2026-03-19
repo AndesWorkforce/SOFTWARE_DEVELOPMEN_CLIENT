@@ -5,6 +5,8 @@ import { Bot } from "lucide-react";
 
 import { Button, DataTable, Modal, Select } from "../../design-system";
 import type { DataTableConfig } from "../../design-system";
+import { AppAssignmentView } from "./AppAssignmentView";
+import { DomainAssignmentView } from "./DomainAssignmentView";
 import { AgentsService } from "../../api/agents/agents.service";
 import { ApplicationsService } from "../../api/applications/applications.service";
 import { ContractorsService } from "../../api/contractors/contractors.service";
@@ -16,7 +18,7 @@ export interface AgentsManagementViewProps {
   role: "super-admin" | "admin";
 }
 
-type Tab = "unlinked" | "applications";
+type Tab = "unlinked" | "applications" | "assign" | "domains";
 
 const agentsService = new AgentsService();
 const applicationsService = new ApplicationsService();
@@ -33,6 +35,7 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [loadingAgents, setLoadingAgents] = useState(false);
   const [loadingApps, setLoadingApps] = useState(false);
+  const [agentsError, setAgentsError] = useState<string | null>(null);
 
   // Link modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,12 +46,16 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
 
   const loadUnlinkedAgents = useCallback(() => {
     setLoadingAgents(true);
+    setAgentsError(null);
     agentsService
       .getUnlinked()
       .then(setUnlinkedAgents)
-      .catch(() => setUnlinkedAgents([]))
+      .catch((err: Error) => {
+        setUnlinkedAgents([]);
+        setAgentsError(err.message ?? t("fetchError"));
+      })
       .finally(() => setLoadingAgents(false));
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadUnlinkedAgents();
@@ -318,16 +325,53 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
         >
           {t("tabs.applications")}
         </button>
+        <button
+          className="px-5 py-2.5 text-sm font-medium transition-colors"
+          style={{
+            color: activeTab === "assign" ? "#0097B2" : "#6B7280",
+            borderBottom: activeTab === "assign" ? "2px solid #0097B2" : "2px solid transparent",
+          }}
+          onClick={() => setActiveTab("assign")}
+        >
+          {t("tabs.assign")}
+        </button>
+        <button
+          className="px-5 py-2.5 text-sm font-medium transition-colors"
+          style={{
+            color: activeTab === "domains" ? "#0097B2" : "#6B7280",
+            borderBottom: activeTab === "domains" ? "2px solid #0097B2" : "2px solid transparent",
+          }}
+          onClick={() => setActiveTab("domains")}
+        >
+          {t("tabs.domains")}
+        </button>
       </div>
 
       {/* Table content */}
       {activeTab === "unlinked" && (
-        <DataTable config={agentsTableConfig} data={unlinkedAgents} loading={loadingAgents} />
+        <>
+          {agentsError && (
+            <div
+              className="flex items-center justify-between mb-4 px-4 py-3 rounded-lg text-sm"
+              style={{ background: "#FEE2E2", color: "#991B1B", border: "1px solid #FECACA" }}
+            >
+              <span>⚠️ {agentsError}</span>
+              <Button size="sm" variant="outline" onClick={loadUnlinkedAgents}>
+                {t("retry")}
+              </Button>
+            </div>
+          )}
+          <DataTable config={agentsTableConfig} data={unlinkedAgents} loading={loadingAgents} />
+        </>
       )}
 
       {activeTab === "applications" && (
         <DataTable config={appsTableConfig} data={applications} loading={loadingApps} />
       )}
+
+      {activeTab === "assign" && <AppAssignmentView role={role} />}
+
+      {activeTab === "domains" && <DomainAssignmentView role={role} />}
 
       {/* Link to Contractor Modal */}
       <Modal

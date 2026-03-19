@@ -313,7 +313,9 @@
     "title": "Agents Management",
     "tabs": {
       "unlinked": "Unlinked Agents",
-      "applications": "Available Applications"
+      "applications": "Available Applications",
+      "assign": "App Assignment",
+      "domains": "URL Assignment"
     },
     "table": {
       "hostname": "Hostname",
@@ -342,7 +344,65 @@
       "weight": "Weight"
     },
     "noAgents": "No unlinked agents found",
-    "noApps": "No applications found"
+    "noApps": "No applications found",
+    "fetchError": "Failed to load agents. Please retry.",
+    "retry": "Retry"
+  },
+  "appAssignment": {
+    "title": "Application Assignment",
+    "subtitle": "Select a contractor to view and manage their assigned applications",
+    "selectContractor": "Select Contractor",
+    "searchContractor": "Search contractor...",
+    "searchApp": "Search application...",
+    "selected": "Selected",
+    "loading": "Loading",
+    "apps": "app(s)",
+    "selectAll": "Select all",
+    "clearSelection": "Clear selection",
+    "availableTitle": "Available Applications",
+    "assignedTitle": "Assigned Applications",
+    "selectContractorFirst": "Select a contractor to manage applications",
+    "noAvailable": "No applications available to assign",
+    "noAssigned": "No applications assigned yet",
+    "assignButton": "Assign {count} app(s)",
+    "removeApp": "Remove application",
+    "assignSuccess": "{count} application(s) assigned successfully",
+    "removeSuccess": "Application removed successfully",
+    "assignError": "Failed to assign applications",
+    "removeError": "Failed to remove application",
+    "table": {
+      "name": "Application Name",
+      "type": "Type",
+      "category": "Category"
+    }
+  },
+  "domainAssignment": {
+    "title": "URL Assignment",
+    "subtitle": "Select a contractor to view and manage their assigned URLs",
+    "selectContractor": "Select Contractor",
+    "searchContractor": "Search contractor...",
+    "searchDomain": "Search URL...",
+    "selected": "Selected",
+    "loading": "Loading",
+    "urls": "URL(s)",
+    "selectAll": "Select all",
+    "clearSelection": "Clear selection",
+    "availableTitle": "Available URLs",
+    "assignedTitle": "Assigned URLs",
+    "selectContractorFirst": "Select a contractor to manage URLs",
+    "noAvailable": "No URLs available to assign",
+    "noAssigned": "No URLs assigned yet",
+    "assignButton": "Assign {count} URL(s)",
+    "removeDomain": "Remove URL",
+    "assignSuccess": "{count} URL(s) assigned successfully",
+    "removeSuccess": "URL removed successfully",
+    "assignError": "Failed to assign URLs",
+    "removeError": "Failed to remove URL",
+    "table": {
+      "name": "URL / Domain",
+      "type": "Type",
+      "category": "Category"
+    }
   },
   "contractors": {
     "title": "Contractors",
@@ -390,6 +450,13 @@
       "jobScheduleNoSchedule": "No schedule",
       "startTime": "Start Time",
       "finishTime": "Finish Time",
+      "date": "Date",
+      "typeLicense": "Type License",
+      "startDate": "Start Date",
+      "finishDate": "Finish Date",
+      "addLicense": "Add License",
+      "description": "Description",
+      "descriptionPlaceholder": "Type the description here...",
       "startLunchTime": "Start Lunch Time",
       "finishLunchTime": "Lunch End Time",
       "optional": "Optional",
@@ -416,6 +483,8 @@
       "editConfirmCancel": "Cancel",
       "editSuccessTitle": "Changes saved successfully",
       "editSuccessContinue": "Continue",
+      "successMessage": "The absence has been added to the calendar.",
+      "editSuccessMessage": "The absence has been updated.",
       "deleteConfirmTitle": "Are you sure?",
       "deleteConfirmSubtitle": "This action cannot be undone. All values associated with this user will be lost.",
       "deleteConfirmDelete": "Delete",
@@ -437,6 +506,13 @@
       "fullTimeContractors": "Full-Time Contractors",
       "partTimeContractors": "Part-Time Contractors"
     },
+    "addAbsence": "Add Absence",
+    "editAbsence": "Edit Absence",
+    "deleteAbsenceConfirmTitle": "Delete absence?",
+    "deleteAbsenceConfirmSubtitle": "This action cannot be undone. The absence will be removed from the calendar.",
+    "deleteAbsenceSuccessTitle": "Absence deleted successfully",
+    "deleteAbsenceSuccessMessage": "The absence has been removed from the calendar.",
+    "deleteAbsenceDeleting": "Deleting...",
     "filters": {
       "allTeams": "All Teams",
       "searchPlaceholder": "Search here...",
