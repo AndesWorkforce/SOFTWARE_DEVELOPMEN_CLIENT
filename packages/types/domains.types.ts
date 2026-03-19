@@ -20,3 +20,10 @@ export interface Domain {
   created_at: string;
   updated_at: string;
 }
+
+export interface CreateDomainPayload {
+  name: string;
+  type?: DomainType;
+  category?: string;
+  weight?: number;
+}

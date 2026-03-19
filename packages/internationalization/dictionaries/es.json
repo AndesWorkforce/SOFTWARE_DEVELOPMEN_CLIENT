@@ -315,6 +315,7 @@
       "unlinked": "Agentes Sin Vincular",
       "applications": "Aplicaciones Disponibles",
       "assign": "Asignación de Apps",
+      "urls": "Gestión de URLs",
       "domains": "Asignación de URLs"
     },
     "table": {
@@ -402,6 +403,40 @@
       "name": "URL / Dominio",
       "type": "Tipo",
       "category": "Categoría"
+    }
+  },
+  "urlManagement": {
+    "title": "Gestión de URLs",
+    "subtitle": "Crea y gestiona URLs que pueden ser asignadas a contratistas",
+    "addUrl": "Agregar URL",
+    "searchUrl": "Buscar URL...",
+    "noUrls": "No se encontraron URLs",
+    "deleteUrl": "Eliminar URL",
+    "createTitle": "Crear URL",
+    "deleteTitle": "Eliminar URL",
+    "deleteConfirm": "¿Estás seguro de que deseas eliminar",
+    "createSuccess": "URL creada correctamente",
+    "createError": "Error al crear la URL",
+    "deleteSuccess": "URL eliminada correctamente",
+    "deleteError": "Error al eliminar la URL",
+    "table": {
+      "name": "URL / Dominio",
+      "type": "Tipo",
+      "category": "Categoría",
+      "weight": "Peso",
+      "createdAt": "Creado el"
+    },
+    "form": {
+      "name": "Nombre de la URL",
+      "namePlaceholder": "ej. github.com",
+      "type": "Tipo",
+      "typePlaceholder": "Selecciona un tipo...",
+      "category": "Categoría",
+      "categoryPlaceholder": "ej. Desarrollo",
+      "weight": "Peso (0 - 2)",
+      "cancel": "Cancelar",
+      "create": "Crear",
+      "delete": "Eliminar"
     }
   },
   "contractors": {

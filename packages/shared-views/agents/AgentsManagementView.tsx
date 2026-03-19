@@ -7,6 +7,7 @@ import { Button, DataTable, Modal, Select } from "../../design-system";
 import type { DataTableConfig } from "../../design-system";
 import { AppAssignmentView } from "./AppAssignmentView";
 import { DomainAssignmentView } from "./DomainAssignmentView";
+import { UrlManagementView } from "./UrlManagementView";
 import { AgentsService } from "../../api/agents/agents.service";
 import { ApplicationsService } from "../../api/applications/applications.service";
 import { ContractorsService } from "../../api/contractors/contractors.service";
@@ -18,7 +19,7 @@ export interface AgentsManagementViewProps {
   role: "super-admin" | "admin";
 }
 
-type Tab = "unlinked" | "applications" | "assign" | "domains";
+type Tab = "unlinked" | "applications" | "assign" | "urls" | "domains";
 
 const agentsService = new AgentsService();
 const applicationsService = new ApplicationsService();
@@ -338,6 +339,16 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
         <button
           className="px-5 py-2.5 text-sm font-medium transition-colors"
           style={{
+            color: activeTab === "urls" ? "#0097B2" : "#6B7280",
+            borderBottom: activeTab === "urls" ? "2px solid #0097B2" : "2px solid transparent",
+          }}
+          onClick={() => setActiveTab("urls")}
+        >
+          {t("tabs.urls")}
+        </button>
+        <button
+          className="px-5 py-2.5 text-sm font-medium transition-colors"
+          style={{
             color: activeTab === "domains" ? "#0097B2" : "#6B7280",
             borderBottom: activeTab === "domains" ? "2px solid #0097B2" : "2px solid transparent",
           }}
@@ -370,6 +381,8 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
       )}
 
       {activeTab === "assign" && <AppAssignmentView role={role} />}
+
+      {activeTab === "urls" && <UrlManagementView role={role} />}
 
       {activeTab === "domains" && <DomainAssignmentView role={role} />}
 
