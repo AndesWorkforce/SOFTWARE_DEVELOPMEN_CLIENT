@@ -315,6 +315,7 @@
       "unlinked": "Unlinked Agents",
       "applications": "Available Applications",
       "assign": "App Assignment",
+      "urls": "URL Management",
       "domains": "URL Assignment"
     },
     "table": {
@@ -402,6 +403,40 @@
       "name": "URL / Domain",
       "type": "Type",
       "category": "Category"
+    }
+  },
+  "urlManagement": {
+    "title": "URL Management",
+    "subtitle": "Create and manage URLs that can be assigned to contractors",
+    "addUrl": "Add URL",
+    "searchUrl": "Search URL...",
+    "noUrls": "No URLs found",
+    "deleteUrl": "Delete URL",
+    "createTitle": "Create URL",
+    "deleteTitle": "Delete URL",
+    "deleteConfirm": "Are you sure you want to delete",
+    "createSuccess": "URL created successfully",
+    "createError": "Failed to create URL",
+    "deleteSuccess": "URL deleted successfully",
+    "deleteError": "Failed to delete URL",
+    "table": {
+      "name": "URL / Domain",
+      "type": "Type",
+      "category": "Category",
+      "weight": "Weight",
+      "createdAt": "Created At"
+    },
+    "form": {
+      "name": "URL Name",
+      "namePlaceholder": "e.g. github.com",
+      "type": "Type",
+      "typePlaceholder": "Select a type...",
+      "category": "Category",
+      "categoryPlaceholder": "e.g. Development",
+      "weight": "Weight (0 - 2)",
+      "cancel": "Cancel",
+      "create": "Create",
+      "delete": "Delete"
     }
   },
   "contractors": {
