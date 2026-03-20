@@ -418,6 +418,40 @@
       "category": "Category"
     }
   },
+  "appManagement": {
+    "title": "App Management",
+    "subtitle": "Create and manage applications that can be assigned to contractors",
+    "addApp": "Add App",
+    "searchApp": "Search app...",
+    "noApps": "No applications found",
+    "deleteApp": "Delete app",
+    "createTitle": "Create Application",
+    "deleteTitle": "Delete Application",
+    "deleteConfirm": "Are you sure you want to delete",
+    "createSuccess": "Application created successfully",
+    "createError": "Failed to create application",
+    "deleteSuccess": "Application deleted successfully",
+    "deleteError": "Failed to delete application",
+    "table": {
+      "name": "Application",
+      "type": "Type",
+      "category": "Category",
+      "weight": "Weight",
+      "createdAt": "Created At"
+    },
+    "form": {
+      "name": "App Name",
+      "namePlaceholder": "e.g. Visual Studio Code",
+      "type": "Type",
+      "typePlaceholder": "Select a type...",
+      "category": "Category",
+      "categoryPlaceholder": "e.g. Development",
+      "weight": "Weight (0 - 2)",
+      "cancel": "Cancel",
+      "create": "Create",
+      "delete": "Delete"
+    }
+  },
   "urlManagement": {
     "title": "URL Management",
     "subtitle": "Create and manage URLs that can be assigned to contractors",

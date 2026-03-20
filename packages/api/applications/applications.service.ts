@@ -1,10 +1,33 @@
 import { http } from "../../setup/axios.config";
 import type { AxiosError } from "axios";
-import type { Application } from "../../types/applications.types";
+import type { Application, CreateApplicationPayload } from "../../types/applications.types";
 
-export type { Application } from "../../types/applications.types";
+export type { Application, CreateApplicationPayload } from "../../types/applications.types";
 
 export class ApplicationsService {
+  async create(payload: CreateApplicationPayload): Promise<Application> {
+    try {
+      const response = await http.post<Application>("/apps", payload);
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new Error(
+        (axiosError.response?.data as { message?: string })?.message ?? "Failed to create application",
+      );
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      await http.delete(`/apps/${id}`);
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new Error(
+        (axiosError.response?.data as { message?: string })?.message ?? "Failed to delete application",
+      );
+    }
+  }
+
   async getAll(): Promise<Application[]> {
     try {
       const response = await http.get<Application[]>("/apps");
