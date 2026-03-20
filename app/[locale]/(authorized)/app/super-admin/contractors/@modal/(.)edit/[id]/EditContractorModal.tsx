@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Clock, CircleCheck } from "lucide-react";
-import { FormModal, Button, COUNTRY_OPTIONS, JOB_POSITION_OPTIONS } from "@/packages/design-system";
+import { FormModal, Button, COUNTRY_OPTIONS } from "@/packages/design-system";
+import { jobPositionsService } from "@/packages/api/job-positions/job-positions.service";
 import type { FormModalConfig } from "@/packages/types/FormModal.types";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import { clientsService } from "@/packages/api/clients/clients.service";
@@ -41,6 +42,7 @@ export function EditContractorModal({
 
   const [clients, setClients] = useState<SelectOption[]>([]);
   const [teams, setTeams] = useState<(SelectOption & { clientId: string })[]>([]);
+  const [jobPositions, setJobPositions] = useState<SelectOption[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -77,6 +79,13 @@ export function EditContractorModal({
           allTeams
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((team) => ({ value: team.id, label: team.name, clientId: team.client_id })),
+        );
+
+        setJobPositions(
+          jobPositionsService
+            .getAll()
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((p) => ({ value: p.name, label: p.name })),
         );
 
         setIsReady(true);
@@ -136,7 +145,7 @@ export function EditContractorModal({
           type: "select",
           label: t("jobPosition") || "Job Position",
           translationKey: "contractors.modal.jobPosition",
-          options: JOB_POSITION_OPTIONS,
+          options: jobPositions,
         },
         {
           key: "client_id",
@@ -247,7 +256,7 @@ export function EditContractorModal({
         return payload;
       },
     }),
-    [t, clients, teams, onClose],
+    [t, clients, teams, jobPositions, onClose],
   );
 
   // Enviar formulario -> mostrar modal de confirmación antes de guardar
