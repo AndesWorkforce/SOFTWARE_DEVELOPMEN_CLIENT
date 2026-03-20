@@ -1,14 +1,50 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { ArrowLeft, Download, ListFilter, Calendar, ArrowDownWideNarrow } from "lucide-react";
+import {
+  ArrowLeft,
+  BriefcaseBusiness,
+  BadgeAlert,
+  ChevronDown,
+  ChevronRight,
+  TreePalm,
+  Cross,
+  FileUser,
+} from "lucide-react";
 import { Header } from "@/packages/design-system";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import type { ContractorDayOff } from "@/packages/api/contractors/contractors.service";
-import { adtService } from "@/packages/api/adt/adt.service";
+
+type AbsenceTypeFilter = "All" | "License" | "Vacation" | "Health";
+
+function TypeBadge({ type }: { type: string }) {
+  const t = useTranslations("visualizer.contractorHistory");
+  if (type === "Vacation") {
+    return (
+      <span className="inline-flex items-center gap-[5px] text-[#5e7a00] text-[14px]">
+        <TreePalm size={14} strokeWidth={1.5} />
+        {t("absenceTypes.vacation")}
+      </span>
+    );
+  }
+  if (type === "Health") {
+    return (
+      <span className="inline-flex items-center gap-[5px] text-[#991b1b] text-[14px]">
+        <Cross size={14} strokeWidth={1.5} />
+        {t("absenceTypes.health")}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-[5px] text-[#007489] text-[14px]">
+      <FileUser size={14} strokeWidth={1.5} />
+      {t("absenceTypes.license")}
+    </span>
+  );
+}
 
 export default function ContractorHistoryPage() {
   const params = useParams();
@@ -19,27 +55,28 @@ export default function ContractorHistoryPage() {
   const contractorId = params.id as string;
   const contractorName = searchParams.get("name") ?? "";
 
-  const productivityParam = searchParams.get("productivity");
-  const avgProductivity = productivityParam !== null ? Number(productivityParam) : null;
-
   const [dayOffs, setDayOffs] = useState<ContractorDayOff[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dateFilter, setDateFilter] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<AbsenceTypeFilter>("All");
   const [workingDays, setWorkingDays] = useState<number | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const dateDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [dayOffsData, sessionsData] = await Promise.all([
+        const [dayOffsData, workingDaysData] = await Promise.all([
           contractorsService.getDayOffs(contractorId),
-          adtService.getContractorSessions(contractorId).catch(() => null),
+          contractorsService.getWorkingDays(contractorId).catch(() => null),
         ]);
 
         setDayOffs(dayOffsData);
 
-        if (sessionsData && sessionsData.length > 0) {
-          const uniqueDays = new Set(sessionsData.map((s) => s.session_start.split(" ")[0]));
-          setWorkingDays(uniqueDays.size);
+        if (workingDaysData) {
+          setWorkingDays(workingDaysData.workingDays);
         }
       } finally {
         setLoading(false);
@@ -48,17 +85,15 @@ export default function ContractorHistoryPage() {
     loadData();
   }, [contractorId]);
 
-  const filteredDayOffs = dateFilter
-    ? dayOffs.filter((d) => {
-        const matchesReason = d.reason.toLowerCase().includes(dateFilter.toLowerCase());
-        const matchesDate = d.dates?.some((iso) => iso.includes(dateFilter)) ?? false;
-        return matchesReason || matchesDate;
-      })
-    : dayOffs;
-
-  const handleCleanFilters = () => {
-    setDateFilter("");
-  };
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (dateDropdownRef.current && !dateDropdownRef.current.contains(e.target as Node)) {
+        setDateDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
 
   const formatDate = (dateStr: string) => {
     const [year, month, day] = dateStr.split("T")[0].split("-").map(Number);
@@ -69,149 +104,311 @@ export default function ContractorHistoryPage() {
     });
   };
 
+  const formatDateRange = (dates: string[]) => {
+    if (!dates || dates.length === 0) return "-";
+    if (dates.length === 1) return formatDate(dates[0]);
+    return `${formatDate(dates[0])} - ${formatDate(dates[dates.length - 1])}`;
+  };
+
+  const getDuration = (dates: string[]) => {
+    if (!dates || dates.length === 0) return "-";
+    return dates.length === 1 ? `1 ${t("durationDay")}` : `${dates.length} ${t("durationDays")}`;
+  };
+
+  const filteredDayOffs = dayOffs.filter((d) => {
+    if (typeFilter !== "All" && d.type !== typeFilter) return false;
+    if (startDate && d.dates) {
+      const afterStart = d.dates.some((dd) => dd.split("T")[0] >= startDate);
+      if (!afterStart) return false;
+    }
+    if (endDate && d.dates) {
+      const beforeEnd = d.dates.some((dd) => dd.split("T")[0] <= endDate);
+      if (!beforeEnd) return false;
+    }
+    return true;
+  });
+
+  const dateRangeLabel =
+    startDate || endDate
+      ? `${startDate ? formatDate(startDate) : "..."} – ${endDate ? formatDate(endDate) : "..."}`
+      : t("datePlaceholder");
+
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: "#F5F5F5" }}>
+    <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       <Header />
-      <div className="flex-1 overflow-x-hidden pt-[71px] px-4 md:px-8 pb-4 md:pb-8">
+      <div className="flex-1 overflow-x-hidden pt-[71px] px-4 md:px-8 pb-6 md:pb-10">
         <div className="max-w-full overflow-x-hidden flex flex-col gap-6">
-          {/* Título + Export */}
-          <div className="flex items-center justify-between pt-4">
-            <div className="flex items-center gap-3">
-              <Link
-                href={`/${locale}/app/visualizer`}
-                className="flex items-center justify-center w-[24px] h-[24px] shrink-0 hover:opacity-70 transition-opacity"
-              >
-                <ArrowLeft size={24} color="#000000" strokeWidth={2} />
-              </Link>
-              <h1 className="text-[24px] font-semibold text-black">
-                {t("title")} {contractorName}
-              </h1>
-            </div>
-            <button
-              type="button"
-              className="flex items-center gap-[10px] bg-[#0097b2] rounded-[8px] px-[21px] py-[7px] h-[40px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] hover:bg-[#007a90] transition-colors"
+          {/* Title */}
+          <div className="flex items-center gap-3 pt-4">
+            <Link
+              href={`/${locale}/app/visualizer`}
+              className="flex items-center justify-center w-[24px] h-[24px] shrink-0 hover:opacity-70 transition-opacity"
             >
-              <Download size={16} color="#ffffff" strokeWidth={2} />
-              <span className="text-[14px] font-semibold text-white whitespace-nowrap">
-                {t("exportPdf")}
-              </span>
-            </button>
+              <ArrowLeft size={24} color="#0F172A" strokeWidth={2} />
+            </Link>
+            <h1 className="text-[24px] font-semibold text-[#0F172A]">
+              {t("title")} {contractorName}
+            </h1>
           </div>
 
           {/* Stats cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-[15px]">
-            <div className="bg-white border border-[rgba(166,166,166,0.25)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] h-[100px] flex items-center justify-center">
-              <div className="flex flex-col gap-[10px] items-center text-center">
-                <p className="text-[16px] font-medium text-[#0097b2]">{t("workingDays")}</p>
-                <p className="text-[32px] font-semibold text-black">
-                  {loading ? "—" : (workingDays ?? "—")}
+          <div className="grid grid-cols-2 gap-2 md:gap-4 md:w-2/3">
+            {/* Working Days */}
+            <div className="group relative bg-white border border-[rgba(100,116,139,0.2)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.2)] h-[58px] md:h-[90px] overflow-hidden">
+              {/* Normal state */}
+              <div className="absolute inset-0 flex flex-row items-center px-[10px] gap-[10px] md:px-5 md:gap-4 transition-opacity duration-200 group-hover:opacity-0">
+                <div className="w-[30px] h-[30px] md:w-10 md:h-10 rounded-full bg-[rgba(124,58,237,0.1)] flex items-center justify-center shrink-0">
+                  <BriefcaseBusiness
+                    className="w-[14px] h-[14px] md:w-5 md:h-5"
+                    color="#7c3aed"
+                    strokeWidth={1.8}
+                  />
+                </div>
+                <div className="flex flex-col items-start">
+                  <p className="text-[10px] md:text-[12px] font-normal text-[#0F172A] leading-tight">
+                    {t("workingDays")}
+                  </p>
+                  <p className="text-[20px] md:text-[28px] font-semibold text-[#7c3aed] leading-tight">
+                    {loading ? "—" : (workingDays ?? "—")}
+                  </p>
+                </div>
+              </div>
+              {/* Hover state */}
+              <div className="absolute inset-0 flex flex-row items-center px-[10px] gap-[10px] md:px-5 md:gap-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                <div className="w-[30px] h-[30px] md:w-10 md:h-10 rounded-full bg-[rgba(124,58,237,0.1)] flex items-center justify-center shrink-0">
+                  <BriefcaseBusiness
+                    className="w-[14px] h-[14px] md:w-5 md:h-5"
+                    color="#7c3aed"
+                    strokeWidth={1.8}
+                  />
+                </div>
+                <p className="text-[11px] md:text-[14px] font-normal text-[#0F172A] leading-snug">
+                  {t("workingDaysDesc")}
                 </p>
               </div>
             </div>
-            <div className="bg-white border border-[rgba(166,166,166,0.25)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] h-[100px] flex items-center justify-center">
-              <div className="flex flex-col gap-[10px] items-center text-center">
-                <p className="text-[16px] font-medium text-[#0097b2]">{t("averageProductivity")}</p>
-                <p className="text-[32px] font-semibold text-black">
-                  {loading ? "—" : avgProductivity !== null ? `${avgProductivity}%` : "—"}
-                </p>
+            {/* Total Absences */}
+            <div className="group relative bg-white border border-[rgba(100,116,139,0.2)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.2)] h-[58px] md:h-[90px] overflow-hidden">
+              {/* Normal state */}
+              <div className="absolute inset-0 flex flex-row items-center px-[10px] gap-[10px] md:px-5 md:gap-4 transition-opacity duration-200 group-hover:opacity-0">
+                <div className="w-[30px] h-[30px] md:w-10 md:h-10 rounded-full bg-[rgba(239,68,68,0.1)] flex items-center justify-center shrink-0">
+                  <BadgeAlert
+                    className="w-[14px] h-[14px] md:w-5 md:h-5"
+                    color="#ef4444"
+                    strokeWidth={1.8}
+                  />
+                </div>
+                <div className="flex flex-col items-start">
+                  <p className="text-[10px] md:text-[12px] font-normal text-[#0F172A] leading-tight">
+                    {t("totalAbsences")}
+                  </p>
+                  <p className="text-[20px] md:text-[28px] font-semibold text-[#ef4444] leading-tight">
+                    {loading ? "—" : dayOffs.length}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="bg-white border border-[rgba(166,166,166,0.25)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] h-[100px] flex items-center justify-center">
-              <div className="flex flex-col gap-[10px] items-center text-center">
-                <p className="text-[16px] font-medium text-[#0097b2]">{t("totalAbsences")}</p>
-                <p className="text-[32px] font-semibold text-black">
-                  {loading ? "—" : dayOffs.length}
+              {/* Hover state */}
+              <div className="absolute inset-0 flex flex-row items-center px-[10px] gap-[10px] md:px-5 md:gap-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                <div className="w-[30px] h-[30px] md:w-10 md:h-10 rounded-full bg-[rgba(239,68,68,0.1)] flex items-center justify-center shrink-0">
+                  <BadgeAlert
+                    className="w-[14px] h-[14px] md:w-5 md:h-5"
+                    color="#ef4444"
+                    strokeWidth={1.8}
+                  />
+                </div>
+                <p className="text-[11px] md:text-[14px] font-normal text-[#0F172A] leading-snug">
+                  {t("totalAbsencesDesc")}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Absence Report title */}
-          <h2 className="text-[20px] font-semibold text-black -mb-2">{t("absenceReport")}</h2>
+          {/* Section title */}
+          <h2 className="text-[20px] font-semibold text-[#0F172A]">{t("absenceReport")}</h2>
 
-          {/* Filtros */}
-          <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] px-[28px] py-[31px]">
-            <div className="flex flex-col gap-[30px]">
-              {/* Header filtros */}
-              <div className="flex items-center gap-[10px]">
-                <ListFilter size={20} color="#000000" strokeWidth={2} />
-                <p className="text-[16px] font-semibold text-black">{t("applyFilters")}</p>
-              </div>
-
-              {/* Inputs + botón */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
-                <div className="flex flex-col sm:flex-row gap-[20px] w-full sm:w-auto">
-                  {/* Search filter */}
-                  <div className="flex flex-col gap-[5px]">
-                    <p className="text-[16px] font-medium text-black">{t("date")}</p>
-                    <div className="flex h-[35px] items-center border border-[rgba(166,166,166,0.5)] rounded-[5px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] bg-white w-full sm:w-[341px] overflow-hidden">
-                      <input
-                        type="text"
-                        placeholder={t("datePlaceholder")}
-                        value={dateFilter}
-                        onChange={(e) => setDateFilter(e.target.value)}
-                        className="flex-1 px-[8px] text-[14px] text-[#b6b4b4] placeholder-[#b6b4b4] border-none outline-none bg-transparent"
-                      />
-                      <div className="flex items-center justify-center w-[40px] h-full border-l border-[rgba(166,166,166,0.5)] bg-white px-[8px]">
-                        <Calendar size={18} color="#6d6d6d" strokeWidth={1.5} />
-                      </div>
-                    </div>
+          {/* Filters row */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            {/* Date range dropdown */}
+            <div className="relative w-full sm:w-auto" ref={dateDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setDateDropdownOpen((o) => !o)}
+                className="w-full sm:w-auto flex items-center gap-2 border border-[rgba(100,116,139,0.3)] rounded-[8px] bg-white px-4 py-2 text-[14px] text-[#0F172A] shadow-sm hover:bg-gray-50 transition-colors"
+              >
+                <span className="text-[11px] text-[#64748B]">{t("date")}</span>
+                <span className="font-medium">{dateRangeLabel}</span>
+                <ChevronDown size={16} color="#64748B" />
+              </button>
+              {dateDropdownOpen && (
+                <div className="absolute top-[calc(100%+6px)] left-0 z-20 bg-white border border-[rgba(100,116,139,0.2)] rounded-[10px] shadow-lg p-4 flex flex-col gap-3 min-w-[260px]">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[12px] font-medium text-[#64748B]">
+                      {t("dateFrom")}
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="border border-[rgba(100,116,139,0.3)] rounded-[6px] px-3 py-1.5 text-[14px] text-[#0F172A] outline-none focus:border-[#007489]"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[12px] font-medium text-[#64748B]">{t("dateTo")}</label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="border border-[rgba(100,116,139,0.3)] rounded-[6px] px-3 py-1.5 text-[14px] text-[#0F172A] outline-none focus:border-[#007489]"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStartDate("");
+                        setEndDate("");
+                        setDateDropdownOpen(false);
+                      }}
+                      className="flex-1 py-1.5 rounded-[6px] border border-[rgba(100,116,139,0.3)] text-[13px] text-[#64748B] hover:bg-gray-50 transition-colors"
+                    >
+                      {t("cleanFilters")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDateDropdownOpen(false)}
+                      className="flex-1 py-1.5 rounded-[6px] bg-[#007489] text-[13px] text-white hover:bg-[#005f70] transition-colors"
+                    >
+                      {t("apply")}
+                    </button>
                   </div>
                 </div>
-
-                {/* Clean filters */}
-                <button
-                  type="button"
-                  onClick={handleCleanFilters}
-                  className="h-[35px] px-[20px] bg-[#ff0004] rounded-[5px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] hover:bg-[#cc0003] transition-colors shrink-0"
-                >
-                  <span className="text-[14px] font-semibold text-white whitespace-nowrap">
-                    {t("cleanFilters")}
-                  </span>
-                </button>
-              </div>
+              )}
             </div>
-          </div>
 
-          {/* Tabla de ausencias */}
-          <div className="bg-white border border-[rgba(166,166,166,0.25)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] overflow-hidden">
-            {/* Header de la tabla */}
-            <div className="grid grid-cols-[180px_1fr] px-6 py-4 border-b border-[rgba(166,166,166,0.2)]">
-              <div className="flex items-center gap-[6px]">
-                <span className="text-[14px] font-semibold text-black">{t("table.date")}</span>
-                <ArrowDownWideNarrow size={16} color="#6d6d6d" strokeWidth={1.5} />
+            {/* Absence type filter + legend */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[12px] text-[#64748B]">{t("absenceType")}</span>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value as AbsenceTypeFilter)}
+                  className="border border-[rgba(100,116,139,0.3)] rounded-[6px] px-2 py-1 text-[14px] text-[#0F172A] bg-white outline-none focus:border-[#007489]"
+                >
+                  <option value="All">{t("absenceTypes.all")}</option>
+                  <option value="License">{t("absenceTypes.license")}</option>
+                  <option value="Vacation">{t("absenceTypes.vacation")}</option>
+                  <option value="Health">{t("absenceTypes.health")}</option>
+                </select>
               </div>
-              <div className="flex items-center gap-[6px]">
-                <span className="text-[14px] font-semibold text-black">
-                  {t("table.description")}
+              <div className="flex items-center gap-4">
+                <span className="inline-flex items-center gap-[5px] text-[#007489] text-[13px]">
+                  <FileUser size={13} strokeWidth={1.5} />
+                  {t("absenceTypes.license")}
+                </span>
+                <span className="inline-flex items-center gap-[5px] text-[#5e7a00] text-[13px]">
+                  <TreePalm size={13} strokeWidth={1.5} />
+                  {t("absenceTypes.vacation")}
+                </span>
+                <span className="inline-flex items-center gap-[5px] text-[#991b1b] text-[13px]">
+                  <Cross size={13} strokeWidth={1.5} />
+                  {t("absenceTypes.health")}
                 </span>
               </div>
             </div>
+          </div>
 
-            {/* Filas */}
+          {/* Table — desktop */}
+          <div className="hidden md:block bg-white border border-[rgba(100,116,139,0.2)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.2)] overflow-hidden">
+            <div className="grid grid-cols-[1fr_150px_120px_1fr] px-6 py-3 border-b border-[rgba(100,116,139,0.15)]">
+              <span className="text-[14px] font-semibold text-[#0F172A]">{t("table.date")}</span>
+              <span className="text-[14px] font-semibold text-[#0F172A]">{t("table.type")}</span>
+              <span className="text-[14px] font-semibold text-[#0F172A]">
+                {t("table.duration")}
+              </span>
+              <span className="text-[14px] font-semibold text-[#0F172A]">
+                {t("table.description")}
+              </span>
+            </div>
             {loading ? (
               <div className="text-center py-12">
-                <p className="text-[16px] text-gray-500">{t("loading")}</p>
+                <p className="text-[14px] text-[#64748B]">{t("loading")}</p>
               </div>
             ) : filteredDayOffs.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-[16px] text-gray-500">{t("noData")}</p>
+                <p className="text-[14px] text-[#64748B]">{t("noData")}</p>
+              </div>
+            ) : (
+              filteredDayOffs.map((dayOff, index) => (
+                <div
+                  key={dayOff.id}
+                  className="grid grid-cols-[1fr_150px_120px_1fr] px-6 py-3 items-center"
+                  style={{
+                    backgroundColor: index % 2 === 0 ? "#ffffff" : "rgba(0,116,137,0.08)",
+                  }}
+                >
+                  <span className="text-[14px] text-[#0F172A]">
+                    {formatDateRange(dayOff.dates)}
+                  </span>
+                  <TypeBadge type={dayOff.type} />
+                  <span className="text-[14px] text-[#0F172A]">{getDuration(dayOff.dates)}</span>
+                  <span className="text-[14px] text-[#64748B]">{dayOff.reason}</span>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Cards — mobile */}
+          <div className="md:hidden bg-white border border-[rgba(100,116,139,0.2)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.2)] overflow-hidden">
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-[14px] text-[#64748B]">{t("loading")}</p>
+              </div>
+            ) : filteredDayOffs.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-[14px] text-[#64748B]">{t("noData")}</p>
               </div>
             ) : (
               filteredDayOffs.map((dayOff, index) => {
-                const isEven = index % 2 === 0;
+                const isExpanded = expandedId === dayOff.id;
                 return (
                   <div
                     key={dayOff.id}
-                    className="grid grid-cols-[180px_1fr] px-6 py-4"
                     style={{
-                      backgroundColor: isEven ? "#ffffff" : "rgba(235, 235, 235, 0.4)",
+                      backgroundColor: index % 2 === 0 ? "#ffffff" : "rgba(0,116,137,0.08)",
                     }}
                   >
-                    <span className="text-[14px] text-black self-center">
-                      {dayOff.dates && dayOff.dates.length > 0 ? formatDate(dayOff.dates[0]) : "-"}
-                    </span>
-                    <span className="text-[14px] text-[#6d6d6d] self-center">{dayOff.reason}</span>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedId(isExpanded ? null : dayOff.id)}
+                      className="w-full flex items-center justify-between px-4 py-3 text-left"
+                    >
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[14px] text-[#0F172A]">
+                          <strong>{t("table.date")}:</strong>{" "}
+                          <span className="font-normal">{formatDateRange(dayOff.dates)}</span>
+                        </span>
+                        <span className="text-[14px] text-[#0F172A] flex items-center gap-1">
+                          <strong>{t("table.type")}:</strong>
+                          <TypeBadge type={dayOff.type} />
+                        </span>
+                      </div>
+                      {isExpanded ? (
+                        <ChevronDown size={18} color="#64748B" />
+                      ) : (
+                        <ChevronRight size={18} color="#64748B" />
+                      )}
+                    </button>
+                    {isExpanded && (
+                      <div className="px-4 pb-4 flex flex-col gap-2 border-t border-[rgba(100,116,139,0.1)]">
+                        <span className="text-[14px] text-[#0F172A] pt-2">
+                          <strong>{t("table.duration")}:</strong> {getDuration(dayOff.dates)}
+                        </span>
+                        <span className="text-[14px] text-[#64748B]">
+                          <strong className="text-[#0F172A]">{t("table.description")}:</strong>{" "}
+                          {dayOff.reason}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 );
               })

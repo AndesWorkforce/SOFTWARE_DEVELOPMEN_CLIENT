@@ -25,6 +25,7 @@ function getApiUrl() {
 }
 
 const nextConfig: NextConfig = {
+  output: "standalone", // necesario para el Dockerfile (copia .next/standalone)
   /* Additional Next.js config options */
   async rewrites() {
     return [

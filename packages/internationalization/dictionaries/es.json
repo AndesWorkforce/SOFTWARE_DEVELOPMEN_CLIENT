@@ -143,8 +143,10 @@
       "title": "Historial",
       "exportPdf": "Exportar PDF",
       "workingDays": "Días Laborales",
+      "workingDaysDesc": "Total de días trabajados por el contratista",
       "averageProductivity": "Productividad Promedio",
       "totalAbsences": "Total Ausencias",
+      "totalAbsencesDesc": "Total de ausencias registradas para el contratista",
       "absenceReport": "Reporte de Ausencias",
       "applyFilters": "Aplicar filtros",
       "date": "Fecha",
@@ -152,13 +154,23 @@
       "absenceType": "Tipo de ausencia",
       "selectPlaceholder": "Seleccionar...",
       "cleanFilters": "Limpiar filtros",
+      "apply": "Aplicar",
+      "dateFrom": "Desde",
+      "dateTo": "Hasta",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Estás seguro de que deseas eliminar esta ausencia?",
+      "durationDay": "día",
+      "durationDays": "días",
       "table": {
         "date": "Fecha",
         "type": "Tipo",
         "duration": "Duración",
-        "description": "Descripción"
+        "description": "Descripción",
+        "action": "Acción"
       },
       "absenceTypes": {
+        "all": "Todos",
         "vacation": "Vacaciones",
         "health": "Salud",
         "license": "Licencia"
