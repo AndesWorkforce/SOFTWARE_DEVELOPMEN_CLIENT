@@ -10,7 +10,7 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function VisualizerClientCalendarPage({ params }: PageProps) {
+export default function AdminClientCalendarPage({ params }: PageProps) {
   const { id: clientId } = use(params);
   const { clientName, cards, teams } = useClientCalendar(clientId);
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function VisualizerClientCalendarPage({ params }: PageProps) {
 
   const handleContractorHistoryClick = (contractorId: string, contractorName: string) => {
     router.push(
-      `/${locale}/app/visualizer/contractor-history/${contractorId}?name=${encodeURIComponent(contractorName)}`,
+      `/${locale}/app/admin/contractors/contractor-history/${contractorId}?name=${encodeURIComponent(contractorName)}`,
     );
   };
 
