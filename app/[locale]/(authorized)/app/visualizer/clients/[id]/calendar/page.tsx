@@ -1,6 +1,7 @@
 "use client";
 
 import { use } from "react";
+
 import { ClientCalendar } from "@/packages/design-system/components/ClientCalendar";
 import { useClientCalendar } from "@/packages/shared-views/clients";
 
