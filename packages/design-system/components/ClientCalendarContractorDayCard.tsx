@@ -1,6 +1,6 @@
 "use client";
 
-import { BriefcaseBusiness, Clock, FileUser, TreePalm, Cross } from "lucide-react";
+import { BriefcaseBusiness, Clock, FileUser, TreePalm, Cross, ArrowRight } from "lucide-react";
 
 export interface ClientCalendarContractorDayCardProps {
   name: string;
@@ -9,6 +9,7 @@ export interface ClientCalendarContractorDayCardProps {
   workScheduleStart?: string | null;
   workScheduleEnd?: string | null;
   dayOffType?: "Health" | "Vacation" | "License" | null;
+  onHistoryClick?: () => void;
 }
 
 export function ClientCalendarContractorDayCard({
@@ -18,6 +19,7 @@ export function ClientCalendarContractorDayCard({
   workScheduleStart,
   workScheduleEnd,
   dayOffType,
+  onHistoryClick,
 }: ClientCalendarContractorDayCardProps) {
   const isFullTime = jobSchedule === "full_time";
   const isPartTime = jobSchedule === "part_time";
@@ -49,13 +51,18 @@ export function ClientCalendarContractorDayCard({
   const scheduleLabel =
     workScheduleStart && workScheduleEnd ? `${workScheduleStart} - ${workScheduleEnd}` : "-";
 
+  const Tag = onHistoryClick ? "button" : "div";
+
   return (
-    <div
-      className="group flex w-full items-center gap-[8px] rounded-[5px] px-[7px] py-[10px]"
+    <Tag
+      {...(onHistoryClick
+        ? { type: "button" as const, onClick: onHistoryClick, title: "Ver historial de ausencias" }
+        : {})}
+      className={`group flex w-full items-center gap-[8px] rounded-[5px] px-[7px] py-[10px] text-left${onHistoryClick ? " transition-opacity hover:opacity-80 cursor-pointer" : ""}`}
       style={{ backgroundColor, color: textColor }}
     >
       {/* Vista por defecto */}
-      <div className="flex w-full items-center gap-[8px] group-hover:hidden">
+      <div className="flex min-w-0 flex-1 items-center gap-[8px] group-hover:hidden">
         <Icon className="h-4 w-4 shrink-0" />
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-[12px] font-medium leading-normal">{name}</span>
@@ -64,13 +71,16 @@ export function ClientCalendarContractorDayCard({
       </div>
 
       {/* Vista en hover: horario de trabajo */}
-      <div className="hidden w-full items-center gap-[8px] group-hover:flex">
+      <div className="hidden min-w-0 flex-1 items-center gap-[8px] group-hover:flex">
         <Clock className="h-4 w-4 shrink-0" />
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-[12px] font-medium leading-normal">{scheduleLabel}</span>
           <span className="truncate text-[10px] font-normal leading-normal">Working Hours</span>
         </div>
       </div>
-    </div>
+
+      {/* Flecha indicadora de navegación */}
+      {onHistoryClick && <ArrowRight className="h-4 w-4 shrink-0 opacity-60" />}
+    </Tag>
   );
 }

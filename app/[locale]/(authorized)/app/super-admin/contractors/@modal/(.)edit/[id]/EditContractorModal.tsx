@@ -61,6 +61,7 @@ export function EditContractorModal({
           client_id: contractor.client_id || "",
           team_id: contractor.team_id || "",
           country: contractor.country || "",
+          job_schedule: contractor.job_schedule || "",
           work_schedule_start: contractor.work_schedule_start || "",
           work_schedule_end: contractor.work_schedule_end || "",
           lunch_start: contractor.lunch_start || "",
@@ -177,28 +178,40 @@ export function EditContractorModal({
           options: COUNTRY_OPTIONS,
         },
         {
+          key: "job_schedule",
+          type: "select",
+          label: t("jobSchedule") || "Job Schedule",
+          translationKey: "contractors.modal.jobSchedule",
+          fullWidth: true,
+          options: [
+            { value: "full_time", label: t("jobScheduleFullTime") || "Full time" },
+            { value: "part_time", label: t("jobSchedulePartTime") || "Part time" },
+            { value: "no_schedule", label: t("jobScheduleNoSchedule") || "No schedule" },
+          ],
+        },
+        {
           key: "work_schedule_start",
           type: "time",
           label: t("startTime") || "Start Time",
           translationKey: "contractors.modal.startTime",
-          optional: true,
           icon: <Clock className="w-6 h-6" />,
+          hidden: (values) => values.job_schedule === "no_schedule",
         },
         {
           key: "work_schedule_end",
           type: "time",
           label: t("finishTime") || "Finish Time",
           translationKey: "contractors.modal.finishTime",
-          optional: true,
           icon: <Clock className="w-6 h-6" />,
+          hidden: (values) => values.job_schedule === "no_schedule",
         },
         {
           key: "lunch_start",
           type: "time",
           label: t("startLunchTime") || "Start Lunch Time",
           translationKey: "contractors.modal.startLunchTime",
-          optional: true,
           icon: <Clock className="w-6 h-6" />,
+          hidden: (values) => values.job_schedule === "no_schedule",
           onValueChange: (value, _formValues, setFieldValue) => {
             if (typeof value === "string" && value) {
               setFieldValue("lunch_end", addOneHour(value));
@@ -212,8 +225,8 @@ export function EditContractorModal({
           type: "time",
           label: t("finishLunchTime") || "Lunch End Time",
           translationKey: "contractors.modal.finishLunchTime",
-          optional: true,
           icon: <Clock className="w-6 h-6" />,
+          hidden: (values) => values.job_schedule === "no_schedule",
           disabled: true,
         },
       ],
@@ -251,6 +264,12 @@ export function EditContractorModal({
 
         if (typeof values.team_id === "string" && values.team_id.trim()) {
           payload.team_id = values.team_id.trim();
+        }
+
+        if (typeof values.job_schedule === "string" && values.job_schedule.trim()) {
+          payload.job_schedule = values.job_schedule.trim();
+        } else {
+          payload.job_schedule = null;
         }
 
         return payload;

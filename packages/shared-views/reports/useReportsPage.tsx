@@ -318,7 +318,6 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
       const allMetrics = await adtService.getAllRealtimeMetrics({
         from: fromDate,
         to: toDate,
-        useCache: true,
         ...(isClientUser && currentClientId ? { client_id: currentClientId } : {}),
       });
 
@@ -348,8 +347,7 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
         client_id?: string;
         team_id?: string;
         job_position?: string;
-        useCache?: boolean;
-      } = { useCache: true };
+      } = {};
 
       if (dateRange?.start && dateRange?.end) {
         adtFilters.from = dateRange.start;

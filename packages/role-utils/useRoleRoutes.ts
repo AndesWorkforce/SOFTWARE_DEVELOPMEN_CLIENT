@@ -40,7 +40,7 @@ export function useRoleRoutes(role: Role): RoleRoutes {
       edit: (id: string) => `${base}/clients/edit/${id}`,
       delete: (id: string) => `${base}/clients/delete/${id}`,
       add: `${base}/clients/add`,
-      ...(role === "visualizer" && {
+      ...((role === "visualizer" || role === "admin" || role === "super-admin") && {
         calendar: (id: string) => `${base}/clients/${id}/calendar`,
       }),
     },

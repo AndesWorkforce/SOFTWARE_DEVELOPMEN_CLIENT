@@ -136,8 +136,8 @@ export default function ContractorHistoryPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#F8FAFC]">
       <Header />
-      <div className="flex-1 overflow-x-hidden pt-[71px] px-4 md:px-8 pb-6 md:pb-10">
-        <div className="max-w-full overflow-x-hidden flex flex-col gap-6">
+      <div className="flex-1 pt-[71px] px-4 md:px-8 pb-6 md:pb-10">
+        <div className="max-w-full flex flex-col gap-6">
           {/* Title */}
           <div className="flex items-center gap-3 pt-4">
             <Link

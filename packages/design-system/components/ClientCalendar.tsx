@@ -25,6 +25,7 @@ export interface ClientCalendarProps {
   cards: ClientCalendarCardDataProps[];
   teams?: ClientCalendarTeam[];
   teamCount?: number;
+  onContractorHistoryClick?: (contractorId: string, contractorName: string) => void;
 }
 
 export function ClientCalendar({
@@ -33,6 +34,7 @@ export function ClientCalendar({
   cards,
   teams = [],
   teamCount,
+  onContractorHistoryClick,
 }: ClientCalendarProps) {
   const tCalendar = useTranslations("calendar");
 
@@ -349,6 +351,7 @@ export function ClientCalendar({
         contractors={selectedTeamContractors}
         teamDayStats={teamDayStats}
         onTeamClick={handleTeamClickFromGrid}
+        onContractorHistoryClick={onContractorHistoryClick}
         jobPositionFilter={jobPositionFilter}
         absenceTypeFilter={absenceTypeFilter}
         getContractorDayOffType={

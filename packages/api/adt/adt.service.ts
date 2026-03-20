@@ -32,7 +32,6 @@ export interface RealtimeMetricsFilters {
   client_id?: string;
   team_id?: string;
   job_position?: string;
-  useCache?: boolean;
 }
 
 export class AdtService {
@@ -48,7 +47,6 @@ export class AdtService {
    *   - client_id: ID del cliente
    *   - team_id: ID del equipo
    *   - job_position: Cargo
-   *   - useCache: Si usar caché (default: true)
    * @returns Array de métricas de productividad por contractor
    */
   async getAllRealtimeMetrics(filters?: RealtimeMetricsFilters): Promise<RealtimeMetrics[]> {
@@ -86,9 +84,6 @@ export class AdtService {
     if (filters?.job_position && filters.job_position.trim() !== "") {
       params.job_position = filters.job_position.trim();
     }
-
-    // useCache siempre se envía (default: true)
-    params.useCache = filters?.useCache === false ? "false" : "true";
 
     console.log("🌐 Llamando a /adt/realtime-metrics con params:", params);
 
@@ -128,7 +123,6 @@ export class AdtService {
    *
    * @param contractorId ID del contratista
    * @param workday Fecha del día en formato YYYY-MM-DD (por defecto: hoy). Se ignora si se proporciona 'from' y 'to'
-   * @param useCache Si usar caché (default: true)
    * @param from Fecha de inicio del rango en formato YYYY-MM-DD (opcional, si se proporciona junto con 'to', devuelve métricas agregadas)
    * @param to Fecha de fin del rango en formato YYYY-MM-DD (opcional, debe usarse junto con 'from')
    * @returns Métricas de productividad del contratista
@@ -136,23 +130,16 @@ export class AdtService {
   async getRealtimeMetrics(
     contractorId: string,
     workday?: string,
-    useCache: boolean = true,
     from?: string,
     to?: string,
   ): Promise<RealtimeMetrics> {
     const params: Record<string, string> = {};
 
     if (from && to) {
-      // Si se proporciona from y to, usar rango de fechas
       params.from = from;
       params.to = to;
     } else if (workday) {
-      // Si solo se proporciona workday, usar día específico
       params.workday = workday;
-    }
-
-    if (!useCache) {
-      params.useCache = "false";
     }
 
     const response = await http.get<RealtimeMetrics>(`/adt/realtime-metrics/${contractorId}`, {
@@ -196,13 +183,9 @@ export class AdtService {
   /**
    * Obtiene el porcentaje de talento activo vs inactivo en un período.
    * @param period 'day' (día actual), 'week' (última semana), 'month' (mes actual)
-   * @param useCache Si usar caché (default: true)
    * @returns Porcentajes y conteos de contractors activos/inactivos
    */
-  async getActiveTalentPercentage(
-    period: "day" | "week" | "month" = "day",
-    useCache: boolean = true,
-  ): Promise<{
+  async getActiveTalentPercentage(period: "day" | "week" | "month" = "day"): Promise<{
     active_percentage: number;
     inactive_percentage: number;
     total_contractors: number;
@@ -212,10 +195,7 @@ export class AdtService {
   }> {
     try {
       const response = await http.get("/adt/active-talent", {
-        params: {
-          period,
-          useCache: useCache ? "true" : "false",
-        },
+        params: { period },
       });
       return response.data;
     } catch (error) {
@@ -233,21 +213,15 @@ export class AdtService {
    * Obtiene top 5 rankings de productividad (mejores o peores).
    * @param period 'day' (día actual), 'week' (última semana), 'month' (mes actual)
    * @param order 'best' para mejores, 'worst' para peores
-   * @param useCache Si usar caché (default: true)
    * @returns Top 5 contractors según el orden especificado
    */
   async getTopRanking(
     period: "day" | "week" | "month" = "day",
     order: "best" | "worst" = "best",
-    useCache: boolean = true,
   ): Promise<RealtimeMetrics[]> {
     try {
       const response = await http.get<RealtimeMetrics[]>("/adt/ranking/top5", {
-        params: {
-          period,
-          order,
-          useCache: useCache ? "true" : "false",
-        },
+        params: { period, order },
       });
       return response.data;
     } catch (error) {
@@ -262,25 +236,19 @@ export class AdtService {
   }
 
   /**
-   * @deprecated Usar getTopRanking(period, 'best', useCache) en su lugar
+   * @deprecated Usar getTopRanking(period, 'best') en su lugar
    * Obtiene top 5 mejores rankings de productividad.
    */
-  async getTop5BestRanking(
-    period: "day" | "week" | "month" = "day",
-    useCache: boolean = true,
-  ): Promise<RealtimeMetrics[]> {
-    return this.getTopRanking(period, "best", useCache);
+  async getTop5BestRanking(period: "day" | "week" | "month" = "day"): Promise<RealtimeMetrics[]> {
+    return this.getTopRanking(period, "best");
   }
 
   /**
-   * @deprecated Usar getTopRanking(period, 'worst', useCache) en su lugar
+   * @deprecated Usar getTopRanking(period, 'worst') en su lugar
    * Obtiene top 5 peores rankings de productividad.
    */
-  async getTop5WorstRanking(
-    period: "day" | "week" | "month" = "day",
-    useCache: boolean = true,
-  ): Promise<RealtimeMetrics[]> {
-    return this.getTopRanking(period, "worst", useCache);
+  async getTop5WorstRanking(period: "day" | "week" | "month" = "day"): Promise<RealtimeMetrics[]> {
+    return this.getTopRanking(period, "worst");
   }
 
   /**
@@ -314,7 +282,7 @@ export class AdtService {
       const response = await http.get<ContractorSession[]>(`/adt/sessions/${contractorId}`, {
         params,
       });
-      return response.data;
+      return response.data.map((s) => ({ ...s, total_seconds: Number(s.total_seconds) }));
     } catch (error) {
       const axiosError = error as AxiosError;
       const data = axiosError?.response?.data as Record<string, unknown> | undefined;
@@ -362,7 +330,10 @@ export class AdtService {
       const response = await http.get<
         Array<{ session_day: string; sessions: ContractorSession[] }>
       >(`/adt/sessions/${contractorId}/by-day`, { params });
-      return response.data;
+      return response.data.map((group) => ({
+        ...group,
+        sessions: group.sessions.map((s) => ({ ...s, total_seconds: Number(s.total_seconds) })),
+      }));
     } catch (error) {
       const axiosError = error as AxiosError;
       const data = axiosError?.response?.data as Record<string, unknown> | undefined;

@@ -21,6 +21,7 @@ export interface ClientCalendarDayColumnProps {
   teams?: ClientCalendarDayColumnTeam[];
   contractors?: Contractor[];
   onTeamClick?: (teamId: string) => void;
+  onContractorHistoryClick?: (contractorId: string, contractorName: string) => void;
   className?: string;
   jobPositionFilter?: string;
   absenceTypeFilter?: string;
@@ -39,6 +40,7 @@ export function ClientCalendarDayColumn({
   teams = [],
   contractors = [],
   onTeamClick,
+  onContractorHistoryClick,
   className = "",
   jobPositionFilter = "all",
   absenceTypeFilter = "all",
@@ -99,6 +101,11 @@ export function ClientCalendarDayColumn({
                       workScheduleStart={contractor.work_schedule_start}
                       workScheduleEnd={contractor.work_schedule_end}
                       dayOffType={contractorDayOffType}
+                      onHistoryClick={
+                        onContractorHistoryClick
+                          ? () => onContractorHistoryClick(contractor.id, contractor.name)
+                          : undefined
+                      }
                     />
                   )))}
         </div>
