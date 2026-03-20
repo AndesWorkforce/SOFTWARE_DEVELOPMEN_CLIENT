@@ -1,4 +1,5 @@
 import { Calendar } from "lucide-react";
+
 import type { Contractor } from "@/packages/types/contractors.types";
 import type { DataTableConfig } from "@/packages/types/DataTable.types";
 import type { FilterPanelConfig, FilterValues } from "@/packages/types/FilterPanel.types";
@@ -108,15 +109,6 @@ export function createTableConfig(
         dataPath: "country",
         type: "text",
         minWidth: "120px",
-        align: "center",
-      },
-      {
-        key: "activationKey",
-        title: "Activation Key",
-        translationKey: "contractors.table.activationKey",
-        dataPath: "activation_key",
-        type: "text",
-        minWidth: "220px",
         align: "center",
       },
     ],

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "name": "Software Engineer",
+    "description": "Designs, develops, and maintains software systems"
+  },
+  {
+    "id": "2",
+    "name": "Product Manager",
+    "description": "Leads product strategy and roadmap planning"
+  },
+  {
+    "id": "3",
+    "name": "UX Designer",
+    "description": "Designs user interfaces and improves user experience"
+  },
+  {
+    "id": "4",
+    "name": "Data Analyst",
+    "description": "Analyzes data and generates actionable insights"
+  },
+  {
+    "id": "5",
+    "name": "DevOps Engineer",
+    "description": "Manages infrastructure, CI/CD pipelines, and deployments"
+  },
+  {
+    "id": "6",
+    "name": "QA Engineer",
+    "description": "Ensures software quality through testing and validation"
+  },
+  {
+    "id": "7",
+    "name": "Project Manager",
+    "description": "Plans and coordinates project execution"
+  },
+  {
+    "id": "8",
+    "name": "Business Analyst",
+    "description": "Bridges business requirements and technical solutions"
+  }
+]
