@@ -1,6 +1,6 @@
 "use client";
 
-import { FileUser, TreePalm, Cross, Pencil, Trash2 } from "lucide-react";
+import { FileUser, TreePalm, Cross, Pencil, Trash2, ArrowRight } from "lucide-react";
 
 type DayOffType = "License" | "Vacation" | "Health";
 
@@ -54,53 +54,60 @@ export const DayOffBadge: React.FC<DayOffBadgeProps> = ({
         <Icon className="h-3.5 w-3.5 shrink-0" />
         <span className="truncate">{label}</span>
       </span>
-      {/* Contenido en hover: lápiz y papelera, cada uno centrado en su mitad */}
-      <span className="hidden w-full group-hover:flex flex-1 min-w-0">
-        <span className="flex flex-1 items-center justify-center">
-          <span
-            role="button"
-            tabIndex={0}
-            className="cursor-pointer p-0.5 rounded hover:opacity-80 transition-opacity"
-            style={{ color: "#0097B2" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit?.(e);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
+      {/* Contenido en hover */}
+      {onEdit || onDelete ? (
+        <span className="hidden w-full group-hover:flex flex-1 min-w-0">
+          <span className="flex flex-1 items-center justify-center">
+            <span
+              role="button"
+              tabIndex={0}
+              className="cursor-pointer p-0.5 rounded hover:opacity-80 transition-opacity"
+              style={{ color: "#0097B2" }}
+              onClick={(e) => {
                 e.stopPropagation();
-                onEdit?.(e as unknown as React.MouseEvent);
-              }
-            }}
-            aria-label="Editar"
-          >
-            <Pencil className="h-3.5 w-3.5" />
+                onEdit?.(e);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onEdit?.(e as unknown as React.MouseEvent);
+                }
+              }}
+              aria-label="Editar"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </span>
+          </span>
+          <span className="flex flex-1 items-center justify-center">
+            <span
+              role="button"
+              tabIndex={0}
+              className="cursor-pointer p-0.5 rounded hover:opacity-80 transition-opacity"
+              style={{ color: "#FF0004" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(e);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete?.(e as unknown as React.MouseEvent);
+                }
+              }}
+              aria-label="Eliminar"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </span>
           </span>
         </span>
-        <span className="flex flex-1 items-center justify-center">
-          <span
-            role="button"
-            tabIndex={0}
-            className="cursor-pointer p-0.5 rounded hover:opacity-80 transition-opacity"
-            style={{ color: "#FF0004" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete?.(e);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                e.stopPropagation();
-                onDelete?.(e as unknown as React.MouseEvent);
-              }
-            }}
-            aria-label="Eliminar"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </span>
+      ) : (
+        <span className="hidden w-full group-hover:flex flex-1 min-w-0 items-center justify-center gap-1 font-semibold">
+          View Details
+          <ArrowRight className="h-3 w-3 shrink-0" />
         </span>
-      </span>
+      )}
     </div>
   );
 };

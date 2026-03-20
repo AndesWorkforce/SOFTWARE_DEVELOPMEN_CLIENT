@@ -16,12 +16,15 @@ export interface DsContractorCalendarModalProps {
   contractorId: string;
   contractorName?: string;
   onClose: () => void;
+  /** When provided, disables edit/delete and uses this as the event click handler (view-only mode). */
+  onEventClick?: (event: CalendarEvent) => void;
 }
 
 export const DsContractorCalendarModal = ({
   contractorId,
   contractorName: initialName,
   onClose,
+  onEventClick: onEventClickProp,
 }: DsContractorCalendarModalProps) => {
   const locale = useLocale();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -106,7 +109,9 @@ export const DsContractorCalendarModal = ({
   };
 
   const handleEventClick = (event: CalendarEvent) => {
-    console.log("Event clicked:", event);
+    if (onEventClickProp) {
+      onEventClickProp(event);
+    }
   };
 
   const handleEventEdit = (event: CalendarEvent) => {
@@ -185,8 +190,8 @@ export const DsContractorCalendarModal = ({
           selectedDate,
           onDateSelect: handleDateSelect,
           onEventClick: handleEventClick,
-          onEventEdit: handleEventEdit,
-          onEventDelete: handleEventDelete,
+          onEventEdit: onEventClickProp ? undefined : handleEventEdit,
+          onEventDelete: onEventClickProp ? undefined : handleEventDelete,
           locale: locale === "es" ? "es-ES" : "en-US",
           showNavigation: true,
           showEventIndicators: true,

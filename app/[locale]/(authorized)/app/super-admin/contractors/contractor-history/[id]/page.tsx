@@ -13,8 +13,10 @@ import {
   TreePalm,
   Cross,
   FileUser,
+  Pencil,
+  Trash2,
 } from "lucide-react";
-import { Header } from "@/packages/design-system";
+import { Header, EditAbsenceModal } from "@/packages/design-system";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import type { ContractorDayOff } from "@/packages/api/contractors/contractors.service";
 
@@ -46,7 +48,7 @@ function TypeBadge({ type }: { type: string }) {
   );
 }
 
-export default function ContractorHistoryPage() {
+export default function SuperAdminContractorHistoryPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const locale = useLocale();
@@ -63,6 +65,7 @@ export default function ContractorHistoryPage() {
   const [typeFilter, setTypeFilter] = useState<AbsenceTypeFilter>("All");
   const [workingDays, setWorkingDays] = useState<number | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [editDayOff, setEditDayOff] = useState<ContractorDayOff | null>(null);
   const dateDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -94,6 +97,16 @@ export default function ContractorHistoryPage() {
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
+
+  const handleDeleteDayOff = async (id: string) => {
+    if (!confirm(t("deleteConfirm"))) return;
+    try {
+      await contractorsService.deleteDayOff(id);
+      setDayOffs((prev) => prev.filter((d) => d.id !== id));
+    } catch {
+      // silent
+    }
+  };
 
   const formatDate = (dateStr: string) => {
     const [year, month, day] = dateStr.split("T")[0].split("-").map(Number);
@@ -141,7 +154,7 @@ export default function ContractorHistoryPage() {
           {/* Title */}
           <div className="flex items-center gap-3 pt-4">
             <Link
-              href={`/${locale}/app/visualizer`}
+              href={`/${locale}/app/super-admin/contractors`}
               className="flex items-center justify-center w-[24px] h-[24px] shrink-0 hover:opacity-70 transition-opacity"
             >
               <ArrowLeft size={24} color="#0F172A" strokeWidth={2} />
@@ -155,7 +168,6 @@ export default function ContractorHistoryPage() {
           <div className="grid grid-cols-2 gap-2 md:gap-4 md:w-2/3">
             {/* Working Days */}
             <div className="group relative bg-white border border-[rgba(100,116,139,0.2)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.2)] h-[58px] md:h-[90px] overflow-hidden">
-              {/* Normal state */}
               <div className="absolute inset-0 flex flex-row items-center px-[10px] gap-[10px] md:px-5 md:gap-4 transition-opacity duration-200 group-hover:opacity-0">
                 <div className="w-[30px] h-[30px] md:w-10 md:h-10 rounded-full bg-[rgba(124,58,237,0.1)] flex items-center justify-center shrink-0">
                   <BriefcaseBusiness
@@ -173,7 +185,6 @@ export default function ContractorHistoryPage() {
                   </p>
                 </div>
               </div>
-              {/* Hover state */}
               <div className="absolute inset-0 flex flex-row items-center px-[10px] gap-[10px] md:px-5 md:gap-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                 <div className="w-[30px] h-[30px] md:w-10 md:h-10 rounded-full bg-[rgba(124,58,237,0.1)] flex items-center justify-center shrink-0">
                   <BriefcaseBusiness
@@ -189,7 +200,6 @@ export default function ContractorHistoryPage() {
             </div>
             {/* Total Absences */}
             <div className="group relative bg-white border border-[rgba(100,116,139,0.2)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.2)] h-[58px] md:h-[90px] overflow-hidden">
-              {/* Normal state */}
               <div className="absolute inset-0 flex flex-row items-center px-[10px] gap-[10px] md:px-5 md:gap-4 transition-opacity duration-200 group-hover:opacity-0">
                 <div className="w-[30px] h-[30px] md:w-10 md:h-10 rounded-full bg-[rgba(239,68,68,0.1)] flex items-center justify-center shrink-0">
                   <BadgeAlert
@@ -207,7 +217,6 @@ export default function ContractorHistoryPage() {
                   </p>
                 </div>
               </div>
-              {/* Hover state */}
               <div className="absolute inset-0 flex flex-row items-center px-[10px] gap-[10px] md:px-5 md:gap-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                 <div className="w-[30px] h-[30px] md:w-10 md:h-10 rounded-full bg-[rgba(239,68,68,0.1)] flex items-center justify-center shrink-0">
                   <BadgeAlert
@@ -319,7 +328,7 @@ export default function ContractorHistoryPage() {
 
           {/* Table — desktop */}
           <div className="hidden md:block bg-white border border-[rgba(100,116,139,0.2)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.2)] overflow-hidden">
-            <div className="grid grid-cols-[1fr_150px_120px_1fr] px-6 py-3 border-b border-[rgba(100,116,139,0.15)]">
+            <div className="grid grid-cols-[1fr_150px_120px_1fr_110px] px-6 py-3 border-b border-[rgba(100,116,139,0.15)]">
               <span className="text-[14px] font-semibold text-[#0F172A]">{t("table.date")}</span>
               <span className="text-[14px] font-semibold text-[#0F172A]">{t("table.type")}</span>
               <span className="text-[14px] font-semibold text-[#0F172A]">
@@ -328,6 +337,7 @@ export default function ContractorHistoryPage() {
               <span className="text-[14px] font-semibold text-[#0F172A]">
                 {t("table.description")}
               </span>
+              <span className="text-[14px] font-semibold text-[#0F172A]">{t("table.action")}</span>
             </div>
             {loading ? (
               <div className="text-center py-12">
@@ -341,7 +351,7 @@ export default function ContractorHistoryPage() {
               filteredDayOffs.map((dayOff, index) => (
                 <div
                   key={dayOff.id}
-                  className="grid grid-cols-[1fr_150px_120px_1fr] px-6 py-3 items-center"
+                  className="grid grid-cols-[1fr_150px_120px_1fr_110px] px-6 py-3 items-center"
                   style={{
                     backgroundColor: index % 2 === 0 ? "#ffffff" : "rgba(0,116,137,0.08)",
                   }}
@@ -352,6 +362,24 @@ export default function ContractorHistoryPage() {
                   <TypeBadge type={dayOff.type} />
                   <span className="text-[14px] text-[#0F172A]">{getDuration(dayOff.dates)}</span>
                   <span className="text-[14px] text-[#64748B]">{dayOff.reason}</span>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setEditDayOff(dayOff)}
+                      className="flex items-center gap-1 text-[13px] text-[#007489] hover:opacity-70 transition-opacity"
+                    >
+                      <Pencil size={13} strokeWidth={1.5} />
+                      {t("edit")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteDayOff(dayOff.id)}
+                      className="flex items-center gap-1 text-[13px] text-[#ef4444] hover:opacity-70 transition-opacity"
+                    >
+                      <Trash2 size={13} strokeWidth={1.5} />
+                      {t("delete")}
+                    </button>
+                  </div>
                 </div>
               ))
             )}
@@ -407,6 +435,24 @@ export default function ContractorHistoryPage() {
                           <strong className="text-[#0F172A]">{t("table.description")}:</strong>{" "}
                           {dayOff.reason}
                         </span>
+                        <div className="flex gap-4 mt-1">
+                          <button
+                            type="button"
+                            onClick={() => setEditDayOff(dayOff)}
+                            className="flex items-center gap-1 text-[13px] text-[#007489]"
+                          >
+                            <Pencil size={13} strokeWidth={1.5} />
+                            {t("edit")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteDayOff(dayOff.id)}
+                            className="flex items-center gap-1 text-[13px] text-[#ef4444]"
+                          >
+                            <Trash2 size={13} strokeWidth={1.5} />
+                            {t("delete")}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -416,6 +462,17 @@ export default function ContractorHistoryPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <EditAbsenceModal
+        isOpen={editDayOff !== null}
+        onClose={() => setEditDayOff(null)}
+        dayOff={editDayOff}
+        onSuccess={async () => {
+          const fresh = await contractorsService.getDayOffs(contractorId);
+          setDayOffs(fresh);
+        }}
+      />
     </div>
   );
 }
