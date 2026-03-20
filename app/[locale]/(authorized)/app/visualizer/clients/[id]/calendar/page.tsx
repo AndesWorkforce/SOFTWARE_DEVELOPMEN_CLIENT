@@ -1,8 +1,6 @@
 "use client";
 
 import { use } from "react";
-import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
 import { ClientCalendar } from "@/packages/design-system/components/ClientCalendar";
 import { useClientCalendar } from "@/packages/shared-views/clients";
 
@@ -13,14 +11,6 @@ interface PageProps {
 export default function VisualizerClientCalendarPage({ params }: PageProps) {
   const { id: clientId } = use(params);
   const { clientName, cards, teams } = useClientCalendar(clientId);
-  const router = useRouter();
-  const locale = useLocale();
-
-  const handleContractorHistoryClick = (contractorId: string, contractorName: string) => {
-    router.push(
-      `/${locale}/app/visualizer/contractor-history/${contractorId}?name=${encodeURIComponent(contractorName)}`,
-    );
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8">
@@ -29,7 +19,6 @@ export default function VisualizerClientCalendarPage({ params }: PageProps) {
         clientName={clientName}
         cards={cards}
         teams={teams}
-        onContractorHistoryClick={handleContractorHistoryClick}
       />
     </div>
   );
