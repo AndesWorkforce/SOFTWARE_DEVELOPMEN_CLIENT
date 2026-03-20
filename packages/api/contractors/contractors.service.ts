@@ -412,6 +412,23 @@ export class ContractorsService {
     }
   }
 
+  async getWorkingDays(contractorId: string): Promise<{ workingDays: number }> {
+    try {
+      const response = await http.get<{ workingDays: number }>(
+        `/contractors/${contractorId}/working-days`,
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error("❌ Error en getWorkingDays:", {
+        message: axiosError?.message || "Unknown error",
+        response: axiosError?.response?.data || null,
+        status: axiosError?.response?.status || null,
+      });
+      throw error;
+    }
+  }
+
   /**
    * Obtiene un día libre por ID
    * @param dayOffId ID del día libre

@@ -7,7 +7,6 @@ import { Button, DataTable, FilterPanel } from "@/packages/design-system";
 import type { Contractor } from "@/packages/types/contractors.types";
 import type { DataTableConfig } from "@/packages/types/DataTable.types";
 import { useContractorsPage } from "./useContractorsPage";
-import { ActivationKeyCell } from "./ActivationKeyCell";
 import type { Role } from "@/packages/role-utils";
 
 interface ContractorsPageProps {
@@ -103,18 +102,6 @@ export function ContractorsPage({ role }: ContractorsPageProps) {
         type: "text",
         minWidth: "120px",
         align: "center",
-      },
-      {
-        key: "activationKey",
-        title: "Activation Key",
-        translationKey: "contractors.table.activationKey",
-        dataPath: "activation_key",
-        type: "custom",
-        minWidth: "220px",
-        align: "center",
-        render: (value: unknown, row: Contractor) => (
-          <ActivationKeyCell value={value as string} contractorId={row.id} />
-        ),
       },
     ];
 
@@ -237,14 +224,6 @@ export function ContractorsPage({ role }: ContractorsPageProps) {
             key: "country",
             label: t("contractors.table.country"),
             dataPath: (row) => row.country || "",
-          },
-          {
-            key: "activationKey",
-            label: t("contractors.table.activationKey"),
-            dataPath: "activation_key",
-            render: (value: unknown, row: Contractor) => (
-              <ActivationKeyCell value={value as string} contractorId={row.id} />
-            ),
           },
           ...(permissions.canEdit || permissions.canDelete
             ? [

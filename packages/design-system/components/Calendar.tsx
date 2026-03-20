@@ -335,14 +335,22 @@ export const Calendar = ({
                             type={event.dayOffType}
                             label={event.title}
                             onClick={handleEventClick}
-                            onEdit={(e) => {
-                              e.stopPropagation();
-                              onEventEdit?.(event);
-                            }}
-                            onDelete={(e) => {
-                              e.stopPropagation();
-                              onEventDelete?.(event);
-                            }}
+                            onEdit={
+                              onEventEdit
+                                ? (e) => {
+                                    e.stopPropagation();
+                                    onEventEdit(event);
+                                  }
+                                : undefined
+                            }
+                            onDelete={
+                              onEventDelete
+                                ? (e) => {
+                                    e.stopPropagation();
+                                    onEventDelete(event);
+                                  }
+                                : undefined
+                            }
                           />
                         );
                       }
