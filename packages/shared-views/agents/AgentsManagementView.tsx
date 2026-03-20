@@ -6,6 +6,7 @@ import { Bot } from "lucide-react";
 import { Button, DataTable, Modal, Select } from "../../design-system";
 import type { DataTableConfig } from "../../design-system";
 import { AppAssignmentView } from "./AppAssignmentView";
+import { AppManagementView } from "./AppManagementView";
 import { DomainAssignmentView } from "./DomainAssignmentView";
 import { UrlManagementView } from "./UrlManagementView";
 import { AgentsService } from "../../api/agents/agents.service";
@@ -376,9 +377,7 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
         </>
       )}
 
-      {activeTab === "applications" && (
-        <DataTable config={appsTableConfig} data={applications} loading={loadingApps} />
-      )}
+      {activeTab === "applications" && <AppManagementView role={role} />}
 
       {activeTab === "assign" && <AppAssignmentView role={role} />}
 

@@ -418,6 +418,40 @@
       "category": "Categoría"
     }
   },
+  "appManagement": {
+    "title": "Gestión de Aplicaciones",
+    "subtitle": "Crea y gestiona aplicaciones que pueden ser asignadas a contratistas",
+    "addApp": "Agregar App",
+    "searchApp": "Buscar aplicación...",
+    "noApps": "No se encontraron aplicaciones",
+    "deleteApp": "Eliminar aplicación",
+    "createTitle": "Crear Aplicación",
+    "deleteTitle": "Eliminar Aplicación",
+    "deleteConfirm": "¿Estás seguro de que deseas eliminar",
+    "createSuccess": "Aplicación creada correctamente",
+    "createError": "Error al crear la aplicación",
+    "deleteSuccess": "Aplicación eliminada correctamente",
+    "deleteError": "Error al eliminar la aplicación",
+    "table": {
+      "name": "Aplicación",
+      "type": "Tipo",
+      "category": "Categoría",
+      "weight": "Peso",
+      "createdAt": "Creado el"
+    },
+    "form": {
+      "name": "Nombre de la aplicación",
+      "namePlaceholder": "ej. Visual Studio Code",
+      "type": "Tipo",
+      "typePlaceholder": "Selecciona un tipo...",
+      "category": "Categoría",
+      "categoryPlaceholder": "ej. Desarrollo",
+      "weight": "Peso (0 - 2)",
+      "cancel": "Cancelar",
+      "create": "Crear",
+      "delete": "Eliminar"
+    }
+  },
   "urlManagement": {
     "title": "Gestión de URLs",
     "subtitle": "Crea y gestiona URLs que pueden ser asignadas a contratistas",

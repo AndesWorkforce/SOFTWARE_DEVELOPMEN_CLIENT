@@ -20,3 +20,10 @@ export interface Application {
   created_at: string;
   updated_at: string;
 }
+
+export interface CreateApplicationPayload {
+  name: string;
+  type?: AppType;
+  category?: string;
+  weight?: number;
+}
