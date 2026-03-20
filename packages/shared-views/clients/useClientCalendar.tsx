@@ -112,13 +112,13 @@ export function useClientCalendar(clientId: string | null | undefined): UseClien
       icon: <BriefcaseBusiness className="h-7 w-7" />,
       title: tCalendarStats("fullTimeContractors"),
       value: fullTimeCount,
-      accentColorClass: "text-[#7E22CE]",
+      accentColorClass: "text-[#0E7490]",
     },
     {
       icon: <BriefcaseBusiness className="h-7 w-7" />,
       title: tCalendarStats("partTimeContractors"),
       value: partTimeCount,
-      accentColorClass: "text-[#0E7490]",
+      accentColorClass: "text-[#7E22CE]",
     },
   ];
 

@@ -220,6 +220,9 @@ export function FormModal({
     const newErrors: Record<string, string> = {};
 
     config.fields.forEach((field) => {
+      const isHidden = typeof field.hidden === "function" ? field.hidden(formValues) : field.hidden;
+      if (isHidden) return;
+
       const value = formValues[field.key];
       const error = validateField(field, value);
       if (error) {
@@ -478,33 +481,46 @@ export function FormModal({
     }
   };
 
+  const getVisibleFields = () =>
+    config.fields.filter((field) => {
+      const isHidden = typeof field.hidden === "function" ? field.hidden(formValues) : field.hidden;
+      return !isHidden;
+    });
+
   const renderFields = () => {
     const layout = config.layout || "two-column";
+    const visibleFields = getVisibleFields();
 
-    if (layout === "custom") {
-      // Para layout custom, renderizar todos los campos en un solo contenedor
+    if (layout === "custom" || layout === "single") {
       return (
         <div className="flex flex-col gap-[25px] items-start w-full">
-          {config.fields.map((field) => renderField(field))}
+          {visibleFields.map((field) => renderField(field))}
         </div>
       );
     }
 
-    if (layout === "single") {
-      return (
-        <div className="flex flex-col gap-[25px] items-start w-full">
-          {config.fields.map((field) => renderField(field))}
-        </div>
-      );
-    }
-
-    // Layout de dos o tres columnas
-    // En mobile: una columna, en desktop: dos o tres columnas
+    // Layout de dos o tres columnas con soporte para fullWidth y hidden
     const fieldsPerRow = layout === "three-column" ? 3 : 2;
     const rows: FormFieldConfig[][] = [];
+    let currentRow: FormFieldConfig[] = [];
 
-    for (let i = 0; i < config.fields.length; i += fieldsPerRow) {
-      rows.push(config.fields.slice(i, i + fieldsPerRow));
+    for (const field of visibleFields) {
+      if (field.fullWidth) {
+        if (currentRow.length > 0) {
+          rows.push(currentRow);
+          currentRow = [];
+        }
+        rows.push([field]);
+      } else {
+        currentRow.push(field);
+        if (currentRow.length >= fieldsPerRow) {
+          rows.push(currentRow);
+          currentRow = [];
+        }
+      }
+    }
+    if (currentRow.length > 0) {
+      rows.push(currentRow);
     }
 
     return (

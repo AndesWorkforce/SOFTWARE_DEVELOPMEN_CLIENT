@@ -22,6 +22,7 @@ export interface ClientCalendarWeekGridProps {
   isAllTeams: boolean;
   contractors?: Contractor[];
   onTeamClick?: (teamId: string) => void;
+  onContractorHistoryClick?: (contractorId: string, contractorName: string) => void;
   className?: string;
   teamDayStats?: Record<string, Record<string, { activeCount: number; absentCount: number }>>;
   jobPositionFilter?: string;
@@ -38,6 +39,7 @@ export function ClientCalendarWeekGrid({
   isAllTeams,
   contractors = [],
   onTeamClick,
+  onContractorHistoryClick,
   className = "",
   teamDayStats,
   jobPositionFilter = "all",
@@ -95,6 +97,7 @@ export function ClientCalendarWeekGrid({
               teams={teamsWithStats}
               contractors={contractors}
               onTeamClick={onTeamClick}
+              onContractorHistoryClick={onContractorHistoryClick}
               jobPositionFilter={jobPositionFilter}
               absenceTypeFilter={absenceTypeFilter}
               getContractorDayOffType={getContractorDayOffType}

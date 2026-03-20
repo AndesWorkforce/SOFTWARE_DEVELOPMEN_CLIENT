@@ -475,7 +475,6 @@ export function GroupReportsView({
       const allMetrics = await adtService.getAllRealtimeMetrics({
         from: fromDate,
         to: toDate,
-        useCache: true,
       });
 
       const extractedOptions = extractFilterOptionsFromMetrics(allMetrics || []);
@@ -502,7 +501,6 @@ export function GroupReportsView({
         client_id: clientId,
         team_id: teamId,
         job_position: jobPosition,
-        useCache: true,
       };
 
       const result = await adtService.getAllRealtimeMetrics(adtFilters);

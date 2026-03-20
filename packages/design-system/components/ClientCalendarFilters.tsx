@@ -46,11 +46,11 @@ export function ClientCalendarFilters({
         </div>
 
         <div className="flex gap-2">
-          <div className="flex items-center gap-1 rounded-[6px] bg-[#F3E8FF] px-2 py-[4px] text-[11px] font-medium text-[#7E22CE]">
+          <div className="flex items-center gap-1 rounded-[6px] bg-[#CFFAFE] px-2 py-[4px] text-[11px] font-medium text-[#0E7490]">
             <BriefcaseBusiness className="h-3 w-3" />
             <span>Full-Time</span>
           </div>
-          <div className="flex items-center gap-1 rounded-[6px] bg-[#CFFAFE] px-2 py-[4px] text-[11px] font-medium text-[#0E7490]">
+          <div className="flex items-center gap-1 rounded-[6px] bg-[#F3E8FF] px-2 py-[4px] text-[11px] font-medium text-[#7E22CE]">
             <BriefcaseBusiness className="h-3 w-3" />
             <span>Part-Time</span>
           </div>

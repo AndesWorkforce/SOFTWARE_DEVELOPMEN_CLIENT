@@ -34,7 +34,7 @@ export const roleConfig: Record<Role, RolePermissions> = {
     canEdit: false,
     canDelete: false,
     canAdd: false,
-    showCalendar: false,
+    showCalendar: true,
     showReports: true,
   },
 };

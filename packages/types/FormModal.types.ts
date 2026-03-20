@@ -123,6 +123,17 @@ export interface FormFieldConfig {
    * Texto de ayuda o descripción
    */
   helpText?: string;
+
+  /**
+   * Si el campo debe ocultarse (no renderizarse ni validarse).
+   * Puede ser un booleano estático o una función que recibe los valores actuales del form.
+   */
+  hidden?: boolean | ((formValues: Record<string, unknown>) => boolean);
+
+  /**
+   * Si true, el campo ocupa una fila completa (en layouts two-column / three-column).
+   */
+  fullWidth?: boolean;
 }
 
 /**
