@@ -488,6 +488,7 @@
   },
   "contractors": {
     "title": "Contractors",
+    "addTeam": "Add Team",
     "addContractor": "Add Contractor",
     "noContractors": "No contractors found",
     "filters": {

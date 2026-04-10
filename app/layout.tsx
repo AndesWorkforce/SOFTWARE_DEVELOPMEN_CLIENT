@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Andes Client",
+  title: "Pulse-AW",
   description: "Internationalized app with authorized/unauthorized routes",
 };
 

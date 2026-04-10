@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 
 export const metadata: Metadata = {
-  title: "Andes Client",
+  title: "Pulse-AW",
   description: "Internationalized app with authorized/unauthorized routes",
 };
 
