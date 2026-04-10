@@ -11,6 +11,10 @@ export interface RoleRoutes {
     delete: (id: string) => string;
     add: string;
     calendar?: (id: string) => string;
+    /** Alta/edición/baja de contractors en contexto de un cliente (detalle cliente) */
+    contractorAdd: (clientId: string) => string;
+    contractorEdit: (clientId: string, contractorId: string) => string;
+    contractorDelete: (clientId: string, contractorId: string) => string;
   };
   contractors: {
     list: string;
@@ -40,6 +44,11 @@ export function useRoleRoutes(role: Role): RoleRoutes {
       edit: (id: string) => `${base}/clients/edit/${id}`,
       delete: (id: string) => `${base}/clients/delete/${id}`,
       add: `${base}/clients/add`,
+      contractorAdd: (clientId: string) => `${base}/clients/${clientId}/contractors/add`,
+      contractorEdit: (clientId: string, contractorId: string) =>
+        `${base}/clients/${clientId}/contractors/edit/${contractorId}`,
+      contractorDelete: (clientId: string, contractorId: string) =>
+        `${base}/clients/${clientId}/contractors/delete/${contractorId}`,
       ...((role === "visualizer" || role === "admin" || role === "super-admin") && {
         calendar: (id: string) => `${base}/clients/${id}/calendar`,
       }),

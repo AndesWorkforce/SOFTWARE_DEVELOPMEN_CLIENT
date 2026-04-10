@@ -488,6 +488,7 @@
   },
   "contractors": {
     "title": "Contratistas",
+    "addTeam": "Agregar Equipo",
     "addContractor": "Agregar Contratista",
     "noContractors": "No se encontraron contratistas",
     "filters": {
