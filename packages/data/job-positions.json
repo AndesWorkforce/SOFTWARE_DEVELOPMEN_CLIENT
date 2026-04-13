@@ -38,5 +38,205 @@
     "id": "8",
     "name": "Business Analyst",
     "description": "Bridges business requirements and technical solutions"
+  },
+  {
+    "id": "9",
+    "name": "Administrative Assistant",
+    "description": "Provides administrative support and office coordination"
+  },
+  {
+    "id": "10",
+    "name": "Administrative Director",
+    "description": "Oversees administrative operations and staff management"
+  },
+  {
+    "id": "11",
+    "name": "Agile Team Coach",
+    "description": "Coaches teams on agile methodologies and continuous improvement"
+  },
+  {
+    "id": "12",
+    "name": "Appeals Team",
+    "description": "Handles case appeals and review processes"
+  },
+  {
+    "id": "13",
+    "name": "Assistant VA Attorney",
+    "description": "Assists in legal representation for veterans affairs cases"
+  },
+  {
+    "id": "14",
+    "name": "Bankruptcy Assistant",
+    "description": "Supports bankruptcy case processing and documentation"
+  },
+  {
+    "id": "15",
+    "name": "Case Manager",
+    "description": "Manages client cases and coordinates services"
+  },
+  {
+    "id": "16",
+    "name": "Chief Agile and Digital transformation officer",
+    "description": "Leads organizational agile and digital transformation initiatives"
+  },
+  {
+    "id": "17",
+    "name": "Disability Service Coordinator",
+    "description": "Coordinates disability services and support programs"
+  },
+  {
+    "id": "18",
+    "name": "Diseñadora UX/UI",
+    "description": "Diseña interfaces de usuario y experiencias digitales"
+  },
+  {
+    "id": "19",
+    "name": "Document Analyst",
+    "description": "Analyzes and processes legal and administrative documents"
+  },
+  {
+    "id": "20",
+    "name": "Document Coordinator",
+    "description": "Coordinates document management and workflow"
+  },
+  {
+    "id": "21",
+    "name": "Forms Team",
+    "description": "Processes and manages forms and documentation workflows"
+  },
+  {
+    "id": "22",
+    "name": "Hearing Level Case Manager",
+    "description": "Manages cases at the hearing level of appeals"
+  },
+  {
+    "id": "23",
+    "name": "Infraestructure Analyst",
+    "description": "Analyzes and maintains IT infrastructure systems"
+  },
+  {
+    "id": "24",
+    "name": "Insurance Specialist",
+    "description": "Manages insurance claims and policy coordination"
+  },
+  {
+    "id": "25",
+    "name": "Intake Assistant",
+    "description": "Assists with client intake processes and documentation"
+  },
+  {
+    "id": "26",
+    "name": "Intake Specialist",
+    "description": "Manages client intake assessments and onboarding"
+  },
+  {
+    "id": "27",
+    "name": "Junior Attorney",
+    "description": "Provides legal support and assistance under senior supervision"
+  },
+  {
+    "id": "28",
+    "name": "Legal Assistant",
+    "description": "Supports attorneys with legal research and documentation"
+  },
+  {
+    "id": "29",
+    "name": "Marketing and Client Relations Director",
+    "description": "Leads marketing strategy and client relationship management"
+  },
+  {
+    "id": "30",
+    "name": "Mid-Level Developer",
+    "description": "Develops and maintains software applications at an intermediate level"
+  },
+  {
+    "id": "31",
+    "name": "Recruiting Operation Manager",
+    "description": "Manages recruiting operations and talent acquisition processes"
+  },
+  {
+    "id": "32",
+    "name": "Recruiting Operations Assistant",
+    "description": "Assists with recruiting operations and candidate coordination"
+  },
+  {
+    "id": "33",
+    "name": "Software Implementation Specialist",
+    "description": "Implements and configures software solutions for clients"
+  },
+  {
+    "id": "34",
+    "name": "Specialized Case Manager",
+    "description": "Manages complex specialized cases requiring expert knowledge"
+  },
+  {
+    "id": "35",
+    "name": "SSA Intake Specialist",
+    "description": "Handles Social Security Administration intake processes"
+  },
+  {
+    "id": "36",
+    "name": "SSA Switchboard Operator",
+    "description": "Manages SSA communications and call routing"
+  },
+  {
+    "id": "37",
+    "name": "Team Lead Case Manager",
+    "description": "Leads a team of case managers and oversees case operations"
+  },
+  {
+    "id": "38",
+    "name": "VA Administrative Assistant",
+    "description": "Provides administrative support for veterans affairs operations"
+  },
+  {
+    "id": "39",
+    "name": "VA Case Manager - Claims Investigation",
+    "description": "Investigates and manages veterans affairs claims cases"
+  },
+  {
+    "id": "40",
+    "name": "VA Case Opener",
+    "description": "Initiates and opens new veterans affairs cases"
+  },
+  {
+    "id": "41",
+    "name": "VA Facenotes Specialist",
+    "description": "Manages and processes veterans affairs facenotes documentation"
+  },
+  {
+    "id": "42",
+    "name": "VA File Review",
+    "description": "Reviews and audits veterans affairs case files"
+  },
+  {
+    "id": "43",
+    "name": "VA Intake Specialist",
+    "description": "Handles intake processes for veterans affairs cases"
+  },
+  {
+    "id": "44",
+    "name": "VA Supervisor",
+    "description": "Supervises veterans affairs operations and staff"
+  },
+  {
+    "id": "45",
+    "name": "VA Team Lead",
+    "description": "Leads a team within veterans affairs operations"
+  },
+  {
+    "id": "46",
+    "name": "VA Welcome Calls",
+    "description": "Conducts welcome calls for new veterans affairs clients"
+  },
+  {
+    "id": "47",
+    "name": "Veteran Success Representative",
+    "description": "Supports veterans in achieving successful outcomes"
+  },
+  {
+    "id": "48",
+    "name": "Veteran Success Representative – Phone Support",
+    "description": "Provides phone-based support for veteran success initiatives"
   }
 ]
