@@ -347,6 +347,7 @@
       "agentLabel": "Agent",
       "selectContractor": "Contractor",
       "selectContractorPlaceholder": "Select a contractor...",
+      "noContractorsMatch": "No contractors match your search",
       "confirm": "Confirm",
       "cancel": "Cancel",
       "errorMessage": "Failed to link agent. Please try again."
