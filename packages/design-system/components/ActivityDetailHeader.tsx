@@ -11,11 +11,8 @@ export const ActivityDetailHeader = ({ activity, dateRange, t }: ActivityDetailH
   const formatDateRange = () => {
     if (!dateRange) return activity.date;
 
-    // Parsear fechas manualmente para evitar problemas de zona horaria
-    // Las fechas vienen en formato YYYY-MM-DD
     const parseDate = (dateStr: string) => {
       const [year, month, day] = dateStr.split("-").map(Number);
-      // Crear fecha usando UTC para evitar conversiones de zona horaria
       return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
     };
 
@@ -26,13 +23,13 @@ export const ActivityDetailHeader = ({ activity, dateRange, t }: ActivityDetailH
       month: "long",
       day: "numeric",
       year: "numeric",
-      timeZone: "UTC",
+      timeZone: "America/New_York",
     });
     const toStr = toDate.toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
       year: "numeric",
-      timeZone: "UTC",
+      timeZone: "America/New_York",
     });
 
     if (fromStr === toStr) return fromStr;
