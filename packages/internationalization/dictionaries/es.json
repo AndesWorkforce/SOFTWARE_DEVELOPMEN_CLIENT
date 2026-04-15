@@ -347,6 +347,7 @@
       "agentLabel": "Agente",
       "selectContractor": "Contratista",
       "selectContractorPlaceholder": "Selecciona un contratista...",
+      "noContractorsMatch": "No hay contratistas que coincidan con la búsqueda",
       "confirm": "Confirmar",
       "cancel": "Cancelar",
       "errorMessage": "Error al vincular el agente. Intenta de nuevo."

@@ -16,17 +16,18 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     const selectId = id || `select-${generatedId}`;
 
     return (
-      <div className="w-full relative">
+      <div className="w-full">
         {label && (
           <label htmlFor={selectId} className="block text-[16px] font-medium text-black mb-1">
             {label}
             {props.required && <span className="text-red-500 ml-1">*</span>}
           </label>
         )}
-        <select
-          ref={ref}
-          id={selectId}
-          className={`
+        <div className="relative w-full">
+          <select
+            ref={ref}
+            id={selectId}
+            className={`
         w-full h-[35px] md:h-[40px] px-[15px] pr-[40px]
         bg-white text-[#08252A] text-[14px] md:text-[16px]
             border rounded-[5px]
@@ -42,17 +43,18 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             }
             ${className}
           `}
-          {...props}
-        >
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        {/* Chevron personalizado al estilo Figma */}
-        <div className="pointer-events-none absolute right-[15px] top-1/2 -translate-y-1/2 flex items-center">
-          <ChevronDown className="w-5 h-5 md:w-5 md:h-5 text-[#000000]" />
+            {...props}
+          >
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          {/* Chevron: contenedor solo del <select> para centrar bien el icono */}
+          <div className="pointer-events-none absolute inset-y-0 right-[11px] flex items-center justify-center">
+            <ChevronDown className="w-5 h-5 shrink-0 text-[#000000]" aria-hidden />
+          </div>
         </div>
         {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
         {helperText && !error && <p className="mt-1 text-sm text-gray-500">{helperText}</p>}

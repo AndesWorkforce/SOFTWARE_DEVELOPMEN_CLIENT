@@ -4,6 +4,8 @@ export * from "./components/Button";
 export * from "./components/Input";
 export { Select } from "./components/Select";
 export type { SelectProps } from "./components/Select";
+export { SearchableSelect } from "./components/SearchableSelect";
+export type { SearchableSelectProps } from "./components/SearchableSelect";
 export * from "./components/MetricCard";
 export * from "./components/ChartCard";
 export * from "./components/EmptyState";

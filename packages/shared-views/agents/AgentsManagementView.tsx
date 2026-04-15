@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Bot } from "lucide-react";
 
-import { Button, DataTable, Modal, Select } from "../../design-system";
+import { Button, DataTable, Modal, SearchableSelect } from "../../design-system";
 import type { DataTableConfig } from "../../design-system";
 import { AppAssignmentView } from "./AppAssignmentView";
 import { AppManagementView } from "./AppManagementView";
@@ -285,10 +285,10 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
     },
   };
 
-  const contractorOptions = [
-    { value: "", label: t("link.selectContractorPlaceholder") },
-    ...contractors.map((c) => ({ value: c.id, label: c.name })),
-  ];
+  const contractorSelectOptions = contractors.map((c) => ({
+    value: c.id,
+    label: c.name,
+  }));
 
   return (
     <div className="p-6">
@@ -402,11 +402,13 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
             </p>
           )}
 
-          <Select
+          <SearchableSelect
             label={t("link.selectContractor")}
-            options={contractorOptions}
+            placeholder={t("link.selectContractorPlaceholder")}
+            options={contractorSelectOptions}
             value={selectedContractorId}
-            onChange={(e) => setSelectedContractorId(e.target.value)}
+            onValueChange={setSelectedContractorId}
+            emptyFilterMessage={t("link.noContractorsMatch")}
             required
           />
 
