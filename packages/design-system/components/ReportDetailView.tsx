@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef, useCallback } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback, forwardRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import ReactCountryFlag from "react-country-flag";
+import DatePicker from "react-datepicker";
+import { enUS, es } from "date-fns/locale";
 import { ArrowLeft, FileText, ChevronDown, Laptop, SquareUserRound, Calendar } from "lucide-react";
 import {
   Button,
@@ -29,6 +31,20 @@ import {
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import type { Contractor } from "@/packages/types/contractors.types";
 import type { UserActivity } from "@/packages/api/reports/reports.service";
+
+const parseIsoDate = (value?: string): Date | null => {
+  if (!value) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day, 12, 0, 0);
+};
+
+const formatIsoDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
 
 // Tipos de aplicaciones (sincronizado con AppType del backend)
 type AppType =
@@ -332,12 +348,41 @@ const SessionSummarySection = ({
 };
 
 // Componente interno para los selectores de fecha con estilo Figma
+const DateSelectorTrigger = forwardRef<
+  HTMLButtonElement,
+  {
+    label: string;
+    displayValue: string;
+    icon: React.ReactNode;
+    onClick?: () => void;
+  }
+>(function DateSelectorTrigger({ label, displayValue, icon, onClick }, ref) {
+  return (
+    <button
+      type="button"
+      ref={ref}
+      onClick={onClick}
+      className="flex-1 bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] px-[15px] py-[10px] lg:p-3 flex items-center justify-between relative cursor-pointer hover:bg-gray-50 transition-colors h-[56px] lg:h-auto min-w-0 w-full"
+    >
+      <div className="flex items-center gap-[5px] lg:gap-3 min-w-0 flex-1">
+        <div className="text-black shrink-0">{icon}</div>
+        <div className="min-w-0 flex-1 text-left">
+          <p className="text-[10px] lg:text-[12px] text-[#6D6D6D] truncate mb-0">{label}</p>
+          <p className="text-[14px] lg:text-base font-medium text-black truncate">{displayValue}</p>
+        </div>
+      </div>
+      <ChevronDown className="w-6 h-6 text-black shrink-0 ml-2" />
+    </button>
+  );
+});
+
 const ReportDateSelector = ({
   label,
   value,
   displayValue,
   onChange,
   icon,
+  inputLang,
   min,
   max,
 }: {
@@ -346,40 +391,26 @@ const ReportDateSelector = ({
   displayValue: string;
   onChange: (val: string) => void;
   icon: React.ReactNode;
+  inputLang: string;
   min?: string;
   max?: string;
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleClick = () => {
-    if (inputRef.current) {
-      inputRef.current.showPicker();
-    }
-  };
+  const pickerLocale = inputLang.toLowerCase().startsWith("es") ? es : enUS;
 
   return (
-    <div
-      onClick={handleClick}
-      className="flex-1 bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] px-[15px] py-[10px] lg:p-3 flex items-center justify-between relative cursor-pointer hover:bg-gray-50 transition-colors h-[56px] lg:h-auto min-w-0"
-    >
-      <div className="flex items-center gap-[5px] lg:gap-3 min-w-0 flex-1">
-        <div className="text-black shrink-0">{icon}</div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] lg:text-[12px] text-[#6D6D6D] truncate mb-0">{label}</p>
-          <p className="text-[14px] lg:text-base font-medium text-black truncate">{displayValue}</p>
-        </div>
-      </div>
-      <ChevronDown className="w-6 h-6 text-black shrink-0 ml-2" />
-      <input
-        ref={inputRef}
-        type="date"
-        className="absolute inset-0 opacity-0 pointer-events-none"
-        value={value}
-        min={min}
-        max={max}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </div>
+    <DatePicker
+      selected={parseIsoDate(value)}
+      onChange={(date: Date | null) => {
+        if (date) onChange(formatIsoDate(date));
+      }}
+      minDate={parseIsoDate(min) ?? undefined}
+      maxDate={parseIsoDate(max) ?? undefined}
+      locale={pickerLocale}
+      dateFormat="yyyy-MM-dd"
+      popperPlacement="bottom-start"
+      wrapperClassName="flex-1 w-full"
+      customInput={<DateSelectorTrigger label={label} displayValue={displayValue} icon={icon} />}
+    />
   );
 };
 
@@ -393,6 +424,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
   const searchParams = useSearchParams();
   const t = useTranslations("reports");
   const locale = useLocale();
+  const resolvedLocale = locale.toLowerCase().startsWith("es") ? "es-ES" : "en-US";
   const mobileDeviceSelectRef = useRef<HTMLSelectElement | null>(null);
   const desktopDeviceSelectRef = useRef<HTMLSelectElement | null>(null);
 
@@ -459,7 +491,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
   const formatDateForDisplay = (dateStr: string) => {
     try {
       const date = new Date(dateStr + "T12:00:00");
-      return date.toLocaleDateString(locale === "es" ? "es-ES" : "en-US", {
+      return date.toLocaleDateString(resolvedLocale, {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -953,6 +985,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                   displayValue={formatDateForDisplay(startDate)}
                   onChange={handleStartDateChange}
                   icon={<Calendar className="w-[25px] h-[25px]" />}
+                  inputLang={resolvedLocale}
                   max={endDate}
                 />
               </div>
@@ -963,6 +996,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                   displayValue={formatDateForDisplay(endDate)}
                   onChange={handleEndDateChange}
                   icon={<Calendar className="w-[25px] h-[25px]" />}
+                  inputLang={resolvedLocale}
                   min={startDate}
                   max={maxDate}
                 />
@@ -1022,6 +1056,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                   displayValue={formatDateForDisplay(startDate)}
                   onChange={handleStartDateChange}
                   icon={<Calendar className="w-7 h-7" />}
+                  inputLang={resolvedLocale}
                   max={endDate}
                 />
                 <ReportDateSelector
@@ -1030,6 +1065,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                   displayValue={formatDateForDisplay(endDate)}
                   onChange={handleEndDateChange}
                   icon={<Calendar className="w-7 h-7" />}
+                  inputLang={resolvedLocale}
                   min={startDate}
                   max={maxDate}
                 />
