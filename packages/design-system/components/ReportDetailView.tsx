@@ -1017,11 +1017,6 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
               <TopWebsites activity={activity} t={t} />
             </div>
 
-            {/* Time Breakdown */}
-            <div className="min-w-0 overflow-hidden">
-              <TimeBreakdown activity={activity} t={t} />
-            </div>
-
             {/* Session & Connectivity */}
             <SessionConnectivitySection
               sessionConnectivityStats={sessionConnectivityStats}
@@ -1094,11 +1089,6 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                     ))}
                   </select>
                 </div>
-              </div>
-
-              {/* Time Breakdown */}
-              <div className="min-w-0 overflow-hidden">
-                <TimeBreakdown activity={activity} t={t} />
               </div>
 
               {/* Session & Connectivity */}
