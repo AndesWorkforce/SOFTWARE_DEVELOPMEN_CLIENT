@@ -13,6 +13,13 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
     return `${hours.toString().padStart(2, "0")}h ${minutes.toString().padStart(2, "0")}m`;
   };
 
+  const getCategoryBadge = (category?: string | null) => {
+    if (category === "productive") return { label: "✅", color: "#16a34a" };
+    if (category === "neutral") return { label: "⚪", color: "#6b7280" };
+    if (category === "non_productive") return { label: "❌", color: "#dc2626" };
+    return { label: "⚠️", color: "#d97706" };
+  };
+
   // Get app icon based on app name
   const getAppIcon = (appName: string) => {
     const lowerName = appName.toLowerCase();
@@ -62,6 +69,12 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
                     style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
                   >
                     {app.appName}
+                  </span>
+                  <span
+                    className="text-[10px] leading-none"
+                    title={app.category ?? "Sin clasificar"}
+                  >
+                    {getCategoryBadge(app.category).label}
                   </span>
                 </div>
                 <span

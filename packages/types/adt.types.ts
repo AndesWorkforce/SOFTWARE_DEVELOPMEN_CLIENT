@@ -6,6 +6,8 @@ export interface AppUsage {
   appName: string;
   seconds: number;
   type?: string;
+  category?: "productive" | "neutral" | "non_productive" | null;
+  weight?: number;
 }
 
 export interface BrowserUsage {

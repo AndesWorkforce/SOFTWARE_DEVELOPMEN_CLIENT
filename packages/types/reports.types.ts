@@ -1,3 +1,5 @@
+import type { AppUsage, BrowserUsage } from "./adt.types";
+
 export interface ReportFilters {
   dateRange?: {
     start: string; // ISO date
@@ -43,8 +45,8 @@ export interface UserActivity {
     totalSessionTimeSeconds: number;
     effectiveWorkSeconds: number;
     productivityScore: number;
-    appUsage?: Array<{ appName: string; seconds: number; type?: string }>;
-    browserUsage?: Array<{ domain: string; seconds: number }>;
+    appUsage?: AppUsage[];
+    browserUsage?: BrowserUsage[];
   };
 }
 
