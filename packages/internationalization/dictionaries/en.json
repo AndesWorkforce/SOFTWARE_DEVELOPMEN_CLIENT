@@ -64,7 +64,7 @@
       "last7Days": "Last 7 days"
     },
     "charts": {
-      "topApplications": "Top Applications",
+      "topApplications": "Top Sites & Apps",
       "topApplicationsSubtitle": "Most used applications this week",
       "recentHeartbeats": "Recent Heartbeats",
       "recentHeartbeatsSubtitle": "Latest activity from agents",
@@ -284,7 +284,7 @@
       "inputTotals": "Input Totals",
       "totalKeyboardInputs": "Total Keyboard Inputs",
       "totalMouseInputs": "Total Mouse Inputs",
-      "topApplications": "Top Applications",
+      "topApplications": "Top Sites & Apps",
       "noApplicationData": "No application data available",
       "topWebsites": "Top Websites",
       "noWebsiteData": "No website data available",
