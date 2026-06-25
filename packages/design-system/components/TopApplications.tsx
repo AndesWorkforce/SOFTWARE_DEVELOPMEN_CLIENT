@@ -54,37 +54,50 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
           className="text-[16px] font-semibold leading-normal mb-0 w-full"
           style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
         >
-          {t("modal.topApplications") || "Top Applications"}
+          {t("modal.topApplications") || "Top Sites & Apps"}
         </h5>
-        <div className="flex flex-col gap-[10px] items-start w-full max-h-[500px] overflow-y-auto">
+        <div className="w-full max-h-[600px] overflow-y-auto">
           {activity.metrics?.appUsage && activity.metrics.appUsage.length > 0 ? (
-            activity.metrics.appUsage.map((app, index) => (
-              <div key={index} className="flex items-center justify-between w-full">
-                <div className="flex gap-[10px] items-center shrink-0">
-                  <span className="text-[15px]" style={{ width: "15px", height: "15px" }}>
-                    {getAppIcon(app.appName)}
-                  </span>
-                  <span
-                    className="text-[12px] font-light leading-normal whitespace-nowrap"
-                    style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
-                  >
-                    {app.appName}
-                  </span>
-                  <span
-                    className="text-[10px] leading-none"
-                    title={app.category ?? "Sin clasificar"}
-                  >
-                    {getCategoryBadge(app.category).label}
-                  </span>
-                </div>
-                <span
-                  className="text-[12px] font-light leading-normal whitespace-nowrap"
-                  style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+              {activity.metrics.appUsage.map((app, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex flex-col gap-2 hover:bg-gray-100 transition-colors"
                 >
-                  {formatSecondsToTime(app.seconds)}
-                </span>
-              </div>
-            ))
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="text-2xl shrink-0">{getAppIcon(app.appName)}</span>
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="text-[13px] font-medium leading-tight truncate"
+                          style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
+                          title={app.appName}
+                        >
+                          {app.appName}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-base shrink-0" title={app.category ?? "Sin clasificar"}>
+                      {getCategoryBadge(app.category).label}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span
+                      className="text-xs text-gray-500"
+                      style={{ fontFamily: "Inter, sans-serif" }}
+                    >
+                      Tiempo de uso
+                    </span>
+                    <span
+                      className="text-sm font-semibold"
+                      style={{ color: "#0097B2", fontFamily: "Inter, sans-serif" }}
+                    >
+                      {formatSecondsToTime(app.seconds)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <p
               className="text-[12px] text-center py-4 w-full"

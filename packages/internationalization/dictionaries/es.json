@@ -64,7 +64,7 @@
       "last7Days": "Últimos 7 días"
     },
     "charts": {
-      "topApplications": "Aplicaciones Principales",
+      "topApplications": "Top Sites & Apps",
       "topApplicationsSubtitle": "Aplicaciones más usadas esta semana",
       "recentHeartbeats": "Heartbeats Recientes",
       "recentHeartbeatsSubtitle": "Última actividad de los agentes",
@@ -284,7 +284,7 @@
       "inputTotals": "Totales de Entradas",
       "totalKeyboardInputs": "Total de Entradas de Teclado",
       "totalMouseInputs": "Total de Entradas de Ratón",
-      "topApplications": "Aplicaciones Principales",
+      "topApplications": "Top Sites & Apps",
       "noApplicationData": "No hay datos de aplicaciones disponibles",
       "topWebsites": "Webs Principales",
       "noWebsiteData": "No hay datos de sitios web disponibles",
