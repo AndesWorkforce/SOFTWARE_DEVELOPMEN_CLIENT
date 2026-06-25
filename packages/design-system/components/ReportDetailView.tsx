@@ -756,11 +756,24 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
 
   // Transformar datos de la API al formato esperado por el gráfico
   const hourlyData = useMemo(() => {
-    return hourlySessionDurationForChart.map((h) => ({
-      hour: h.hour_label,
-      productivity: 0, // No se usa en el gráfico actual
-      duration: Math.round((h.avg_duration_seconds / 3600) * 100) / 100, // Convertir segundos a horas (decimal)
-    }));
+    return hourlySessionDurationForChart.map((h, index) => {
+      let durationInHours = Math.round((h.avg_duration_seconds / 3600) * 100) / 100;
+
+      // Si los datos vienen acumulativos, desacumular restando el valor anterior
+      // para mostrar solo la duración de cada hora específica
+      if (index > 0) {
+        const prevDurationInHours =
+          Math.round((hourlySessionDurationForChart[index - 1].avg_duration_seconds / 3600) * 100) /
+          100;
+        durationInHours = Math.max(0, durationInHours - prevDurationInHours);
+      }
+
+      return {
+        hour: h.hour_label,
+        productivity: 0, // No se usa en el gráfico actual
+        duration: durationInHours,
+      };
+    });
   }, [hourlySessionDurationForChart]);
 
   // Consolidado: sessionsByDay (backend una fila por sesión). Por agente: datos cargados desde backend por agentId.
