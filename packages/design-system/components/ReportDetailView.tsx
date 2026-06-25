@@ -46,39 +46,6 @@ const formatIsoDate = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
-// Tipos de aplicaciones (sincronizado con AppType del backend)
-type AppType =
-  | "Code"
-  | "Web"
-  | "Design"
-  | "Chat"
-  | "Office"
-  | "Productivity"
-  | "Development"
-  | "Database"
-  | "Cloud"
-  | "Entertainment"
-  | "System"
-  | "Other";
-
-// Colores para cada tipo de app (según diseños de Figma)
-const APP_TYPE_COLORS: Record<AppType, string> = {
-  Code: "#0097B2", // Cyan/Teal - IDEs y editores
-  Web: "#7DA40A", // Verde - Navegadores
-  Design: "#FF1493", // Magenta/Fuchsia - Diseño
-  Chat: "#9966FF", // Púrpura - Mensajería
-  Office: "#FF9F40", // Naranja - Ofimática
-  Productivity: "#FF6384", // Rosa/Rojo - Productividad
-  Development: "#9966FF", // Púrpura - Herramientas dev
-  Database: "#36A2EB", // Azul medio - Bases de datos
-  Cloud: "#C9CBCF", // Gris - Cloud
-  Entertainment: "#E74C3C", // Rojo - Entretenimiento/Ocio
-  System: "#95A5A6", // Gris claro - Sistema
-  Other: "#BDC3C7", // Gris neutro - Sin categoría
-};
-
-const VALID_APP_TYPES = Object.keys(APP_TYPE_COLORS) as AppType[];
-
 const DEFAULT_CHART_HOURS = { start: 8, end: 17 } as const;
 
 function parseHourFromTime(value: string | null | undefined): number | null {
@@ -164,45 +131,6 @@ function fillHourlyProductivityRange(
   }
   return filled;
 }
-
-// Componente interno: barra de distribución de uso por tipo de app (reutilizada en mobile y desktop)
-const UsageDistributionBar = ({
-  distribution,
-  t,
-}: {
-  distribution: Array<{ type: AppType; seconds: number; percentage: number; color: string }>;
-  t: (key: string) => string;
-}) => {
-  if (distribution.length === 0) return null;
-  return (
-    <div className="mt-8 pt-4 border-t border-gray-100">
-      <p className="text-[12px] font-semibold mb-2 text-black">{t("usageDistribution")}</p>
-      <div className="h-2 w-full rounded-full flex overflow-hidden mb-4">
-        {distribution.map((item) => (
-          <div
-            key={item.type}
-            style={{
-              backgroundColor: item.color,
-              width: `${item.percentage}%`,
-              minWidth: item.percentage > 0 ? "2px" : "0",
-            }}
-            title={`${item.type}: ${item.percentage}%`}
-          />
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-x-4 gap-y-2">
-        {distribution.map((item) => (
-          <div key={item.type} className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: item.color }} />
-            <span className="text-[12px] font-medium text-black">
-              {item.type} ({item.percentage}%)
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const SessionConnectivitySection = ({
   sessionConnectivityStats,
@@ -829,37 +757,6 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
     return `0h ${m}m`;
   };
 
-  // Calcular distribución de uso por tipo de app
-  const usageDistribution = useMemo(() => {
-    const apps = activity?.metrics?.appUsage || [];
-
-    // Agrupar por tipo y sumar segundos
-    const byType: Record<AppType, number> = {} as Record<AppType, number>;
-    let totalSeconds = 0;
-
-    for (const app of apps) {
-      const appType = app.type as string;
-      const type: AppType =
-        appType && VALID_APP_TYPES.includes(appType as AppType) ? (appType as AppType) : "Other";
-
-      byType[type] = (byType[type] || 0) + app.seconds;
-      totalSeconds += app.seconds;
-    }
-
-    // Convertir a array con porcentajes, ordenar por segundos desc, filtrar los que tienen uso
-    const distribution = Object.entries(byType)
-      .filter(([_, seconds]) => seconds > 0)
-      .map(([type, seconds]) => ({
-        type: type as AppType,
-        seconds,
-        percentage: totalSeconds > 0 ? Math.round((seconds / totalSeconds) * 100) : 0,
-        color: APP_TYPE_COLORS[type as AppType],
-      }))
-      .sort((a, b) => b.seconds - a.seconds);
-
-    return { distribution, totalSeconds };
-  }, [activity?.metrics?.appUsage]);
-
   const handleBack = useCallback(() => {
     router.push(`/${locale}/app/${basePath}/reports`);
   }, [router, locale, basePath]);
@@ -1040,7 +937,6 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
             {/* Top Applications */}
             <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-[17px] md:p-5 min-w-0 overflow-hidden">
               <TopApplications activity={activity} t={t} />
-              <UsageDistributionBar distribution={usageDistribution.distribution} t={t} />
             </div>
 
             {/* Top Websites */}
@@ -1138,7 +1034,6 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
               {/* Top Applications - Moved above sessions */}
               <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden">
                 <TopApplications activity={activity} t={t} />
-                <UsageDistributionBar distribution={usageDistribution.distribution} t={t} />
               </div>
 
               {/* Session Summary - Desktop */}
