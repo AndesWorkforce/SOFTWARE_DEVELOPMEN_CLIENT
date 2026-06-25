@@ -756,8 +756,15 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
 
   // Transformar datos de la API al formato esperado por el gráfico
   const hourlyData = useMemo(() => {
-    return hourlySessionDurationForChart.map((h, index) => {
-      let durationInHours = Math.round((h.avg_duration_seconds / 3600) * 100) / 100;
+    console.log("📊 Datos originales del backend:", hourlySessionDurationForChart);
+
+    const transformed = hourlySessionDurationForChart.map((h, index) => {
+      const originalSeconds = h.avg_duration_seconds;
+      let durationInHours = Math.round((originalSeconds / 3600) * 100) / 100;
+
+      console.log(
+        `Hora ${h.hour_label}: ${originalSeconds}s = ${durationInHours}h ANTES de desacumular`,
+      );
 
       // Si los datos vienen acumulativos, desacumular restando el valor anterior
       // para mostrar solo la duración de cada hora específica
@@ -766,6 +773,14 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
           Math.round((hourlySessionDurationForChart[index - 1].avg_duration_seconds / 3600) * 100) /
           100;
         durationInHours = Math.max(0, durationInHours - prevDurationInHours);
+        console.log(`  → Después de desacumular: ${durationInHours}h`);
+      }
+
+      // Limitar a máximo 1 hora (60 minutos) por hora trabajada
+      const beforeLimit = durationInHours;
+      durationInHours = Math.min(1.0, durationInHours);
+      if (beforeLimit !== durationInHours) {
+        console.log(`  → Limitado de ${beforeLimit}h a ${durationInHours}h`);
       }
 
       // Limitar a máximo 1 hora (60 minutos) por hora trabajada
@@ -777,6 +792,9 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
         duration: durationInHours,
       };
     });
+
+    console.log("📊 Datos transformados finales:", transformed);
+    return transformed;
   }, [hourlySessionDurationForChart]);
 
   // Consolidado: sessionsByDay (backend una fila por sesión). Por agente: datos cargados desde backend por agentId.
