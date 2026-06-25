@@ -768,6 +768,9 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
         durationInHours = Math.max(0, durationInHours - prevDurationInHours);
       }
 
+      // Limitar a máximo 1 hora (60 minutos) por hora trabajada
+      durationInHours = Math.min(1.0, durationInHours);
+
       return {
         hour: h.hour_label,
         productivity: 0, // No se usa en el gráfico actual
