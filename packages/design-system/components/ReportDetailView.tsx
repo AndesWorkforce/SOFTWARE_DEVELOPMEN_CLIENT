@@ -1104,6 +1104,12 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                 variant="desktop"
               />
 
+              {/* Top Applications - Moved above sessions */}
+              <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden">
+                <TopApplications activity={activity} t={t} />
+                <UsageDistributionBar distribution={usageDistribution.distribution} t={t} />
+              </div>
+
               {/* Session Summary - Desktop */}
               <SessionSummarySection
                 sessionsByDayFiltered={sessionsByDayFiltered}
@@ -1119,11 +1125,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
               <div className="min-w-0 overflow-hidden">
                 <InputTotals activity={activity} t={t} />
               </div>
-              <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden">
-                <TopApplications activity={activity} t={t} />
-                <UsageDistributionBar distribution={usageDistribution.distribution} t={t} />
-              </div>
-              {/* Top Websites - mismas dimensiones que Top Applications */}
+              {/* Top Websites */}
               <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden">
                 <TopWebsites activity={activity} t={t} />
               </div>

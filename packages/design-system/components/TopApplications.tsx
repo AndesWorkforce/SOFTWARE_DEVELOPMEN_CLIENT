@@ -56,9 +56,9 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
         >
           {t("modal.topApplications") || "Top Applications"}
         </h5>
-        <div className="flex flex-col gap-[10px] items-start w-full">
+        <div className="flex flex-col gap-[10px] items-start w-full max-h-[500px] overflow-y-auto">
           {activity.metrics?.appUsage && activity.metrics.appUsage.length > 0 ? (
-            activity.metrics.appUsage.slice(0, 5).map((app, index) => (
+            activity.metrics.appUsage.map((app, index) => (
               <div key={index} className="flex items-center justify-between w-full">
                 <div className="flex gap-[10px] items-center shrink-0">
                   <span className="text-[15px]" style={{ width: "15px", height: "15px" }}>
