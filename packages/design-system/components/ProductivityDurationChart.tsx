@@ -87,10 +87,14 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
         type: "value",
         name: "Duration (h)",
         min: 0,
-        max: 5,
-        interval: 1,
+        max: 1,
+        interval: 0.25,
         axisLabel: {
-          formatter: "{value}h",
+          formatter: (value: number) => {
+            if (value === 0) return "0m";
+            if (value === 1) return "60m";
+            return `${Math.round(value * 60)}m`;
+          },
           color: "#000000",
           fontSize: 12,
         },
