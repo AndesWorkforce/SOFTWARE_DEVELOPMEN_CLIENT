@@ -320,6 +320,7 @@
     "clients": "Clientes",
     "roles": "Roles",
     "jobPositions": "Cargos",
+    "contractorConnectivity": "Estado de equipos",
     "agents": "Agentes",
     "changeRole": "Cambiar de Rol",
     "logout": "Cerrar Sesión"
@@ -782,6 +783,31 @@
       "errorDeleting": "Error al eliminar el cargo. Por favor, intenta de nuevo.",
       "deleteSuccessTitle": "Cargo eliminado correctamente",
       "deleteSuccessContinue": "Continuar"
+    }
+  },
+  "contractorConnectivity": {
+    "title": "Estado de equipos",
+    "subtitle": "Contratistas con agente instalado y estado de conectividad en tiempo real",
+    "refresh": "Actualizar",
+    "fetchError": "No se pudo cargar el estado de los equipos",
+    "noAgents": "No hay contratistas con agente vinculado",
+    "lastUpdated": "Actualizado a las {time}",
+    "filters": {
+      "all": "Todos"
+    },
+    "power": {
+      "active": "Activo",
+      "suspended": "Suspendido"
+    },
+    "table": {
+      "contractor": "Contratista",
+      "jobPosition": "Cargo",
+      "hostname": "Equipo",
+      "type": "Tipo",
+      "status": "Conectividad",
+      "power": "Energía",
+      "action": "Acción",
+      "viewReport": "Ver reporte"
     }
   },
   "teams": {
