@@ -8,10 +8,10 @@ import {
   FileText,
   Users,
   LogOut,
-  User,
   RefreshCw,
   Bot,
   Briefcase,
+  Monitor,
 } from "lucide-react";
 import Image from "next/image";
 import pulseLogo from "@/packages/design-system/images/logo pulse 1.png";
@@ -86,10 +86,10 @@ export const Sidebar = ({ role }: SidebarProps) => {
       icon: <FileText className="w-5 h-5" />,
     },
     {
-      name: t("roles"),
+      name: t("contractorConnectivity"),
       path: `/${locale}/app/${role}/roles`,
-      icon: <User className="w-5 h-5" />,
-      roles: ["super-admin"], // Solo para super-admin
+      icon: <Monitor className="w-5 h-5" />,
+      roles: ["super-admin"],
     },
     {
       name: t("jobPositions"),

@@ -320,6 +320,7 @@
     "clients": "Clients",
     "roles": "Roles",
     "jobPositions": "Job Positions",
+    "contractorConnectivity": "Device Status",
     "agents": "Agents",
     "changeRole": "Role Change",
     "logout": "Logout"
@@ -775,6 +776,31 @@
       "errorDeleting": "Error deleting job position. Please try again.",
       "deleteSuccessTitle": "Job position deleted successfully",
       "deleteSuccessContinue": "Continue"
+    }
+  },
+  "contractorConnectivity": {
+    "title": "Device Status",
+    "subtitle": "Contractors with an installed agent and real-time connectivity status",
+    "refresh": "Refresh",
+    "fetchError": "Failed to load device status",
+    "noAgents": "No contractors with a linked agent",
+    "lastUpdated": "Updated at {time}",
+    "filters": {
+      "all": "All"
+    },
+    "power": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "table": {
+      "contractor": "Contractor",
+      "jobPosition": "Job Position",
+      "hostname": "Device",
+      "type": "Type",
+      "status": "Connectivity",
+      "power": "Power",
+      "action": "Action",
+      "viewReport": "View report"
     }
   },
   "teams": {

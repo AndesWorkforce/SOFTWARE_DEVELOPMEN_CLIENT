@@ -15,7 +15,12 @@ export interface Agent {
   seconds_since_heartbeat?: number | null;
   created_at: string;
   updated_at: string;
-  contractor?: { id: string; name: string; email: string | null } | null;
+  contractor?: {
+    id: string;
+    name: string;
+    email: string | null;
+    job_position?: string;
+  } | null;
 }
 
 export interface AgentConnectivity extends Agent {
