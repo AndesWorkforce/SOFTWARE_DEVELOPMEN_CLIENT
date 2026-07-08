@@ -29,6 +29,13 @@ import {
   type ProductivitySummary,
 } from "@/packages/api/adt/adt.service";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
+import { agentsService } from "@/packages/api/agents/agents.service";
+import type { AgentConnectivity } from "@/packages/types/agents.types";
+import {
+  resolveDeviceStatus,
+  getDeviceStatusDisplay,
+  formatLastHeartbeat,
+} from "@/packages/utils/device-status.utils";
 import type { Contractor } from "@/packages/types/contractors.types";
 import type { UserActivity } from "@/packages/api/reports/reports.service";
 
@@ -209,6 +216,37 @@ const SessionConnectivitySection = ({
     </div>
   </div>
 );
+
+const DeviceStatusBadge = ({
+  agent,
+  locale,
+  t,
+}: {
+  agent: AgentConnectivity | null;
+  locale: string;
+  t: (key: string) => string;
+}) => {
+  if (!agent) return null;
+  const status = resolveDeviceStatus(agent);
+  const display = getDeviceStatusDisplay(status, locale);
+  const lastSeen = formatLastHeartbeat(agent.last_heartbeat, locale);
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="text-xs text-[#6D6D6D]">{t("deviceStatus")}:</span>
+      <span
+        className="px-2 py-0.5 rounded-full text-xs font-medium"
+        style={{ background: display.background, color: display.color }}
+      >
+        {display.label}
+      </span>
+      {lastSeen && (
+        <span className="text-xs text-[#6D6D6D]">
+          {t("lastSeen")}: {lastSeen}
+        </span>
+      )}
+    </div>
+  );
+};
 
 // Sección resumen de sesiones por día (mobile: cards con SessionSummaryMobile; desktop: tabla con SessionSummaryTable)
 const SessionSummarySection = ({
@@ -394,6 +432,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
     ...DEFAULT_CHART_HOURS,
   });
   const [loading, setLoading] = useState(true);
+  const [deviceConnectivity, setDeviceConnectivity] = useState<AgentConnectivity[]>([]);
 
   // Sincronizar estado local cuando cambian los searchParams (ej: navegación con botones del browser)
   // Solo actualizar si los valores son diferentes para evitar loops
@@ -505,6 +544,31 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
     const found = agentSelectorOptions.find((opt) => opt.value === selectedAgentId);
     return found ? found.label : "";
   }, [agentSelectorOptions, selectedAgentId]);
+
+  const selectedAgentConnectivity = useMemo(() => {
+    if (selectedAgentId === "consolidated") return null;
+    return deviceConnectivity.find((agent) => agent.id === selectedAgentId) ?? null;
+  }, [deviceConnectivity, selectedAgentId]);
+
+  useEffect(() => {
+    if (!contractorId) return;
+
+    const loadConnectivity = async () => {
+      try {
+        const data = await agentsService.getContractorConnectivity(contractorId);
+        setDeviceConnectivity(data);
+      } catch {
+        setDeviceConnectivity([]);
+      }
+    };
+
+    void loadConnectivity();
+    const interval = setInterval(() => {
+      void loadConnectivity();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [contractorId]);
 
   // Cargar datos cuando cambian las fechas o el contractor
   useEffect(() => {
@@ -903,6 +967,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                 ))}
               </select>
             </div>
+            <DeviceStatusBadge agent={selectedAgentConnectivity} locale={locale} t={t} />
 
             {/* Date Pickers - Side by Side on Mobile */}
             <div className="flex gap-[5px] w-full min-w-0">
@@ -1017,6 +1082,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
                   </select>
                 </div>
               </div>
+              <DeviceStatusBadge agent={selectedAgentConnectivity} locale={locale} t={t} />
 
               {/* Session & Connectivity */}
               <SessionConnectivitySection
