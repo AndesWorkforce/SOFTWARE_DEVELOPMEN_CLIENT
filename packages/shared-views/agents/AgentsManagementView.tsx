@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Bot } from "lucide-react";
 
 import { Button, DataTable, Modal, SearchableSelect } from "../../design-system";
@@ -15,6 +15,11 @@ import { ContractorsService } from "../../api/contractors/contractors.service";
 import type { Agent } from "../../types/agents.types";
 import type { Application } from "../../types/applications.types";
 import type { Contractor } from "../../types/contractors.types";
+import {
+  resolveDeviceStatus,
+  getDeviceStatusDisplay,
+  formatLastHeartbeat,
+} from "../../utils/device-status.utils";
 
 export interface AgentsManagementViewProps {
   role: "super-admin" | "admin";
@@ -28,6 +33,7 @@ const contractorsService = new ContractorsService();
 
 export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
   const t = useTranslations("agents");
+  const locale = useLocale();
 
   const canLink = role === "super-admin" || role === "admin";
 
@@ -133,6 +139,33 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
         dataPath: "type",
         type: "badge",
         minWidth: "110px",
+      },
+      {
+        key: "device_status",
+        title: t("table.connectivity"),
+        dataPath: "device_status",
+        type: "text",
+        minWidth: "160px",
+        render: (_value, row) => {
+          const status = resolveDeviceStatus(row);
+          const display = getDeviceStatusDisplay(status, locale);
+          const lastSeen = formatLastHeartbeat(row.last_heartbeat, locale);
+          return (
+            <div className="flex flex-col gap-0.5">
+              <span
+                className="px-2 py-0.5 rounded-full text-xs font-medium w-fit"
+                style={{ background: display.background, color: display.color }}
+              >
+                {display.label}
+              </span>
+              {lastSeen && (
+                <span className="text-[10px]" style={{ color: "#6B7280" }}>
+                  {lastSeen}
+                </span>
+              )}
+            </div>
+          );
+        },
       },
       {
         key: "is_active",

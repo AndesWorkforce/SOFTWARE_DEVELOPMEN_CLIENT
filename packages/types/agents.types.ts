@@ -1,3 +1,5 @@
+export type DeviceStatus = "ONLINE" | "OFFLINE" | "SUSPENDED" | "UNKNOWN";
+
 export interface Agent {
   id: string;
   contractor_id: string | null;
@@ -7,9 +9,17 @@ export interface Agent {
   parent_agent_id: string | null;
   is_active: boolean;
   last_heartbeat: string | null;
+  device_status?: DeviceStatus;
+  power_state?: string | null;
+  last_power_event_at?: string | null;
+  seconds_since_heartbeat?: number | null;
   created_at: string;
   updated_at: string;
   contractor?: { id: string; name: string; email: string | null } | null;
+}
+
+export interface AgentConnectivity extends Agent {
+  seconds_since_heartbeat: number | null;
 }
 
 export interface LinkAgentDto {

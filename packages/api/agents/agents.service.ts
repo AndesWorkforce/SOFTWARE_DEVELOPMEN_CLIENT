@@ -1,8 +1,8 @@
 import { http } from "../../setup/axios.config";
 import type { AxiosError } from "axios";
-import type { Agent, LinkAgentDto } from "../../types/agents.types";
+import type { Agent, AgentConnectivity, LinkAgentDto } from "../../types/agents.types";
 
-export type { Agent, LinkAgentDto } from "../../types/agents.types";
+export type { Agent, AgentConnectivity, LinkAgentDto } from "../../types/agents.types";
 
 export class AgentsService {
   async getAll(): Promise<Agent[]> {
@@ -51,6 +51,21 @@ export class AgentsService {
       throw new Error(
         (axiosError.response?.data as { message?: string })?.message ??
           "Failed to fetch contractor agents",
+      );
+    }
+  }
+
+  async getContractorConnectivity(contractorId: string): Promise<AgentConnectivity[]> {
+    try {
+      const response = await http.get<AgentConnectivity[]>(
+        `/agents/contractor/${contractorId}/connectivity`,
+      );
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      throw new Error(
+        (axiosError.response?.data as { message?: string })?.message ??
+          "Failed to fetch contractor connectivity",
       );
     }
   }
