@@ -300,7 +300,7 @@ export const ActivityDetailModal = ({
                 style={{ width: "32.79%", minWidth: "200px" }}
               >
                 {/* Input Totals */}
-                <InputTotals activity={activity} t={t} />
+                <InputTotals activity={activity} t={t} layout="stack" />
 
                 {/* Top Applications */}
                 <TopApplications activity={activity} t={t} />

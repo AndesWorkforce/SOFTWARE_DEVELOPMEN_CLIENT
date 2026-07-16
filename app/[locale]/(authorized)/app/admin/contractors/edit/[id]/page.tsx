@@ -1,19 +1,12 @@
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
-import { useLocale } from "next-intl";
-import { EditContractorModal } from "@/app/[locale]/(authorized)/app/admin/contractors/@modal/(.)edit/[id]/EditContractorModal";
+import { useParams } from "next/navigation";
+import { EditContractorModal, useContractorsListClose } from "@/packages/shared-views/contractors";
 
 export default function EditContractorPage() {
-  const router = useRouter();
-  const locale = useLocale();
   const params = useParams();
   const contractorId = params?.id as string;
-
-  const handleClose = () => {
-    const basePath = `/${locale}/app/admin/contractors`;
-    router.push(basePath);
-  };
+  const handleClose = useContractorsListClose("admin");
 
   if (!contractorId) return null;
 

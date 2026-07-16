@@ -12,8 +12,9 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
   const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
 
   const formatSecondsToTime = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
+    const safe = Number(seconds) || 0;
+    const hours = Math.floor(safe / 3600);
+    const minutes = Math.floor((safe % 3600) / 60);
     return `${hours.toString().padStart(2, "0")}h ${minutes.toString().padStart(2, "0")}m`;
   };
 
@@ -39,11 +40,12 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
 
   const totals = useMemo(() => {
     const count = uniqueSessions.length;
-    const totalSeconds = uniqueSessions.reduce((sum, s) => sum + s.total_seconds, 0);
+    // ClickHouse Int64 llega como string en JSON; sin Number() el `+` concatena.
+    const totalSeconds = uniqueSessions.reduce((sum, s) => sum + (Number(s.total_seconds) || 0), 0);
     const avgSeconds = count > 0 ? totalSeconds / count : 0;
     const avgProductivity =
       count > 0
-        ? uniqueSessions.reduce((sum, s) => sum + (s.productivity_score || 0), 0) / count
+        ? uniqueSessions.reduce((sum, s) => sum + (Number(s.productivity_score) || 0), 0) / count
         : 0;
 
     return {
@@ -83,11 +85,12 @@ export const SessionSummaryMobile = ({ sessions, date }: SessionSummaryMobilePro
             const isEven = index % 2 === 1;
             const startTime = session.session_start.split(" ")[1]?.substring(0, 5) || "00:00";
             const endTime = session.session_end.split(" ")[1]?.substring(0, 5) || "00:00";
-            const duration = formatSecondsToTime(session.total_seconds);
-            const activeTime = formatSecondsToTime(session.active_seconds);
-            const idleTime = formatSecondsToTime(session.idle_seconds);
-            const productivity = `${Math.round(session.productivity_score || 0)}%`;
-            const productivityColor = session.productivity_score >= 70 ? "#0097B2" : "#FF0004";
+            const duration = formatSecondsToTime(Number(session.total_seconds) || 0);
+            const activeTime = formatSecondsToTime(Number(session.active_seconds) || 0);
+            const idleTime = formatSecondsToTime(Number(session.idle_seconds) || 0);
+            const productivityScore = Number(session.productivity_score) || 0;
+            const productivity = `${Math.round(productivityScore)}%`;
+            const productivityColor = productivityScore >= 70 ? "#0097B2" : "#FF0004";
 
             return (
               <div

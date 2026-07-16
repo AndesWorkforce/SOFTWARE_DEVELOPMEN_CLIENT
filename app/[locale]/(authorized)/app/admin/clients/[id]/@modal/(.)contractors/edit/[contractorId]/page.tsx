@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { EditContractorModalWrapper } from "../../../../contractors/_components/EditContractorModalWrapper";
+import { EditContractorModalWrapper } from "@/packages/shared-views/contractors";
 
 export default function ClientEditContractorModalRoute() {
   const params = useParams<{ id: string; contractorId: string }>();
@@ -9,5 +9,7 @@ export default function ClientEditContractorModalRoute() {
   const contractorId = params?.contractorId;
   if (!clientId || !contractorId) return null;
 
-  return <EditContractorModalWrapper clientId={clientId} contractorId={contractorId} />;
+  return (
+    <EditContractorModalWrapper clientId={clientId} contractorId={contractorId} role="admin" />
+  );
 }

@@ -1,16 +1,12 @@
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
-import { EditContractorModal } from "./EditContractorModal";
+import { useParams } from "next/navigation";
+import { EditContractorModal, useContractorsListClose } from "@/packages/shared-views/contractors";
 
 export default function EditContractorPage() {
-  const router = useRouter();
   const params = useParams();
   const contractorId = params?.id as string;
-
-  const handleClose = () => {
-    router.back();
-  };
+  const handleClose = useContractorsListClose("admin");
 
   if (!contractorId) return null;
 

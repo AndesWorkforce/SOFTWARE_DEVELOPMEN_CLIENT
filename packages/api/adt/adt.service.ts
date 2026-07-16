@@ -383,8 +383,8 @@ export class AdtService {
    * @param from Fecha de inicio del rango en formato YYYY-MM-DD (opcional)
    * @param to Fecha de fin del rango en formato YYYY-MM-DD (opcional)
    * @param days Días hacia atrás (default: 30)
-   * @param startHour Hora de inicio de jornada (default: 8)
-   * @param endHour Hora de fin de jornada (default: 17)
+   * @param startHour Hora de inicio de jornada (default: 7)
+   * @param endHour Hora de fin de jornada (default: 19)
    * @returns Array de actividad promedio por hora
    */
   async getHourlyActivity(
@@ -392,8 +392,8 @@ export class AdtService {
     from?: string,
     to?: string,
     days: number = 30,
-    startHour: number = 8,
-    endHour: number = 17,
+    startHour: number = 7,
+    endHour: number = 19,
   ): Promise<HourlyActivity[]> {
     try {
       const params: Record<string, string> = {
@@ -433,8 +433,8 @@ export class AdtService {
    * @param from Fecha de inicio del rango en formato YYYY-MM-DD (opcional)
    * @param to Fecha de fin del rango en formato YYYY-MM-DD (opcional)
    * @param days Días hacia atrás (default: 30)
-   * @param startHour Hora de inicio de jornada (default: 8)
-   * @param endHour Hora de fin de jornada (default: 17)
+   * @param startHour Hora de inicio de jornada (default: 7)
+   * @param endHour Hora de fin de jornada (default: 19)
    * @returns Array de duración de sesiones por hora
    */
   async getHourlySessionDuration(
@@ -442,8 +442,8 @@ export class AdtService {
     from?: string,
     to?: string,
     days: number = 30,
-    startHour: number = 8,
-    endHour: number = 17,
+    startHour: number = 7,
+    endHour: number = 19,
     agentId?: string,
   ): Promise<HourlySessionDuration[]> {
     try {
@@ -488,8 +488,8 @@ export class AdtService {
    * @param from Fecha de inicio del rango en formato YYYY-MM-DD (opcional)
    * @param to Fecha de fin del rango en formato YYYY-MM-DD (opcional)
    * @param days Días hacia atrás (default: 30)
-   * @param startHour Hora de inicio de jornada (default: 8)
-   * @param endHour Hora de fin de jornada (default: 17)
+   * @param startHour Hora de inicio de jornada (default: 7)
+   * @param endHour Hora de fin de jornada (default: 19)
    * @param agentId ID del agente (opcional). Si se indica, solo productividad de ese agente.
    * @returns Array de productividad promedio por hora
    */
@@ -498,8 +498,8 @@ export class AdtService {
     from?: string,
     to?: string,
     days: number = 30,
-    startHour: number = 8,
-    endHour: number = 17,
+    startHour: number = 7,
+    endHour: number = 19,
     agentId?: string,
   ): Promise<HourlyProductivity[]> {
     try {

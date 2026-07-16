@@ -27,6 +27,7 @@ const STATUS_ORDER: Record<DeviceStatus, number> = {
   SUSPENDED: 1,
   OFFLINE: 2,
   UNKNOWN: 3,
+  DISABLED: 4,
 };
 
 export const ContractorConnectivityView = ({ role }: ContractorConnectivityViewProps) => {
@@ -83,6 +84,7 @@ export const ContractorConnectivityView = ({ role }: ContractorConnectivityViewP
       OFFLINE: 0,
       SUSPENDED: 0,
       UNKNOWN: 0,
+      DISABLED: 0,
     };
     for (const agent of agents) {
       counts[resolveDeviceStatus(agent)]++;
@@ -285,6 +287,7 @@ export const ContractorConnectivityView = ({ role }: ContractorConnectivityViewP
     { value: "OFFLINE", label: getDeviceStatusDisplay("OFFLINE", locale).label },
     { value: "SUSPENDED", label: getDeviceStatusDisplay("SUSPENDED", locale).label },
     { value: "UNKNOWN", label: getDeviceStatusDisplay("UNKNOWN", locale).label },
+    { value: "DISABLED", label: getDeviceStatusDisplay("DISABLED", locale).label },
   ];
 
   return (
@@ -319,32 +322,34 @@ export const ContractorConnectivityView = ({ role }: ContractorConnectivityViewP
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          {(["ONLINE", "OFFLINE", "SUSPENDED", "UNKNOWN"] as DeviceStatus[]).map((status) => {
-            const display = getDeviceStatusDisplay(status, locale);
-            return (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(statusFilter === status ? "ALL" : status)}
-                className="rounded-[10px] p-3 text-left transition-opacity cursor-pointer"
-                style={{
-                  border:
-                    statusFilter === status
-                      ? "2px solid #0097B2"
-                      : "1px solid rgba(166,166,166,0.4)",
-                  background: display.background,
-                  opacity: statusFilter === "ALL" || statusFilter === status ? 1 : 0.6,
-                }}
-              >
-                <p className="text-2xl font-bold" style={{ color: display.color }}>
-                  {summary[status]}
-                </p>
-                <p className="text-xs font-medium" style={{ color: display.color }}>
-                  {display.label}
-                </p>
-              </button>
-            );
-          })}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+          {(["ONLINE", "OFFLINE", "SUSPENDED", "UNKNOWN", "DISABLED"] as DeviceStatus[]).map(
+            (status) => {
+              const display = getDeviceStatusDisplay(status, locale);
+              return (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(statusFilter === status ? "ALL" : status)}
+                  className="rounded-[10px] p-3 text-left transition-opacity cursor-pointer"
+                  style={{
+                    border:
+                      statusFilter === status
+                        ? "2px solid #0097B2"
+                        : "1px solid rgba(166,166,166,0.4)",
+                    background: display.background,
+                    opacity: statusFilter === "ALL" || statusFilter === status ? 1 : 0.6,
+                  }}
+                >
+                  <p className="text-2xl font-bold" style={{ color: display.color }}>
+                    {summary[status]}
+                  </p>
+                  <p className="text-xs font-medium" style={{ color: display.color }}>
+                    {display.label}
+                  </p>
+                </button>
+              );
+            },
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2 mb-4">
