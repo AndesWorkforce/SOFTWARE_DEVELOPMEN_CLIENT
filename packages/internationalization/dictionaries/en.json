@@ -550,6 +550,7 @@
       "optional": "Optional",
       "userPlaceholder": "Type name and last name here...",
       "emailPlaceholder": "mail@outlook.com",
+      "jobPositionPlaceholder": "Type job position here...",
       "selectPlaceholder": "Select...",
       "addButton": "Add Contractor",
       "cancel": "Cancel",

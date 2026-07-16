@@ -25,8 +25,11 @@ export const SessionConnectivity = ({ sessions, t }: SessionConnectivityProps) =
   const getAvgDuration = () => {
     if (sessions.length === 0) return "0h 00m";
 
-    // Calcular el promedio de total_seconds de todas las sesiones
-    const totalSeconds = sessions.reduce((sum, session) => sum + session.total_seconds, 0);
+    // ClickHouse Int64 llega como string en JSON; sin Number() el `+` concatena.
+    const totalSeconds = sessions.reduce(
+      (sum, session) => sum + (Number(session.total_seconds) || 0),
+      0,
+    );
     const avgSeconds = totalSeconds / sessions.length;
 
     return formatSecondsToTime(avgSeconds);

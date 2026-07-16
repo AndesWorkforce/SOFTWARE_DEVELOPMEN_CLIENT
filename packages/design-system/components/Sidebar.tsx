@@ -3,16 +3,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useAuthStore } from "@/packages/store";
 import { ReactNode } from "react";
-import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  LogOut,
-  RefreshCw,
-  Bot,
-  Briefcase,
-  Monitor,
-} from "lucide-react";
+import { LayoutDashboard, FileText, Users, LogOut, RefreshCw, Bot, Monitor } from "lucide-react";
 import Image from "next/image";
 import pulseLogo from "@/packages/design-system/images/logo pulse 1.png";
 
@@ -90,12 +81,6 @@ export const Sidebar = ({ role }: SidebarProps) => {
       path: `/${locale}/app/${role}/roles`,
       icon: <Monitor className="w-5 h-5" />,
       roles: ["super-admin"],
-    },
-    {
-      name: t("jobPositions"),
-      path: `/${locale}/app/${role}/job-positions`,
-      icon: <Briefcase className="w-5 h-5" />,
-      roles: ["super-admin", "admin"],
     },
     {
       name: t("agents"),

@@ -1,16 +1,15 @@
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
-import { DeleteContractorModal } from "./DeleteContractorModal";
+import { useParams } from "next/navigation";
+import {
+  DeleteContractorModal,
+  useContractorsListClose,
+} from "@/packages/shared-views/contractors";
 
 export default function DeleteContractorPage() {
-  const router = useRouter();
   const params = useParams();
   const contractorId = params?.id as string;
-
-  const handleClose = () => {
-    router.back();
-  };
+  const handleClose = useContractorsListClose("super-admin");
 
   if (!contractorId) return null;
 

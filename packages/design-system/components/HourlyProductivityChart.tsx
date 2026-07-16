@@ -63,9 +63,9 @@ export const HourlyProductivityChart = ({ hourlyData }: HourlyProductivityChartP
         axisLine: { lineStyle: { color: "#E5E5E5" } },
         axisLabel: {
           color: "#000000",
-          fontSize: isMobile ? 9 : 12,
+          fontSize: isMobile ? 9 : 11,
           rotate: 0,
-          interval: 0, // Mostrar todas las etiquetas
+          interval: hourlyData.length > 14 ? 1 : 0,
           showMinLabel: true,
           showMaxLabel: true,
         },

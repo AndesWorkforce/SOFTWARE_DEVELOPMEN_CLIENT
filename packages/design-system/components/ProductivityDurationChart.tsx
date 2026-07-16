@@ -75,9 +75,10 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
         axisLine: { lineStyle: { color: "#E5E5E5" } },
         axisLabel: {
           color: "#000000",
-          fontSize: isMobile ? 9 : 12,
+          fontSize: isMobile ? 9 : 11,
           rotate: 0,
-          interval: 0, // Mostrar todas las etiquetas
+          // Con 24h a ancho completo: mostrar cada 2 horas para legibilidad
+          interval: hourlyData.length > 14 ? 1 : 0,
           showMinLabel: true,
           showMaxLabel: true,
         },

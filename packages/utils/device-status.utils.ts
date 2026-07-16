@@ -11,6 +11,7 @@ const DEVICE_STATUS_STYLES: Record<DeviceStatus, DeviceStatusDisplay> = {
   OFFLINE: { label: "Apagado / Sin conexión", background: "#FEE2E2", color: "#991B1B" },
   SUSPENDED: { label: "Suspendido", background: "#FEF3C7", color: "#92400E" },
   UNKNOWN: { label: "Desconocido", background: "#F3F4F6", color: "#4B5563" },
+  DISABLED: { label: "Deshabilitado", background: "#E5E7EB", color: "#374151" },
 };
 
 const DEVICE_STATUS_STYLES_EN: Record<DeviceStatus, DeviceStatusDisplay> = {
@@ -18,6 +19,7 @@ const DEVICE_STATUS_STYLES_EN: Record<DeviceStatus, DeviceStatusDisplay> = {
   OFFLINE: { label: "Powered off / Offline", background: "#FEE2E2", color: "#991B1B" },
   SUSPENDED: { label: "Suspended", background: "#FEF3C7", color: "#92400E" },
   UNKNOWN: { label: "Unknown", background: "#F3F4F6", color: "#4B5563" },
+  DISABLED: { label: "Disabled", background: "#E5E7EB", color: "#374151" },
 };
 
 export function resolveDeviceStatus(agent: Agent): DeviceStatus {

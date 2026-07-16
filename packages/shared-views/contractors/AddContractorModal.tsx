@@ -13,7 +13,6 @@ import {
   Select,
   COUNTRY_OPTIONS,
 } from "@/packages/design-system";
-import { jobPositionsService } from "@/packages/api/job-positions/job-positions.service";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import { clientsService } from "@/packages/api/clients/clients.service";
 import { teamsService } from "@/packages/api/teams/teams.service";
@@ -75,7 +74,6 @@ export function AddContractorModal({
 
   const [clients, setClients] = useState<SelectOption[]>([]);
   const [teams, setTeams] = useState<(SelectOption & { clientId: string })[]>([]);
-  const [jobPositions, setJobPositions] = useState<SelectOption[]>([]);
   const [lockedClientOption, setLockedClientOption] = useState<SelectOption | null>(null);
 
   const schema = useMemo(() => {
@@ -283,7 +281,7 @@ export function AddContractorModal({
     onClose();
   };
 
-  // Cargar opciones del form (clients/teams/countries/job positions)
+  // Cargar opciones del form (clients/teams)
   useEffect(() => {
     const loadOptions = async () => {
       try {
@@ -304,18 +302,10 @@ export function AddContractorModal({
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((team) => ({ value: team.id, label: team.name, clientId: team.client_id })),
         );
-
-        setJobPositions(
-          jobPositionsService
-            .getAll()
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((p) => ({ value: p.name, label: p.name })),
-        );
       } catch (error) {
         console.error("Error loading AddContractor options:", error);
         setClients([]);
         setTeams([]);
-        setJobPositions([]);
       } finally {
         setIsLoadingData(false);
       }
@@ -369,13 +359,10 @@ export function AddContractorModal({
                   error={errors.job_position?.message}
                   required
                 >
-                  <Select
+                  <Input
                     {...register("job_position")}
-                    options={[
-                      { value: "", label: tCommon("formModal.selectPlaceholder") || "Select..." },
-                      ...jobPositions,
-                    ]}
-                    className={FORM_SELECT_CLASS}
+                    placeholder={t("jobPositionPlaceholder") || "Type job position here..."}
+                    className={FORM_CONTROL_CLASS}
                     style={getFormControlStyle(!!errors.job_position)}
                     disabled={isLoadingData || isPending}
                   />

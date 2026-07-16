@@ -1,20 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
-import { AddContractorModal } from "@/app/[locale]/(authorized)/app/admin/contractors/@modal/(.)add/AddContractorModal";
+import { AddContractorModal, useContractorsListClose } from "@/packages/shared-views/contractors";
 
 export default function AddContractorPage() {
-  const router = useRouter();
-  const locale = useLocale();
-
-  const handleClose = () => {
-    // Navegar de vuelta a contractors
-    const basePath = `/${locale}/app/admin/contractors`;
-    router.push(basePath);
-  };
-
-  // Esta página solo se renderiza en navegación directa (hard navigation)
-  // En navegación interceptada, se usa @modal/(.)add/page.tsx
+  const handleClose = useContractorsListClose("admin");
   return <AddContractorModal onClose={handleClose} />;
 }

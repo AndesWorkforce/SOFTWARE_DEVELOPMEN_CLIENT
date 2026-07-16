@@ -13,7 +13,6 @@ import {
   TimeBreakdown,
   InputTotals,
   TopApplications,
-  TopWebsites,
   HourlyProductivityChart,
   ProductivityDurationChart,
   SessionSummaryTable,
@@ -28,7 +27,6 @@ import {
   type HourlyProductivity,
   type ProductivitySummary,
 } from "@/packages/api/adt/adt.service";
-import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import { agentsService } from "@/packages/api/agents/agents.service";
 import type { AgentConnectivity } from "@/packages/types/agents.types";
 import {
@@ -36,7 +34,6 @@ import {
   getDeviceStatusDisplay,
   formatLastHeartbeat,
 } from "@/packages/utils/device-status.utils";
-import type { Contractor } from "@/packages/types/contractors.types";
 import type { UserActivity } from "@/packages/api/reports/reports.service";
 
 const parseIsoDate = (value?: string): Date | null => {
@@ -53,33 +50,7 @@ const formatIsoDate = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
-const DEFAULT_CHART_HOURS = { start: 8, end: 17 } as const;
-
-function parseHourFromTime(value: string | null | undefined): number | null {
-  if (!value) return null;
-  // Espera "HH:MM" (o "H:MM"). Si viniera con segundos, igual funciona.
-  const match = value.trim().match(/^(\d{1,2})\s*:\s*(\d{2})(?::\d{2})?$/);
-  if (!match) return null;
-  const h = Number(match[1]);
-  if (!Number.isFinite(h) || h < 0 || h > 23) return null;
-  return h;
-}
-
-function getChartHoursFromContractor(contractor?: Contractor | null): {
-  start: number;
-  end: number;
-} {
-  const start = parseHourFromTime(contractor?.work_schedule_start);
-  const end = parseHourFromTime(contractor?.work_schedule_end);
-
-  const resolvedStart = start ?? DEFAULT_CHART_HOURS.start;
-  const resolvedEnd = end ?? DEFAULT_CHART_HOURS.end;
-
-  // Si viene invertido o inválido, fallback seguro.
-  if (resolvedEnd < resolvedStart) return { ...DEFAULT_CHART_HOURS };
-
-  return { start: resolvedStart, end: resolvedEnd };
-}
+const DEFAULT_CHART_HOURS = { start: 0, end: 23 } as const;
 
 function toHourLabel(hour: number): string {
   return `${hour.toString().padStart(2, "0")}:00`;
@@ -192,21 +163,15 @@ const SessionConnectivitySection = ({
         </p>
       </div>
     </div>
-    <div
-      className={
-        variant === "desktop"
-          ? "flex flex-col md:flex-row gap-5 w-full min-w-0"
-          : "flex flex-col gap-5 w-full min-w-0"
-      }
-    >
-      <div className="flex-1 min-w-0 w-full">
+    <div className="flex flex-col gap-5 w-full min-w-0">
+      <div className="w-full min-w-0">
         {hourlySessionDurationAgentLoading ? (
           <div className="flex items-center justify-center py-8 text-gray-500">{t("loading")}</div>
         ) : (
           <ProductivityDurationChart key={selectedAgentId} hourlyData={hourlyData} />
         )}
       </div>
-      <div className="flex-1 min-w-0 w-full">
+      <div className="w-full min-w-0">
         {hourlyProductivityAgentLoading ? (
           <div className="flex items-center justify-center py-8 text-gray-500">{t("loading")}</div>
         ) : (
@@ -580,16 +545,14 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
 
       try {
         setLoading(true);
-        const [contractor, summary, contractorSessions, contractorSessionsByDay] =
-          await Promise.all([
-            contractorsService.getById(contractorId).catch(() => null),
-            adtService.getProductivitySummary(contractorId, undefined, startDate, endDate),
-            adtService.getContractorSessions(contractorId, startDate, endDate),
-            adtService.getContractorSessionsByDay(contractorId, startDate, endDate),
-          ]);
-
-        const nextChartHours = getChartHoursFromContractor(contractor);
+        const nextChartHours = { ...DEFAULT_CHART_HOURS };
         setChartHours(nextChartHours);
+
+        const [summary, contractorSessions, contractorSessionsByDay] = await Promise.all([
+          adtService.getProductivitySummary(contractorId, undefined, startDate, endDate),
+          adtService.getContractorSessions(contractorId, startDate, endDate),
+          adtService.getContractorSessionsByDay(contractorId, startDate, endDate),
+        ]);
 
         const [sessionDurationData, hourlyProductivityData] = await Promise.all([
           adtService.getHourlySessionDuration(
@@ -600,13 +563,14 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
             nextChartHours.start,
             nextChartHours.end,
           ),
+          // ADT productivity filtra hour < endHour (exclusivo) → +1 para incluir las 23:00
           adtService.getHourlyProductivity(
             contractorId,
             startDate,
             endDate,
             30,
             nextChartHours.start,
-            nextChartHours.end,
+            nextChartHours.end + 1,
           ),
         ]);
 
@@ -677,7 +641,7 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
         endDate,
         30,
         chartHours.start,
-        chartHours.end,
+        chartHours.end + 1,
         selectedAgentId,
       ),
     ])
@@ -996,18 +960,8 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
               </div>
             </div>
 
-            {/* Input Totals */}
+            {/* Input Totals — debajo del date range, arriba de los gráficos */}
             <InputTotals activity={activity} t={t} />
-
-            {/* Top Applications */}
-            <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-[17px] md:p-5 min-w-0 overflow-hidden">
-              <TopApplications activity={activity} t={t} />
-            </div>
-
-            {/* Top Websites */}
-            <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-[17px] md:p-5 min-w-0 overflow-hidden">
-              <TopWebsites activity={activity} t={t} />
-            </div>
 
             {/* Session & Connectivity */}
             <SessionConnectivitySection
@@ -1022,6 +976,11 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
               variant="mobile"
             />
 
+            {/* Top Applications */}
+            <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-[17px] md:p-5 min-w-0 overflow-hidden">
+              <TopApplications activity={activity} t={t} />
+            </div>
+
             {/* Session Summary - Mobile */}
             <SessionSummarySection
               sessionsByDayFiltered={sessionsByDayFiltered}
@@ -1033,95 +992,85 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
           </div>
 
           {/* Desktop Layout */}
-          <div className="hidden lg:flex flex-col lg:flex-row gap-5 w-full min-w-0">
-            <div className="flex flex-col gap-5 flex-1 min-w-0">
-              {/* Selectors Row */}
-              <div className="flex flex-col md:flex-row gap-3 w-full min-w-0">
-                <ReportDateSelector
-                  label={t("startDate")}
-                  value={startDate}
-                  displayValue={formatDateForDisplay(startDate)}
-                  onChange={handleStartDateChange}
-                  icon={<Calendar className="w-7 h-7" />}
-                  inputLang={resolvedLocale}
-                  max={endDate}
-                />
-                <ReportDateSelector
-                  label={t("endDate")}
-                  value={endDate}
-                  displayValue={formatDateForDisplay(endDate)}
-                  onChange={handleEndDateChange}
-                  icon={<Calendar className="w-7 h-7" />}
-                  inputLang={resolvedLocale}
-                  min={startDate}
-                  max={maxDate}
-                />
-                <div className="relative flex-1 bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-3 flex items-center justify-between min-w-0 cursor-pointer">
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <Laptop className="w-7 h-7 text-black shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[12px] text-[#6D6D6D]">{t("currentDevice")}</p>
-                      <p className="text-base font-medium text-black truncate">
-                        {selectedAgentLabel}
-                      </p>
-                    </div>
+          <div className="hidden lg:flex flex-col gap-5 w-full min-w-0">
+            {/* Selectors Row */}
+            <div className="flex flex-col md:flex-row gap-3 w-full min-w-0">
+              <ReportDateSelector
+                label={t("startDate")}
+                value={startDate}
+                displayValue={formatDateForDisplay(startDate)}
+                onChange={handleStartDateChange}
+                icon={<Calendar className="w-7 h-7" />}
+                inputLang={resolvedLocale}
+                max={endDate}
+              />
+              <ReportDateSelector
+                label={t("endDate")}
+                value={endDate}
+                displayValue={formatDateForDisplay(endDate)}
+                onChange={handleEndDateChange}
+                icon={<Calendar className="w-7 h-7" />}
+                inputLang={resolvedLocale}
+                min={startDate}
+                max={maxDate}
+              />
+              <div className="relative flex-1 bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-3 flex items-center justify-between min-w-0 cursor-pointer">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <Laptop className="w-7 h-7 text-black shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[12px] text-[#6D6D6D]">{t("currentDevice")}</p>
+                    <p className="text-base font-medium text-black truncate">
+                      {selectedAgentLabel}
+                    </p>
                   </div>
-                  <ChevronDown className="w-6 h-6 text-black shrink-0 ml-2 pointer-events-none" />
-                  <select
-                    ref={desktopDeviceSelectRef}
-                    value={selectedAgentId}
-                    onChange={(e) => setSelectedAgentId(e.target.value)}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    aria-label={t("currentDevice")}
-                  >
-                    {agentSelectorOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
                 </div>
-              </div>
-              <DeviceStatusBadge agent={selectedAgentConnectivity} locale={locale} t={t} />
-
-              {/* Session & Connectivity */}
-              <SessionConnectivitySection
-                sessionConnectivityStats={sessionConnectivityStats}
-                formatDurationFromSeconds={formatDurationFromSeconds}
-                hourlyData={hourlyData}
-                hourlyProductivityForChart={hourlyProductivityForChart}
-                hourlySessionDurationAgentLoading={hourlySessionDurationAgentLoading}
-                hourlyProductivityAgentLoading={hourlyProductivityAgentLoading}
-                selectedAgentId={selectedAgentId}
-                t={t}
-                variant="desktop"
-              />
-
-              {/* Top Applications - Moved above sessions */}
-              <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden">
-                <TopApplications activity={activity} t={t} />
-              </div>
-
-              {/* Session Summary - Desktop */}
-              <SessionSummarySection
-                sessionsByDayFiltered={sessionsByDayFiltered}
-                loading={sessionsByDayAgentLoading && selectedAgentId !== "consolidated"}
-                locale={locale}
-                t={t}
-                variant="desktop"
-              />
-            </div>
-
-            {/* Right Column */}
-            <div className="flex flex-col gap-5 w-full lg:w-[335px] shrink-0 min-w-0">
-              <div className="min-w-0 overflow-hidden">
-                <InputTotals activity={activity} t={t} />
-              </div>
-              {/* Top Websites */}
-              <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden">
-                <TopWebsites activity={activity} t={t} />
+                <ChevronDown className="w-6 h-6 text-black shrink-0 ml-2 pointer-events-none" />
+                <select
+                  ref={desktopDeviceSelectRef}
+                  value={selectedAgentId}
+                  onChange={(e) => setSelectedAgentId(e.target.value)}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  aria-label={t("currentDevice")}
+                >
+                  {agentSelectorOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
+            <DeviceStatusBadge agent={selectedAgentConnectivity} locale={locale} t={t} />
+
+            {/* Input Totals — debajo del date range, arriba de los gráficos */}
+            <InputTotals activity={activity} t={t} />
+
+            {/* Session & Connectivity */}
+            <SessionConnectivitySection
+              sessionConnectivityStats={sessionConnectivityStats}
+              formatDurationFromSeconds={formatDurationFromSeconds}
+              hourlyData={hourlyData}
+              hourlyProductivityForChart={hourlyProductivityForChart}
+              hourlySessionDurationAgentLoading={hourlySessionDurationAgentLoading}
+              hourlyProductivityAgentLoading={hourlyProductivityAgentLoading}
+              selectedAgentId={selectedAgentId}
+              t={t}
+              variant="desktop"
+            />
+
+            {/* Top Applications */}
+            <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-5 min-w-0 overflow-hidden">
+              <TopApplications activity={activity} t={t} />
+            </div>
+
+            {/* Session Summary - Desktop */}
+            <SessionSummarySection
+              sessionsByDayFiltered={sessionsByDayFiltered}
+              loading={sessionsByDayAgentLoading && selectedAgentId !== "consolidated"}
+              locale={locale}
+              t={t}
+              variant="desktop"
+            />
           </div>
         </div>
       </div>

@@ -550,6 +550,7 @@
       "optional": "Opcional",
       "userPlaceholder": "Escribe nombre y apellido aquí...",
       "emailPlaceholder": "correo@outlook.com",
+      "jobPositionPlaceholder": "Escribe el cargo aquí...",
       "selectPlaceholder": "Seleccionar...",
       "addButton": "Agregar Contratista",
       "cancel": "Cancelar",

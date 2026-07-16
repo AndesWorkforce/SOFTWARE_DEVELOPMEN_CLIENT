@@ -1,12 +1,12 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { AddContractorModalWrapper } from "../_components/AddContractorModalWrapper";
+import { AddContractorModalWrapper } from "@/packages/shared-views/contractors";
 
 export default function ClientAddContractorPage() {
   const params = useParams<{ id: string }>();
   const clientId = params?.id;
   if (!clientId) return null;
 
-  return <AddContractorModalWrapper clientId={clientId} />;
+  return <AddContractorModalWrapper clientId={clientId} role="admin" />;
 }

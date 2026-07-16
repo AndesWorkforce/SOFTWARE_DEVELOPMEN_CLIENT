@@ -1,16 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { AddContractorModal } from "./AddContractorModal";
+import { AddContractorModal, useContractorsListClose } from "@/packages/shared-views/contractors";
 
-export default function AddContractorPage() {
-  const router = useRouter();
-
-  const handleClose = () => {
-    // Usar router.back() para volver a la página anterior sin recargar
-    // Esto funciona correctamente con intercepting routes
-    router.back();
-  };
-
+export default function AddContractorModalPage() {
+  const handleClose = useContractorsListClose("super-admin");
   return <AddContractorModal onClose={handleClose} />;
 }

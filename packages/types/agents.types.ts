@@ -1,4 +1,4 @@
-export type DeviceStatus = "ONLINE" | "OFFLINE" | "SUSPENDED" | "UNKNOWN";
+export type DeviceStatus = "ONLINE" | "OFFLINE" | "SUSPENDED" | "UNKNOWN" | "DISABLED";
 
 export interface Agent {
   id: string;

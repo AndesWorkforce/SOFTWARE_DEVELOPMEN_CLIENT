@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { DeleteContractorModalWrapper } from "../../../../contractors/_components/DeleteContractorModalWrapper";
+import { DeleteContractorModalWrapper } from "@/packages/shared-views/contractors";
 
 export default function ClientDeleteContractorModalRoute() {
   const params = useParams<{ id: string; contractorId: string }>();
@@ -9,5 +9,7 @@ export default function ClientDeleteContractorModalRoute() {
   const contractorId = params?.contractorId;
   if (!clientId || !contractorId) return null;
 
-  return <DeleteContractorModalWrapper clientId={clientId} contractorId={contractorId} />;
+  return (
+    <DeleteContractorModalWrapper clientId={clientId} contractorId={contractorId} role="admin" />
+  );
 }
