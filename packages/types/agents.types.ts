@@ -8,6 +8,7 @@ export interface Agent {
   hostname: string | null;
   parent_agent_id: string | null;
   is_active: boolean;
+  is_disabled?: boolean;
   last_heartbeat: string | null;
   device_status?: DeviceStatus;
   power_state?: string | null;
