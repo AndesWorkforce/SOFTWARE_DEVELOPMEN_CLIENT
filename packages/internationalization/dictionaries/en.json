@@ -84,6 +84,16 @@
     },
     "loading": "Loading...",
     "noDataAvailable": "No data available",
+    "agentsConnectivity": {
+      "title": "Connected Agents",
+      "subtitle": "{connected} of {total} linked agents online",
+      "refresh": "Refresh",
+      "viewAll": "Device Status",
+      "connectedRate": "Connection rate",
+      "onlineList": "Online now",
+      "noOnline": "No agents currently online",
+      "loading": "Loading agents..."
+    },
     "table": {
       "sessionId": "Session ID",
       "startTime": "Start Time",

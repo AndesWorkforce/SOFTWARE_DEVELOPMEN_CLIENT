@@ -26,6 +26,7 @@ export * from "./components/FormField";
 export * from "./components/TalentPercentageChart";
 export * from "./components/TopEfficiency";
 export * from "./components/LowPerformers";
+export * from "./components/ConnectedAgentsPanel";
 export * from "./components/DashboardSkeleton";
 export * from "./components/ProductivityDurationChart";
 export * from "./components/HourlyProductivityChart";
