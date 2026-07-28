@@ -77,7 +77,7 @@ export function ConnectedAgentsPanel({
 
   const totalLinked = linkedAgents.length;
   const connectedPct = totalLinked > 0 ? Math.round((summary.ONLINE / totalLinked) * 100) : 0;
-  const visibleOnline = compact ? onlineAgents.slice(0, 4) : onlineAgents;
+  const visibleOnline = compact ? onlineAgents.slice(0, 8) : onlineAgents;
   const hiddenOnlineCount = Math.max(onlineAgents.length - visibleOnline.length, 0);
 
   const openDeviceStatus = () => {
@@ -85,7 +85,7 @@ export function ConnectedAgentsPanel({
   };
 
   const renderStatusChips = (dense: boolean) => (
-    <div className={dense ? "flex flex-wrap gap-1.5" : "grid grid-cols-2 md:grid-cols-5 gap-3"}>
+    <div className={dense ? "flex flex-wrap gap-2" : "grid grid-cols-2 md:grid-cols-5 gap-3"}>
       {STATUS_ORDER.map((status) => {
         const display = getDeviceStatusDisplay(status, locale);
         const label = dense ? t(COMPACT_STATUS_LABEL_KEYS[status]) : display.label;
@@ -95,7 +95,7 @@ export function ConnectedAgentsPanel({
             key={status}
             className={
               dense
-                ? "inline-flex items-center gap-1.5 rounded-md px-2 py-1"
+                ? "inline-flex items-center gap-2 rounded-md px-3 py-2"
                 : "rounded-[10px] p-3 text-left"
             }
             style={{
@@ -105,13 +105,13 @@ export function ConnectedAgentsPanel({
             title={display.label}
           >
             <span
-              className={`font-bold ${dense ? "text-sm leading-none" : "text-2xl"}`}
+              className={`font-bold ${dense ? "text-lg" : "text-2xl"}`}
               style={{ color: display.color }}
             >
               {loading ? "—" : summary[status]}
             </span>
             <span
-              className={`font-medium ${dense ? "text-[10px] leading-tight" : "text-xs"}`}
+              className={`font-medium ${dense ? "text-xs" : "text-xs"}`}
               style={{ color: display.color }}
             >
               {label}
@@ -124,7 +124,7 @@ export function ConnectedAgentsPanel({
 
   const renderOnlineList = (dense: boolean) => (
     <div className={dense ? "min-w-0 flex-1" : undefined}>
-      <h3 className={`font-semibold text-black ${dense ? "text-xs mb-1.5" : "text-[16px] mb-3"}`}>
+      <h3 className={`font-semibold text-black ${dense ? "text-sm mb-2" : "text-[16px] mb-3"}`}>
         {t("onlineList")}
       </h3>
       {loading ? (
@@ -138,7 +138,7 @@ export function ConnectedAgentsPanel({
       ) : (
         <div
           className={`flex flex-col overflow-y-auto ${
-            dense ? "gap-1 max-h-[88px]" : "gap-2 max-h-[320px]"
+            dense ? "gap-2 max-h-[240px]" : "gap-2 max-h-[320px]"
           }`}
         >
           {visibleOnline.map((agent) => {
@@ -146,8 +146,8 @@ export function ConnectedAgentsPanel({
             return (
               <div
                 key={agent.id}
-                className={`flex items-center justify-between gap-2 rounded-[6px] ${
-                  dense ? "px-2 py-1" : "px-3 py-2 rounded-[8px]"
+                className={`flex items-center justify-between gap-2 ${
+                  dense ? "px-3 py-2 rounded-[8px]" : "px-3 py-2 rounded-[8px]"
                 }`}
                 style={{
                   border: "1px solid rgba(166,166,166,0.3)",
@@ -156,13 +156,11 @@ export function ConnectedAgentsPanel({
               >
                 <div className="min-w-0 flex-1">
                   <p
-                    className={`font-semibold text-black truncate ${
-                      dense ? "text-[11px] leading-tight" : "text-sm"
-                    }`}
+                    className={`font-semibold text-black truncate ${dense ? "text-sm" : "text-sm"}`}
                   >
                     {agent.contractor?.name ?? "—"}
                   </p>
-                  <p className="text-[10px] truncate leading-tight" style={{ color: "#6d6d6d" }}>
+                  <p className="text-xs truncate" style={{ color: "#6d6d6d" }}>
                     {agent.hostname ?? "—"}
                     {lastSeen ? ` · ${lastSeen}` : ""}
                   </p>
@@ -182,7 +180,7 @@ export function ConnectedAgentsPanel({
             <button
               type="button"
               onClick={openDeviceStatus}
-              className="text-[11px] font-medium text-left py-0.5 cursor-pointer"
+              className="text-xs font-medium text-left py-1 cursor-pointer hover:underline"
               style={{ color: "#0097B2" }}
             >
               {t("moreOnline", { count: hiddenOnlineCount })}
@@ -196,30 +194,30 @@ export function ConnectedAgentsPanel({
   if (compact) {
     return (
       <div
-        className={`bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_rgba(166,166,166,0.25)] w-full p-3 ${className ?? ""}`}
+        className={`bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_rgba(166,166,166,0.25)] w-full p-5 ${className ?? ""}`}
       >
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <Monitor className="w-4 h-4 shrink-0" style={{ color: "#0097B2" }} />
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <Monitor className="w-5 h-5 shrink-0" style={{ color: "#0097B2" }} />
             <div className="min-w-0">
-              <h2 className="font-bold text-black text-sm leading-tight">{t("title")}</h2>
-              <p className="text-[11px] truncate leading-tight" style={{ color: "#64748B" }}>
+              <h2 className="font-bold text-black text-base">{t("title")}</h2>
+              <p className="text-sm truncate" style={{ color: "#64748B" }}>
                 {t("subtitle", { connected: summary.ONLINE, total: totalLinked })}
                 {!loading && (
-                  <span className="ml-1 font-medium" style={{ color: "#0097B2" }}>
+                  <span className="ml-1.5 font-semibold" style={{ color: "#0097B2" }}>
                     · {connectedPct}%
                   </span>
                 )}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             {onRefresh && (
               <button
                 type="button"
                 onClick={onRefresh}
                 disabled={loading}
-                className="inline-flex items-center justify-center w-7 h-7 rounded-md cursor-pointer disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center w-9 h-9 rounded-md cursor-pointer disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
                 style={{
                   border: "1px solid rgba(166,166,166,0.5)",
                   color: "#475569",
@@ -227,13 +225,13 @@ export function ConnectedAgentsPanel({
                 }}
                 aria-label={t("refresh")}
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
               </button>
             )}
             <button
               type="button"
               onClick={openDeviceStatus}
-              className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center px-3 py-2 rounded-md text-xs font-medium cursor-pointer whitespace-nowrap hover:opacity-90 transition-opacity"
               style={{ background: "#0097B2", color: "#FFFFFF" }}
             >
               {t("viewAll")}
@@ -241,9 +239,9 @@ export function ConnectedAgentsPanel({
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-3">
-          <div className="md:w-[42%] md:shrink-0">{renderStatusChips(true)}</div>
-          <div className="md:flex-1 md:min-w-0 md:border-l md:pl-3 border-[rgba(166,166,166,0.25)]">
+        <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-5">
+          <div className="md:w-[44%] md:shrink-0">{renderStatusChips(true)}</div>
+          <div className="md:flex-1 md:min-w-0 md:border-l md:pl-5 border-[rgba(166,166,166,0.25)]">
             {renderOnlineList(true)}
           </div>
         </div>
