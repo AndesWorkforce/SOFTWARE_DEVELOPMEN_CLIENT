@@ -99,12 +99,12 @@ export default function SuperAdminPage() {
   return (
     <div className="p-6 md:p-8 min-h-screen overflow-x-hidden" style={{ background: "#FFFFFF" }}>
       <div className="max-w-full overflow-x-hidden">
-        <h1 className="text-[24px] font-semibold text-black mb-6">
+        <h1 className="text-[24px] font-semibold text-black mb-5">
           {t("dashboard.title", { month: currentMonth }) || `${currentMonth} Summary`}
         </h1>
 
-        <div className="flex flex-col lg:flex-row gap-6 items-stretch">
-          <div className="w-full lg:flex-[1.81] lg:min-w-0 flex flex-col gap-6">
+        <div className="flex flex-col lg:flex-row gap-5 items-start">
+          <div className="w-full lg:flex-[1.81] lg:min-w-0 flex flex-col gap-4">
             <TalentPercentageChart
               activePercentage={talentData.active_percentage}
               inactivePercentage={talentData.inactive_percentage}
@@ -118,11 +118,10 @@ export default function SuperAdminPage() {
               role="super-admin"
               onRefresh={loadAgents}
               compact
-              className="flex-1"
             />
           </div>
 
-          <div className="w-full lg:flex-[1] lg:min-w-0 flex flex-col gap-6">
+          <div className="w-full lg:flex-[1] lg:min-w-0 flex flex-col gap-5">
             <TopEfficiency rankings={topRankings} loading={loading} />
             <LowPerformers rankings={worstRankings} loading={loading} />
           </div>
