@@ -93,7 +93,14 @@
       "onlineList": "En línea ahora",
       "noOnline": "No hay agentes en línea en este momento",
       "loading": "Cargando agentes...",
-      "moreOnline": "+{count} más en línea"
+      "moreOnline": "+{count} más en línea",
+      "statusShort": {
+        "online": "En línea",
+        "offline": "Apagado",
+        "suspended": "Suspendido",
+        "unknown": "Desconocido",
+        "disabled": "Deshabilitado"
+      }
     },
     "table": {
       "sessionId": "ID de Sesión",

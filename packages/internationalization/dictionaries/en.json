@@ -93,7 +93,14 @@
       "onlineList": "Online now",
       "noOnline": "No agents currently online",
       "loading": "Loading agents...",
-      "moreOnline": "+{count} more online"
+      "moreOnline": "+{count} more online",
+      "statusShort": {
+        "online": "Online",
+        "offline": "Offline",
+        "suspended": "Suspended",
+        "unknown": "Unknown",
+        "disabled": "Disabled"
+      }
     },
     "table": {
       "sessionId": "Session ID",
