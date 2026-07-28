@@ -84,6 +84,17 @@
     },
     "loading": "Cargando...",
     "noDataAvailable": "No hay datos disponibles",
+    "agentsConnectivity": {
+      "title": "Agentes conectados",
+      "subtitle": "{connected} de {total} agentes vinculados en línea",
+      "refresh": "Actualizar",
+      "viewAll": "Estado de equipos",
+      "connectedRate": "Tasa de conexión",
+      "onlineList": "En línea ahora",
+      "noOnline": "No hay agentes en línea en este momento",
+      "loading": "Cargando agentes...",
+      "moreOnline": "+{count} más en línea"
+    },
     "table": {
       "sessionId": "ID de Sesión",
       "startTime": "Hora de Inicio",
