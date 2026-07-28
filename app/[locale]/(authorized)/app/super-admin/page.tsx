@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { TalentPercentageChart, TopEfficiency, LowPerformers } from "@/packages/design-system";
+import {
+  TalentPercentageChart,
+  TopEfficiency,
+  LowPerformers,
+  ConnectedAgentsPanel,
+} from "@/packages/design-system";
 import { adtService } from "@/packages/api/adt/adt.service";
 import type { RealtimeMetrics } from "@/packages/api/adt/adt.service";
+import { AgentsService } from "@/packages/api/agents/agents.service";
+import type { Agent } from "@/packages/types/agents.types";
 
 type Period = "day" | "week" | "month";
 
@@ -13,12 +20,14 @@ interface TalentPercentageData {
   inactive_percentage: number;
 }
 
+const agentsService = new AgentsService();
+const AGENTS_REFRESH_MS = 60_000;
+
 export default function SuperAdminPage() {
   const t = useTranslations();
   const locale = useLocale();
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("day");
 
-  // Estados para los datos
   const [talentData, setTalentData] = useState<TalentPercentageData>({
     active_percentage: 0,
     inactive_percentage: 0,
@@ -27,18 +36,31 @@ export default function SuperAdminPage() {
   const [worstRankings, setWorstRankings] = useState<RealtimeMetrics[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Obtener el mes actual para el título
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agentsLoading, setAgentsLoading] = useState(true);
+
   const currentMonth = new Date().toLocaleString(locale === "es" ? "es-ES" : "en-US", {
     month: "long",
   });
 
-  // Cargar datos cuando cambia el período
+  const loadAgents = useCallback(async () => {
+    try {
+      setAgentsLoading(true);
+      const data = await agentsService.getAll();
+      setAgents(data);
+    } catch (error) {
+      console.error("Error loading agents connectivity:", error);
+      setAgents([]);
+    } finally {
+      setAgentsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
 
-        // Cargar todos los datos en paralelo
         const [talentPercentage, top5, worst5] = await Promise.all([
           adtService.getActiveTalentPercentage(selectedPeriod),
           adtService.getTopRanking(selectedPeriod, "best"),
@@ -53,7 +75,6 @@ export default function SuperAdminPage() {
         setWorstRankings(worst5);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
-        // Mantener valores por defecto en caso de error
         setTalentData({ active_percentage: 0, inactive_percentage: 100 });
         setTopRankings([]);
         setWorstRankings([]);
@@ -65,6 +86,12 @@ export default function SuperAdminPage() {
     loadData();
   }, [selectedPeriod]);
 
+  useEffect(() => {
+    loadAgents();
+    const interval = setInterval(loadAgents, AGENTS_REFRESH_MS);
+    return () => clearInterval(interval);
+  }, [loadAgents]);
+
   const handlePeriodChange = (period: Period) => {
     setSelectedPeriod(period);
   };
@@ -72,14 +99,11 @@ export default function SuperAdminPage() {
   return (
     <div className="p-8 min-h-screen overflow-x-hidden" style={{ background: "#FFFFFF" }}>
       <div className="max-w-full overflow-x-hidden">
-        {/* Título */}
         <h1 className="text-[24px] font-semibold text-black mb-[46px]">
           {t("dashboard.title", { month: currentMonth }) || `${currentMonth} Summary`}
         </h1>
 
-        {/* Layout principal: gráfico a la izquierda, rankings a la derecha */}
         <div className="flex flex-col lg:flex-row gap-[40px] items-start">
-          {/* Gráfico de porcentaje de talento */}
           <div className="w-full lg:flex-[1.81] lg:min-w-0">
             <TalentPercentageChart
               activePercentage={talentData.active_percentage}
@@ -90,11 +114,19 @@ export default function SuperAdminPage() {
             />
           </div>
 
-          {/* Paneles de rankings */}
           <div className="w-full lg:flex-[1] lg:min-w-0 flex flex-col gap-[40px]">
             <TopEfficiency rankings={topRankings} loading={loading} />
             <LowPerformers rankings={worstRankings} loading={loading} />
           </div>
+        </div>
+
+        <div className="mt-[40px]">
+          <ConnectedAgentsPanel
+            agents={agents}
+            loading={agentsLoading}
+            role="super-admin"
+            onRefresh={loadAgents}
+          />
         </div>
       </div>
     </div>
