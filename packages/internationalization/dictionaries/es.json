@@ -92,7 +92,8 @@
       "connectedRate": "Tasa de conexión",
       "onlineList": "En línea ahora",
       "noOnline": "No hay agentes en línea en este momento",
-      "loading": "Cargando agentes..."
+      "loading": "Cargando agentes...",
+      "moreOnline": "+{count} más en línea"
     },
     "table": {
       "sessionId": "ID de Sesión",

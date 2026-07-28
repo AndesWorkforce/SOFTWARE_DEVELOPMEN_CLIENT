@@ -92,7 +92,8 @@
       "connectedRate": "Connection rate",
       "onlineList": "Online now",
       "noOnline": "No agents currently online",
-      "loading": "Loading agents..."
+      "loading": "Loading agents...",
+      "moreOnline": "+{count} more online"
     },
     "table": {
       "sessionId": "Session ID",
