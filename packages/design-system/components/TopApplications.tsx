@@ -41,6 +41,11 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
     return "📱";
   };
 
+  // Ocultar apps con menos de 1 minuto (se mostrarían como 00h 00m)
+  const sortedAppUsage = [...(activity.metrics?.appUsage ?? [])]
+    .filter((app) => (app.seconds ?? 0) >= 60)
+    .sort((a, b) => (b.seconds ?? 0) - (a.seconds ?? 0));
+
   return (
     <div
       className="px-[17px] py-[28px] rounded-[5px]"
@@ -57,9 +62,9 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
           {t("modal.topApplications") || "Top Sites & Apps"}
         </h5>
         <div className="w-full max-h-[600px] overflow-y-auto">
-          {activity.metrics?.appUsage && activity.metrics.appUsage.length > 0 ? (
+          {sortedAppUsage.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-              {activity.metrics.appUsage.map((app, index) => (
+              {sortedAppUsage.map((app, index) => (
                 <div
                   key={index}
                   className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex flex-col gap-2 hover:bg-gray-100 transition-colors"
