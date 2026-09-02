@@ -707,45 +707,25 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
     return hourlySessionDurationByAgent[selectedAgentId] ?? [];
   }, [selectedAgentId, hourlySessionDuration, hourlySessionDurationByAgent]);
 
-  // Transformar datos de la API al formato esperado por el gráfico
-  const hourlyData = useMemo(() => {
-    console.log("📊 Datos originales del backend:", hourlySessionDurationForChart);
-
-    const transformed = hourlySessionDurationForChart.map((h, index) => {
-      const originalSeconds = h.avg_duration_seconds;
-      let durationInHours = Math.round((originalSeconds / 3600) * 100) / 100;
-
-      console.log(
-        `Hora ${h.hour_label}: ${originalSeconds}s = ${durationInHours}h ANTES de desacumular`,
-      );
-
-      // Si los datos vienen acumulativos, desacumular restando el valor anterior
-      // para mostrar solo la duración de cada hora específica
-      if (index > 0) {
-        const prevDurationInHours =
-          Math.round((hourlySessionDurationForChart[index - 1].avg_duration_seconds / 3600) * 100) /
-          100;
-        durationInHours = Math.max(0, durationInHours - prevDurationInHours);
-        console.log(`  → Después de desacumular: ${durationInHours}h`);
-      }
-
-      // Limitar a máximo 1 hora (60 minutos) por hora trabajada
-      const beforeLimit = durationInHours;
-      durationInHours = Math.min(1.0, durationInHours);
-      if (beforeLimit !== durationInHours) {
-        console.log(`  → Limitado de ${beforeLimit}h a ${durationInHours}h`);
-      }
-
-      return {
+  // Transformar datos de la API al formato esperado por el gráfico.
+  //
+  // `avg_duration_seconds` ya viene como tiempo monitoreado DENTRO de cada hora,
+  // asi que se dibuja directo. Antes se le restaba la hora anterior, asumiendo
+  // que el backend mandaba un acumulado: la serie no era monotona —caia cuando
+  // una sesion terminaba y arrancaba otra mas corta— y el `Math.max(0, ...)`
+  // convertia esas horas en cero. Sobre datos reales se perdian 4 de las 8 horas
+  // con datos. Tambien habia un techo de 1 h que tapaba que el backend podia
+  // devolver mas de 3600 s por hora; al acotar cada sesion a la ventana
+  // [h, h+1) eso ya no puede pasar.
+  const hourlyData = useMemo(
+    () =>
+      hourlySessionDurationForChart.map((h) => ({
         hour: h.hour_label,
         productivity: 0, // No se usa en el gráfico actual
-        duration: durationInHours,
-      };
-    });
-
-    console.log("📊 Datos transformados finales:", transformed);
-    return transformed;
-  }, [hourlySessionDurationForChart]);
+        duration: Math.round((h.avg_duration_seconds / 3600) * 100) / 100,
+      })),
+    [hourlySessionDurationForChart],
+  );
 
   // Consolidado: sessionsByDay (backend una fila por sesión). Por agente: datos cargados desde backend por agentId.
   const sessionsByDayFiltered = useMemo(() => {
