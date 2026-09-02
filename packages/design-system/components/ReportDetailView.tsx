@@ -101,9 +101,6 @@ function fillHourlyProductivityRange(
         days_with_data: 0,
         avg_productivity_score: 0,
         avg_active_percentage: 0,
-        avg_keyboard_mouse_score: 0,
-        avg_app_score: 0,
-        avg_browser_score: 0,
       });
     }
   }

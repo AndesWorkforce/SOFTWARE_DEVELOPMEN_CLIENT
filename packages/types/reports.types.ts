@@ -55,7 +55,9 @@ export interface ActivityDetail {
   type: "active" | "idle" | "break";
   duration: number; // minutes
   application?: string;
-  windowTitle?: string;
+  // `windowTitle` se elimino: el agente dejo de reportar titulos de ventana a
+  // proposito, porque usarlos como clave era la raiz del ruido en la atribucion
+  // de apps. El campo no se poblaba ni se renderizaba en ningun componente.
 }
 
 export interface ReportSummary {
