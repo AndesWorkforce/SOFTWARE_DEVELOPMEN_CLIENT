@@ -165,7 +165,11 @@ const SessionConnectivitySection = ({
         {hourlySessionDurationAgentLoading ? (
           <div className="flex items-center justify-center py-8 text-gray-500">{t("loading")}</div>
         ) : (
-          <ProductivityDurationChart key={selectedAgentId} hourlyData={hourlyData} />
+          <ProductivityDurationChart
+            key={selectedAgentId}
+            hourlyData={hourlyData}
+            seriesName={t("modal.monitoredTime") || "Tiempo monitoreado"}
+          />
         )}
       </div>
       <div className="w-full min-w-0">
@@ -742,14 +746,36 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
       (sum, s) => sum + (Number((s as ContractorSession).total_seconds) || 0),
       0,
     );
-    const totalProductivity = allSessions.reduce(
-      (sum, s) => sum + (Number((s as ContractorSession).productivity_score) || 0),
-      0,
-    );
+    // Promedio PONDERADO POR DURACION, no aritmetico simple.
+    //
+    // El promedio simple le daba el mismo peso a una sesion de 1 minuto que a
+    // una de 98, asi que esta tarjeta mostraba un numero distinto al de la lista
+    // de reportes, que usa el productivity_score del dia (calculado de una sola
+    // vez sobre todos los beats). Medido sobre un dia real con 8 sesiones de
+    // 1 a 98 minutos: promedio simple 70.12, ponderado 74.62, score diario 75.1.
+    // O sea que el simple se desviaba 5 puntos y el ponderado queda alineado.
+    //
+    // No coinciden EXACTO —y no pueden— porque el score diario no es un promedio
+    // de scores: la formula es multiplicativa y el denominador de calidad es de
+    // todo el dia, no por sesion. La diferencia queda por debajo de medio punto.
+    const weightedProductivity = allSessions.reduce((sum, s) => {
+      const session = s as ContractorSession;
+      const seconds = Number(session.total_seconds) || 0;
+      return sum + (Number(session.productivity_score) || 0) * seconds;
+    }, 0);
+
     return {
       sessionCount: count,
       avgDurationSeconds: totalSeconds / count,
-      avgProductivity: totalProductivity / count,
+      // Si todas las sesiones duran 0 s no hay con que ponderar: se cae al
+      // promedio simple antes que dividir por cero.
+      avgProductivity:
+        totalSeconds > 0
+          ? weightedProductivity / totalSeconds
+          : allSessions.reduce(
+              (sum, s) => sum + (Number((s as ContractorSession).productivity_score) || 0),
+              0,
+            ) / count,
     };
   }, [sessionsByDayFiltered]);
 

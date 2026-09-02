@@ -30,7 +30,21 @@ export interface UserActivity {
   };
   country: string;
   timeWorked: string; // "HH:MM:SS"
+  /**
+   * Porcentaje de ACTIVIDAD: beats activos / beats totales (`active_percentage`).
+   */
   activityPercentage: number; // 0-100
+  /**
+   * Score de PRODUCTIVIDAD: `S_active * S_quality / 100`, o sea actividad
+   * ponderada por el peso de las apps y dominios usados (`productivity_score`).
+   *
+   * Es una metrica DISTINTA de `activityPercentage` y suele ser menor: sobre un
+   * dia real, 96.7% de actividad daba 75.1 de productividad. Antes las dos
+   * viajaban en el mismo campo segun quien lo llenara —la lista ponia el score,
+   * el detalle la actividad— y eso hacia que la misma columna significara cosas
+   * distintas en cada vista.
+   */
+  productivityScore?: number; // 0-100
   date: string; // ISO date
   details: ActivityDetail[];
   // Métricas detalladas

@@ -71,7 +71,11 @@
       "productivityTrend": "Productivity Trend",
       "productivityTrendSubtitle": "Last 7 days",
       "recentSessions": "Recent Sessions",
-      "recentSessionsSubtitle": "Your latest activity sessions"
+      "recentSessionsSubtitle": "Your latest activity sessions",
+      "applications": "Applications",
+      "sites": "Sites",
+      "usageTime": "Usage time",
+      "monitoredTime": "Monitored time"
     },
     "topEfficiency": "Top Efficiency",
     "lowPerformers": "Low Performers",
@@ -328,7 +332,11 @@
       "avgKeyboardPerMin": "Avg. Keyboard/Min",
       "avgMousePerMin": "Avg. Mouse/Min",
       "effectiveWork": "Effective Work",
-      "productivityScore": "Productivity Score"
+      "productivityScore": "Productivity Score",
+      "applications": "Applications",
+      "sites": "Sites",
+      "usageTime": "Usage time",
+      "monitoredTime": "Monitored time"
     }
   },
   "sidebar": {

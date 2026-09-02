@@ -87,7 +87,11 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
       },
       country: metric.country || "N/A",
       timeWorked: formatSecondsToTime(metric.total_session_time_seconds),
-      activityPercentage: Math.round(metric.productivity_score),
+      // Esta vista muestra PRODUCTIVIDAD (la columna se titula "Productivity"),
+      // no actividad. Se completan los dos campos: el score para la columna y
+      // la actividad real por si algun consumidor la necesita.
+      productivityScore: Math.round(metric.productivity_score),
+      activityPercentage: Math.round(metric.active_percentage),
       date: metric.workday,
       details: [],
       metrics: {
@@ -571,10 +575,10 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
           align: "center",
         },
         {
-          key: "activityPercentage",
+          key: "productivityScore",
           title: "Productivity",
           translationKey: "reports.table.productivity",
-          dataPath: "activityPercentage",
+          dataPath: "productivityScore",
           type: "percentage",
           width: "100px",
           align: "center",
@@ -640,9 +644,9 @@ export function useReportsPage(role: Role): UseReportsPageReturn {
             dataPath: "timeWorked",
           },
           {
-            key: "activityPercentage",
+            key: "productivityScore",
             label: "Productivity",
-            dataPath: "activityPercentage",
+            dataPath: "productivityScore",
           },
         ],
         expandable: true,

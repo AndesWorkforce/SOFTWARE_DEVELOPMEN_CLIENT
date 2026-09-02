@@ -41,10 +41,19 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
     return "📱";
   };
 
-  // Ocultar apps con menos de 1 minuto (se mostrarían como 00h 00m)
+  // Ocultar entradas con menos de 1 minuto (se mostrarían como 00h 00m)
   const sortedAppUsage = [...(activity.metrics?.appUsage ?? [])]
     .filter((app) => (app.seconds ?? 0) >= 60)
     .sort((a, b) => (b.seconds ?? 0) - (a.seconds ?? 0));
+
+  // El titulo de la tarjeta es "Top Sites & Apps" pero solo se dibujaban las
+  // apps: `browserUsage` nunca se referenciaba, asi que los dominios visitados
+  // no aparecian en ningun lado de la vista.
+  const sortedBrowserUsage = [...(activity.metrics?.browserUsage ?? [])]
+    .filter((site) => (site.seconds ?? 0) >= 60)
+    .sort((a, b) => (b.seconds ?? 0) - (a.seconds ?? 0));
+
+  const hasAnyUsage = sortedAppUsage.length > 0 || sortedBrowserUsage.length > 0;
 
   return (
     <div
@@ -61,49 +70,84 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
         >
           {t("modal.topApplications") || "Top Sites & Apps"}
         </h5>
-        <div className="w-full max-h-[600px] overflow-y-auto">
-          {sortedAppUsage.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-              {sortedAppUsage.map((app, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex flex-col gap-2 hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <span className="text-2xl shrink-0">{getAppIcon(app.appName)}</span>
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className="text-[13px] font-medium leading-tight truncate"
-                          style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
-                          title={app.appName}
-                        >
-                          {app.appName}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-base shrink-0" title={app.category ?? "Sin clasificar"}>
+        <div className="w-full max-h-[420px] overflow-y-auto flex flex-col gap-4">
+          {sortedAppUsage.length > 0 && (
+            <div className="w-full">
+              <p
+                className="text-[12px] font-semibold uppercase tracking-wide mb-2"
+                style={{ color: "#6B7280", fontFamily: "Inter, sans-serif" }}
+              >
+                {t("modal.applications") || "Aplicaciones"}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 w-full">
+                {sortedAppUsage.map((app, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-50 border border-gray-200 rounded-md px-2.5 py-1.5 flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                  >
+                    <span className="text-base shrink-0 leading-none">
+                      {getAppIcon(app.appName)}
+                    </span>
+                    <p
+                      className="text-[12px] font-medium leading-tight truncate min-w-0 flex-1 mb-0"
+                      style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
+                      title={app.appName}
+                    >
+                      {app.appName}
+                    </p>
+                    <span
+                      className="text-[11px] shrink-0 leading-none"
+                      title={app.category ?? "Sin clasificar"}
+                    >
                       {getCategoryBadge(app.category).label}
                     </span>
-                  </div>
-                  <div className="flex items-center justify-between mt-1">
                     <span
-                      className="text-xs text-gray-500"
-                      style={{ fontFamily: "Inter, sans-serif" }}
-                    >
-                      Tiempo de uso
-                    </span>
-                    <span
-                      className="text-sm font-semibold"
+                      className="text-[12px] font-semibold shrink-0 tabular-nums"
                       style={{ color: "#0097B2", fontFamily: "Inter, sans-serif" }}
                     >
                       {formatSecondsToTime(app.seconds)}
                     </span>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          ) : (
+          )}
+
+          {sortedBrowserUsage.length > 0 && (
+            <div className="w-full">
+              <p
+                className="text-[12px] font-semibold uppercase tracking-wide mb-2"
+                style={{ color: "#6B7280", fontFamily: "Inter, sans-serif" }}
+              >
+                {t("modal.sites") || "Sitios"}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 w-full">
+                {sortedBrowserUsage.map((site, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-50 border border-gray-200 rounded-md px-2.5 py-1.5 flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                  >
+                    <span className="text-base shrink-0 leading-none">🌐</span>
+                    <p
+                      className="text-[12px] font-medium leading-tight truncate min-w-0 flex-1 mb-0"
+                      style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
+                      title={site.domain}
+                    >
+                      {site.domain}
+                    </p>
+                    <span
+                      className="text-[12px] font-semibold shrink-0 tabular-nums"
+                      style={{ color: "#0097B2", fontFamily: "Inter, sans-serif" }}
+                    >
+                      {formatSecondsToTime(site.seconds)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!hasAnyUsage && (
             <p
               className="text-[12px] text-center py-4 w-full"
               style={{ color: "#9CA3AF", fontFamily: "Inter, sans-serif" }}

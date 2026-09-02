@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import { NotebookTabs, Hourglass, Target } from "lucide-react";
+import { NotebookTabs, Hourglass, Target, Clock } from "lucide-react";
 import type { ContractorSession } from "@/packages/types/adt.types";
 
 export interface SessionSummaryTableProps {
@@ -18,12 +18,22 @@ export const SessionSummaryTable = ({ sessions }: SessionSummaryTableProps) => {
 
   const uniqueSessions = useMemo(() => {
     const seen = new Set<string>();
-    return sessions.filter((session) => {
+    const deduped = sessions.filter((session) => {
       const key = `${session.session_id}-${session.agent_id ?? ""}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
+
+    // Orden cronologico ASCENDENTE: la fila #1 es la PRIMERA sesion del dia.
+    // El backend las devuelve DESC (mas reciente primero), que sirve para un
+    // listado de "ultimas sesiones" pero no para una tabla numerada donde el
+    // indice se lee como el orden en que ocurrieron. Se ordena aca, en la capa
+    // de presentacion, para no cambiarle el contrato a otros consumidores del
+    // endpoint.
+    return deduped.sort(
+      (a, b) => new Date(a.session_start).getTime() - new Date(b.session_start).getTime(),
+    );
   }, [sessions]);
 
   const totals = useMemo(() => {
@@ -38,6 +48,8 @@ export const SessionSummaryTable = ({ sessions }: SessionSummaryTableProps) => {
 
     return {
       count,
+      // Suma de la duracion de todas las sesiones del dia.
+      totalDuration: formatSecondsToTime(totalSeconds),
       avgDuration: formatSecondsToTime(avgSeconds),
       avgProductivity: `${Math.round(avgProductivity)}%`,
     };
@@ -84,7 +96,7 @@ export const SessionSummaryTable = ({ sessions }: SessionSummaryTableProps) => {
         </table>
       </div>
 
-      <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-4 flex gap-10 items-center">
+      <div className="bg-white border border-[rgba(166,166,166,0.5)] rounded-[5px] p-4 flex flex-wrap gap-x-10 gap-y-4 items-center">
         <div className="flex items-center gap-3">
           <div className="bg-blue-50 p-2 rounded-lg">
             <NotebookTabs className="w-6 h-6 text-[#0097B2]" />
@@ -92,6 +104,15 @@ export const SessionSummaryTable = ({ sessions }: SessionSummaryTableProps) => {
           <div>
             <p className="text-[12px] text-[#6D6D6D]">Total Session</p>
             <p className="text-base font-semibold text-[#0097B2]">{totals.count}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-50 p-2 rounded-lg">
+            <Clock className="w-6 h-6 text-[#0097B2]" />
+          </div>
+          <div>
+            <p className="text-[12px] text-[#6D6D6D]">Total Duration</p>
+            <p className="text-base font-semibold text-[#0097B2]">{totals.totalDuration}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
