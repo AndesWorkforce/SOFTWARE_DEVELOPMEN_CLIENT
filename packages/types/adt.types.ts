@@ -84,9 +84,6 @@ export interface HourlyProductivity {
   days_with_data: number; // Cantidad de días con datos en esta hora
   avg_productivity_score: number; // 0-100
   avg_active_percentage: number; // 0-100
-  avg_keyboard_mouse_score: number; // 0-100
-  avg_app_score: number; // 0-100
-  avg_browser_score: number; // 0-100
 }
 
 /**

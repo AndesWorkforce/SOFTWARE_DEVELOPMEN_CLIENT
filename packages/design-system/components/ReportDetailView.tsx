@@ -101,9 +101,6 @@ function fillHourlyProductivityRange(
         days_with_data: 0,
         avg_productivity_score: 0,
         avg_active_percentage: 0,
-        avg_keyboard_mouse_score: 0,
-        avg_app_score: 0,
-        avg_browser_score: 0,
       });
     }
   }
@@ -168,7 +165,11 @@ const SessionConnectivitySection = ({
         {hourlySessionDurationAgentLoading ? (
           <div className="flex items-center justify-center py-8 text-gray-500">{t("loading")}</div>
         ) : (
-          <ProductivityDurationChart key={selectedAgentId} hourlyData={hourlyData} />
+          <ProductivityDurationChart
+            key={selectedAgentId}
+            hourlyData={hourlyData}
+            seriesName={t("modal.monitoredTime") || "Tiempo monitoreado"}
+          />
         )}
       </div>
       <div className="w-full min-w-0">
@@ -710,45 +711,25 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
     return hourlySessionDurationByAgent[selectedAgentId] ?? [];
   }, [selectedAgentId, hourlySessionDuration, hourlySessionDurationByAgent]);
 
-  // Transformar datos de la API al formato esperado por el gráfico
-  const hourlyData = useMemo(() => {
-    console.log("📊 Datos originales del backend:", hourlySessionDurationForChart);
-
-    const transformed = hourlySessionDurationForChart.map((h, index) => {
-      const originalSeconds = h.avg_duration_seconds;
-      let durationInHours = Math.round((originalSeconds / 3600) * 100) / 100;
-
-      console.log(
-        `Hora ${h.hour_label}: ${originalSeconds}s = ${durationInHours}h ANTES de desacumular`,
-      );
-
-      // Si los datos vienen acumulativos, desacumular restando el valor anterior
-      // para mostrar solo la duración de cada hora específica
-      if (index > 0) {
-        const prevDurationInHours =
-          Math.round((hourlySessionDurationForChart[index - 1].avg_duration_seconds / 3600) * 100) /
-          100;
-        durationInHours = Math.max(0, durationInHours - prevDurationInHours);
-        console.log(`  → Después de desacumular: ${durationInHours}h`);
-      }
-
-      // Limitar a máximo 1 hora (60 minutos) por hora trabajada
-      const beforeLimit = durationInHours;
-      durationInHours = Math.min(1.0, durationInHours);
-      if (beforeLimit !== durationInHours) {
-        console.log(`  → Limitado de ${beforeLimit}h a ${durationInHours}h`);
-      }
-
-      return {
+  // Transformar datos de la API al formato esperado por el gráfico.
+  //
+  // `avg_duration_seconds` ya viene como tiempo monitoreado DENTRO de cada hora,
+  // asi que se dibuja directo. Antes se le restaba la hora anterior, asumiendo
+  // que el backend mandaba un acumulado: la serie no era monotona —caia cuando
+  // una sesion terminaba y arrancaba otra mas corta— y el `Math.max(0, ...)`
+  // convertia esas horas en cero. Sobre datos reales se perdian 4 de las 8 horas
+  // con datos. Tambien habia un techo de 1 h que tapaba que el backend podia
+  // devolver mas de 3600 s por hora; al acotar cada sesion a la ventana
+  // [h, h+1) eso ya no puede pasar.
+  const hourlyData = useMemo(
+    () =>
+      hourlySessionDurationForChart.map((h) => ({
         hour: h.hour_label,
         productivity: 0, // No se usa en el gráfico actual
-        duration: durationInHours,
-      };
-    });
-
-    console.log("📊 Datos transformados finales:", transformed);
-    return transformed;
-  }, [hourlySessionDurationForChart]);
+        duration: Math.round((h.avg_duration_seconds / 3600) * 100) / 100,
+      })),
+    [hourlySessionDurationForChart],
+  );
 
   // Consolidado: sessionsByDay (backend una fila por sesión). Por agente: datos cargados desde backend por agentId.
   const sessionsByDayFiltered = useMemo(() => {
@@ -765,14 +746,36 @@ export function ReportDetailView({ contractorId, basePath }: ReportDetailViewPro
       (sum, s) => sum + (Number((s as ContractorSession).total_seconds) || 0),
       0,
     );
-    const totalProductivity = allSessions.reduce(
-      (sum, s) => sum + (Number((s as ContractorSession).productivity_score) || 0),
-      0,
-    );
+    // Promedio PONDERADO POR DURACION, no aritmetico simple.
+    //
+    // El promedio simple le daba el mismo peso a una sesion de 1 minuto que a
+    // una de 98, asi que esta tarjeta mostraba un numero distinto al de la lista
+    // de reportes, que usa el productivity_score del dia (calculado de una sola
+    // vez sobre todos los beats). Medido sobre un dia real con 8 sesiones de
+    // 1 a 98 minutos: promedio simple 70.12, ponderado 74.62, score diario 75.1.
+    // O sea que el simple se desviaba 5 puntos y el ponderado queda alineado.
+    //
+    // No coinciden EXACTO —y no pueden— porque el score diario no es un promedio
+    // de scores: la formula es multiplicativa y el denominador de calidad es de
+    // todo el dia, no por sesion. La diferencia queda por debajo de medio punto.
+    const weightedProductivity = allSessions.reduce((sum, s) => {
+      const session = s as ContractorSession;
+      const seconds = Number(session.total_seconds) || 0;
+      return sum + (Number(session.productivity_score) || 0) * seconds;
+    }, 0);
+
     return {
       sessionCount: count,
       avgDurationSeconds: totalSeconds / count,
-      avgProductivity: totalProductivity / count,
+      // Si todas las sesiones duran 0 s no hay con que ponderar: se cae al
+      // promedio simple antes que dividir por cero.
+      avgProductivity:
+        totalSeconds > 0
+          ? weightedProductivity / totalSeconds
+          : allSessions.reduce(
+              (sum, s) => sum + (Number((s as ContractorSession).productivity_score) || 0),
+              0,
+            ) / count,
     };
   }, [sessionsByDayFiltered]);
 

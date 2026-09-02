@@ -10,9 +10,24 @@ export interface ProductivityDurationChartProps {
     productivity: number;
     duration: number; // in hours (decimal)
   }>;
+  /**
+   * Nombre de la serie. Es configurable porque este componente sirve a dos
+   * metricas distintas y el rotulo fijo "Avg. Duration" describia solo una:
+   *
+   * - Vista de detalle: tiempo MONITOREADO dentro de cada hora (0 a 1 h). No es
+   *   un promedio. Con el rotulo viejo, una sesion de 12:07 a 13:02 hacia
+   *   esperar 55 min en la barra de las 13:00, cuando ahi solo caen los 2 min
+   *   posteriores a las 13:00; los otros 53 pertenecen a la barra de las 12:00.
+   * - Vista de grupo: `avg_duration_hours`, que si es una duracion promedio de
+   *   sesion por grupo.
+   */
+  seriesName?: string;
 }
 
-export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationChartProps) => {
+export const ProductivityDurationChart = ({
+  hourlyData,
+  seriesName = "Avg. Duration",
+}: ProductivityDurationChartProps) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -36,6 +51,13 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
     return `${mins}m`;
   };
 
+  const yAxisMax = useMemo(() => {
+    const maxValue = hourlyData.reduce((max, d) => Math.max(max, d.duration || 0), 0);
+    // Se redondea hacia arriba al cuarto de hora para que los ticks queden
+    // limpios (interval = max / 4).
+    return Math.max(1, Math.ceil(maxValue * 4) / 4);
+  }, [hourlyData]);
+
   const option = useMemo(() => {
     return {
       tooltip: {
@@ -57,7 +79,7 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
         },
       },
       legend: {
-        data: ["Avg. Duration"],
+        data: [seriesName],
         bottom: 0,
         icon: "roundRect",
       },
@@ -88,14 +110,21 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
         type: "value",
         name: "Duration (h)",
         min: 0,
-        max: 1,
-        interval: 0.25,
+        // El maximo se calcula del dato, no fijo en 1.
+        //
+        // Este componente sirve a dos fuentes con rangos distintos: en la vista
+        // de detalle son horas del dia, acotadas a 1 h por construccion; en la
+        // vista de grupo es `avg_duration_hours`, la duracion PROMEDIO de sesion,
+        // que pasa de 1 sin problema (medido: 1.57 h). Con `max: 1` fijo esas
+        // barras quedaban recortadas y el eje marcaba 60m para un promedio de
+        // 1 h 34 m, subestimando un 36%.
+        //
+        // El piso de 1 conserva la escala del grafico horario, donde el maximo
+        // real es exactamente 1.0.
+        max: yAxisMax,
+        interval: yAxisMax / 4,
         axisLabel: {
-          formatter: (value: number) => {
-            if (value === 0) return "0m";
-            if (value === 1) return "60m";
-            return `${Math.round(value * 60)}m`;
-          },
+          formatter: (value: number) => formatHoursToTime(value),
           color: "#000000",
           fontSize: 12,
         },
@@ -104,7 +133,7 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
       },
       series: [
         {
-          name: "Avg. Duration",
+          name: seriesName,
           type: "line",
           smooth: true,
           showSymbol: true,
@@ -129,7 +158,7 @@ export const ProductivityDurationChart = ({ hourlyData }: ProductivityDurationCh
         },
       ],
     };
-  }, [hourlyData, isMobile]);
+  }, [hourlyData, isMobile, yAxisMax, seriesName]);
 
   return (
     <div className="h-[300px] w-full min-w-0 overflow-hidden">

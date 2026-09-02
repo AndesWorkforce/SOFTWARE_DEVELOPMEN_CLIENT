@@ -611,15 +611,24 @@ export function GroupReportsView({
     const totalKeyboard = metrics.reduce((acc, m) => acc + m.total_keyboard_inputs, 0);
     const totalMouse = metrics.reduce((acc, m) => acc + m.total_mouse_clicks, 0);
 
-    const sortedByProductivity = [...metrics].sort(
-      (a, b) => b.productivity_score - a.productivity_score,
-    );
-    const mostActive = sortedByProductivity[0];
-    const leastActive = sortedByProductivity[sortedByProductivity.length - 1];
+    // Se ordena por ACTIVIDAD, no por productividad: la tarjeta se rotula
+    // "Contratista Mas Activo" / "Most Active Contractor". Son cosas distintas
+    // desde que productivity_score es S_active * S_quality / 100: un contratista
+    // puede estar activo el 90.8% del tiempo y quedar cuarto por score si usa
+    // apps de bajo peso. Antes se ordenaba por productivity_score y la tarjeta
+    // coronaba a alguien que no era el mas activo.
+    const sortedByActivity = [...metrics].sort((a, b) => b.active_percentage - a.active_percentage);
+    const mostActive = sortedByActivity[0];
+    const leastActive = sortedByActivity[sortedByActivity.length - 1];
 
     const totalSeconds = metrics.reduce((acc, m) => acc + m.total_session_time_seconds, 0);
     const totalActiveSeconds = metrics.reduce((acc, m) => acc + m.effective_work_seconds, 0);
-    const totalIdleSeconds = metrics.reduce((acc, m) => acc + m.idle_beats * 15, 0);
+    // El idle sale de la resta de los dos totales reales, no de idle_beats * 15.
+    // `beat_duration` es tiempo transcurrido, no 15 s fijos: medido, p50 15.1 s
+    // pero p90 26.6 s y maximo 135 s. Multiplicar por 15 subestimaba el idle.
+    // total_session_time_seconds y effective_work_seconds ya vienen sumados con
+    // el beat_duration real desde el ETL.
+    const totalIdleSeconds = Math.max(0, totalSeconds - totalActiveSeconds);
 
     const avgSeconds = totalSeconds / totalContractors;
     const avgActiveSeconds = totalActiveSeconds / totalContractors;
@@ -627,7 +636,6 @@ export function GroupReportsView({
 
     const clientsSet = new Set(metrics.map((m) => m.client_id).filter(Boolean));
     const teamsSet = new Set(metrics.map((m) => m.team_id).filter(Boolean));
-    const totalSessions = metrics.reduce((acc, m) => acc + m.total_beats / 4, 0);
 
     return {
       totalContractors,
@@ -642,7 +650,6 @@ export function GroupReportsView({
       avgIdleSeconds,
       totalClients: clientsSet.size,
       totalTeams: teamsSet.size,
-      totalSessions: Math.round(totalSessions),
     };
   }, [metrics]);
 
@@ -1125,12 +1132,6 @@ export function GroupReportsView({
                       {summaryMetrics?.totalTeams || 0}
                     </p>
                   </div>
-                  <div className="bg-white border border-[rgba(166,166,166,0.25)] rounded-[5px] p-[10px] flex-1 flex flex-col justify-center min-w-0">
-                    <p className="text-[10px] font-light text-black">{t("totalSessionCount")}</p>
-                    <p className="text-[20px] font-semibold text-[#0097B2]">
-                      {summaryMetrics?.totalSessions || 0}
-                    </p>
-                  </div>
                 </div>
                 <div className="w-full min-h-[280px] overflow-hidden">
                   <ProductivityDurationChart hourlyData={chartData} />
@@ -1413,12 +1414,6 @@ export function GroupReportsView({
                     <p className="text-[12px] font-light text-black">{t("totalTeams")}</p>
                     <p className="text-xl font-semibold text-[#0097B2]">
                       {summaryMetrics?.totalTeams || 0}
-                    </p>
-                  </div>
-                  <div className="bg-white border border-[rgba(166,166,166,0.25)] rounded-[5px] p-3 flex-1 flex flex-col justify-center">
-                    <p className="text-[12px] font-light text-black">{t("totalSessionCount")}</p>
-                    <p className="text-xl font-semibold text-[#0097B2]">
-                      {summaryMetrics?.totalSessions || 0}
                     </p>
                   </div>
                 </div>
