@@ -1,5 +1,6 @@
 "use client";
 import type { UserActivity } from "@/packages/types/reports.types";
+import { AppBrandIcon } from "./AppBrandIcon";
 
 export interface TopApplicationsProps {
   activity: UserActivity;
@@ -14,31 +15,12 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
   };
 
   const getCategoryBadge = (category?: string | null) => {
-    if (category === "productive") return { label: "✅", color: "#16a34a" };
-    if (category === "neutral") return { label: "⚪", color: "#6b7280" };
-    if (category === "non_productive") return { label: "❌", color: "#dc2626" };
-    return { label: "⚠️", color: "#d97706" };
-  };
-
-  // Get app icon based on app name
-  const getAppIcon = (appName: string) => {
-    const lowerName = appName.toLowerCase();
-    if (lowerName.includes("code") || lowerName.includes("vscode")) {
-      return "💻";
-    }
-    if (lowerName.includes("chrome") || lowerName.includes("browser")) {
-      return "🌐";
-    }
-    if (lowerName.includes("figma")) {
-      return "🎨";
-    }
-    if (lowerName.includes("slack")) {
-      return "💬";
-    }
-    if (lowerName.includes("teams")) {
-      return "📞";
-    }
-    return "📱";
+    if (category === "productive")
+      return { label: t("modal.productive") || "Productiva", color: "#16a34a" };
+    if (category === "neutral") return { label: t("modal.neutral") || "Neutral", color: "#6b7280" };
+    if (category === "non_productive")
+      return { label: t("modal.nonProductive") || "No productiva", color: "#dc2626" };
+    return { label: t("modal.unclassified") || "Sin clasificar", color: "#d97706" };
   };
 
   // Ocultar entradas con menos de 1 minuto (se mostrarían como 00h 00m)
@@ -70,45 +52,51 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
         >
           {t("modal.topApplications") || "Top Sites & Apps"}
         </h5>
-        <div className="w-full max-h-[420px] overflow-y-auto flex flex-col gap-4">
+        <div className="w-full max-h-[560px] overflow-y-auto flex flex-col gap-5">
           {sortedAppUsage.length > 0 && (
             <div className="w-full">
               <p
-                className="text-[12px] font-semibold uppercase tracking-wide mb-2"
+                className="text-[13px] font-semibold uppercase tracking-wide mb-3"
                 style={{ color: "#6B7280", fontFamily: "Inter, sans-serif" }}
               >
                 {t("modal.applications") || "Aplicaciones"}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 w-full">
-                {sortedAppUsage.map((app, index) => (
-                  <div
-                    key={index}
-                    className="bg-gray-50 border border-gray-200 rounded-md px-2.5 py-1.5 flex items-center gap-2 hover:bg-gray-100 transition-colors"
-                  >
-                    <span className="text-base shrink-0 leading-none">
-                      {getAppIcon(app.appName)}
-                    </span>
-                    <p
-                      className="text-[12px] font-medium leading-tight truncate min-w-0 flex-1 mb-0"
-                      style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
-                      title={app.appName}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 w-full">
+                {sortedAppUsage.map((app, index) => {
+                  const badge = getCategoryBadge(app.category);
+                  return (
+                    <div
+                      key={index}
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-3 flex items-center gap-3 hover:bg-gray-100 transition-colors"
                     >
-                      {app.appName}
-                    </p>
-                    <span
-                      className="text-[11px] shrink-0 leading-none"
-                      title={app.category ?? "Sin clasificar"}
-                    >
-                      {getCategoryBadge(app.category).label}
-                    </span>
-                    <span
-                      className="text-[12px] font-semibold shrink-0 tabular-nums"
-                      style={{ color: "#0097B2", fontFamily: "Inter, sans-serif" }}
-                    >
-                      {formatSecondsToTime(app.seconds)}
-                    </span>
-                  </div>
-                ))}
+                      <AppBrandIcon name={app.appName} size={36} />
+                      {/* min-w-0 en el contenedor Y en el <p>: sin eso el flex
+                          item no baja de su ancho de contenido y el truncate
+                          nunca se aplica, desbordando la tarjeta. */}
+                      <div className="flex flex-col min-w-0 flex-1 gap-0.5">
+                        <p
+                          className="text-[14px] font-semibold leading-tight truncate min-w-0 mb-0"
+                          style={{ color: "#111827", fontFamily: "Inter, sans-serif" }}
+                          title={app.appName}
+                        >
+                          {app.appName}
+                        </p>
+                        <span
+                          className="text-[11px] font-medium leading-none truncate"
+                          style={{ color: badge.color, fontFamily: "Inter, sans-serif" }}
+                        >
+                          {badge.label}
+                        </span>
+                      </div>
+                      <span
+                        className="text-[15px] font-bold shrink-0 tabular-nums"
+                        style={{ color: "#0097B2", fontFamily: "Inter, sans-serif" }}
+                      >
+                        {formatSecondsToTime(app.seconds)}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -116,27 +104,27 @@ export const TopApplications = ({ activity, t }: TopApplicationsProps) => {
           {sortedBrowserUsage.length > 0 && (
             <div className="w-full">
               <p
-                className="text-[12px] font-semibold uppercase tracking-wide mb-2"
+                className="text-[13px] font-semibold uppercase tracking-wide mb-3"
                 style={{ color: "#6B7280", fontFamily: "Inter, sans-serif" }}
               >
                 {t("modal.sites") || "Sitios"}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 w-full">
                 {sortedBrowserUsage.map((site, index) => (
                   <div
                     key={index}
-                    className="bg-gray-50 border border-gray-200 rounded-md px-2.5 py-1.5 flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                    className="bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-3 flex items-center gap-3 hover:bg-gray-100 transition-colors"
                   >
-                    <span className="text-base shrink-0 leading-none">🌐</span>
+                    <AppBrandIcon name={site.domain} size={36} kind="domain" />
                     <p
-                      className="text-[12px] font-medium leading-tight truncate min-w-0 flex-1 mb-0"
-                      style={{ color: "#000000", fontFamily: "Inter, sans-serif" }}
+                      className="text-[14px] font-semibold leading-tight truncate min-w-0 flex-1 mb-0"
+                      style={{ color: "#111827", fontFamily: "Inter, sans-serif" }}
                       title={site.domain}
                     >
                       {site.domain}
                     </p>
                     <span
-                      className="text-[12px] font-semibold shrink-0 tabular-nums"
+                      className="text-[15px] font-bold shrink-0 tabular-nums"
                       style={{ color: "#0097B2", fontFamily: "Inter, sans-serif" }}
                     >
                       {formatSecondsToTime(site.seconds)}

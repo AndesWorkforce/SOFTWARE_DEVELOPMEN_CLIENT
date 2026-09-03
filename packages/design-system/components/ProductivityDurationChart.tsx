@@ -4,6 +4,24 @@ import { useMemo, useState, useEffect } from "react";
 
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
+/**
+ * Rango que abarca un bucket horario, para el tooltip.
+ *
+ * Una etiqueta "08:00" no significa "a las 8 en punto" sino "entre 08:00 y
+ * 09:00". Mostrar el rango completo evita la lectura de que la actividad
+ * ocurrio en ese instante. Devuelve null si la etiqueta no es una hora: este
+ * componente tambien sirve a la vista de grupo, donde las etiquetas son nombres
+ * de equipo.
+ */
+function bucketRangeLabel(label: string): string | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(label.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  if (!Number.isInteger(h) || h < 0 || h > 23) return null;
+  const next = (h + 1) % 24;
+  return `${String(h).padStart(2, "0")}:${m[2]} - ${String(next).padStart(2, "0")}:${m[2]}`;
+}
+
 export interface ProductivityDurationChartProps {
   hourlyData: Array<{
     hour: string;
@@ -73,7 +91,8 @@ export const ProductivityDurationChart = ({
             "value" in param
           ) {
             const value = typeof param.value === "number" ? param.value : 0;
-            return `${String(param.name)}<br/>${String(param.seriesName)}: ${formatHoursToTime(value)}`;
+            const label = bucketRangeLabel(String(param.name)) ?? String(param.name);
+            return `${label}<br/>${String(param.seriesName)}: ${formatHoursToTime(value)}`;
           }
           return "";
         },
@@ -92,7 +111,10 @@ export const ProductivityDurationChart = ({
       },
       xAxis: {
         type: "category",
-        boundaryGap: false,
+        // true: cada barra ocupa el ancho de su intervalo. Con false quedaban
+        // centradas sobre la marca del eje, reforzando la lectura de "a las
+        // 08:00" en lugar de "entre 08:00 y 09:00".
+        boundaryGap: true,
         data: hourlyData.map((d) => d.hour),
         axisLine: { lineStyle: { color: "#E5E5E5" } },
         axisLabel: {
@@ -134,15 +156,16 @@ export const ProductivityDurationChart = ({
       series: [
         {
           name: seriesName,
-          type: "line",
-          smooth: true,
-          showSymbol: true,
-          symbol: "circle",
-          symbolSize: 8,
+          // Barras y no linea: el dato es una cantidad POR BUCKET, no una
+          // serie continua. Con `smooth: true` la curva interpolaba entre horas
+          // e inventaba actividad donde no la hubo: una jornada que arrancaba
+          // 08:26 dibujaba la subida desde las 07:00, sugiriendo un comienzo
+          // a las 7:26. Una barra ocupa su hora y no afirma nada fuera de ella.
+          type: "bar",
+          barMaxWidth: 28,
           data: hourlyData.map((d) => d.duration),
-          itemStyle: { color: "#0097B2" },
-          lineStyle: { width: 2, color: "#0097B2" },
-          areaStyle: {
+          itemStyle: {
+            borderRadius: [3, 3, 0, 0],
             color: {
               type: "linear",
               x: 0,
@@ -150,8 +173,8 @@ export const ProductivityDurationChart = ({
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: "rgba(0, 151, 178, 0.4)" },
-                { offset: 1, color: "rgba(0, 151, 178, 0.05)" },
+                { offset: 0, color: "#0097B2" },
+                { offset: 1, color: "rgba(0, 151, 178, 0.45)" },
               ],
             },
           },

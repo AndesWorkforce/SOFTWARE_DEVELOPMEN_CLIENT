@@ -1,19 +1,13 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Bot } from "lucide-react";
+import { Bot, Trash2 } from "lucide-react";
 
-import { Button, DataTable, Modal, SearchableSelect } from "../../design-system";
+import { Button, ContractorSearch, DataTable, Modal, SearchableSelect } from "../../design-system";
 import type { DataTableConfig } from "../../design-system";
-import { AppAssignmentView } from "./AppAssignmentView";
-import { AppManagementView } from "./AppManagementView";
-import { DomainAssignmentView } from "./DomainAssignmentView";
-import { UrlManagementView } from "./UrlManagementView";
 import { AgentsService } from "../../api/agents/agents.service";
-import { ApplicationsService } from "../../api/applications/applications.service";
 import { ContractorsService } from "../../api/contractors/contractors.service";
 import type { Agent } from "../../types/agents.types";
-import type { Application } from "../../types/applications.types";
 import type { Contractor } from "../../types/contractors.types";
 import {
   resolveDeviceStatus,
@@ -25,10 +19,7 @@ export interface AgentsManagementViewProps {
   role: "super-admin" | "admin";
 }
 
-type Tab = "unlinked" | "applications" | "assign" | "urls" | "domains";
-
 const agentsService = new AgentsService();
-const applicationsService = new ApplicationsService();
 const contractorsService = new ContractorsService();
 
 export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
@@ -37,13 +28,16 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
 
   const canLink = role === "super-admin" || role === "admin";
 
-  const [activeTab, setActiveTab] = useState<Tab>("unlinked");
   const [unlinkedAgents, setUnlinkedAgents] = useState<Agent[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [search, setSearch] = useState("");
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [loadingAgents, setLoadingAgents] = useState(false);
-  const [loadingApps, setLoadingApps] = useState(false);
   const [agentsError, setAgentsError] = useState<string | null>(null);
+
+  // Borrado de agentes sin vincular
+  const [agentToDelete, setAgentToDelete] = useState<Agent | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Link modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,17 +62,6 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
   useEffect(() => {
     loadUnlinkedAgents();
   }, [loadUnlinkedAgents]);
-
-  useEffect(() => {
-    if (activeTab === "applications" && applications.length === 0) {
-      setLoadingApps(true);
-      applicationsService
-        .getAll()
-        .then(setApplications)
-        .catch(() => setApplications([]))
-        .finally(() => setLoadingApps(false));
-    }
-  }, [activeTab, applications.length]);
 
   const openLinkModal = useCallback(
     async (agent: Agent) => {
@@ -109,6 +92,42 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
       setLinkError(t("link.errorMessage"));
     } finally {
       setLinking(false);
+    }
+  };
+
+  /**
+   * Un agente sin vincular todavia no tiene contratista, asi que lo unico que
+   * lo identifica es su equipo, su clave de activacion o su tipo. Se busca
+   * sobre los tres: la clave es lo que le pasan a soporte cuando piden
+   * vincular un equipo, y el hostname lo que ve la persona en su maquina.
+   */
+  const visibleAgents = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return unlinkedAgents;
+    return unlinkedAgents.filter((agent) =>
+      `${agent.hostname ?? ""} ${agent.activation_key ?? ""} ${agent.type}`
+        .toLowerCase()
+        .includes(term),
+    );
+  }, [unlinkedAgents, search]);
+
+  /**
+   * El backend solo permite borrar agentes SIN vincular y sin sesiones; si
+   * rechaza, se muestra su mensaje en vez de uno genérico, porque distingue
+   * entre "esta vinculado" y "tiene historial".
+   */
+  const handleDelete = async () => {
+    if (!agentToDelete) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await agentsService.remove(agentToDelete.id);
+      setUnlinkedAgents((prev) => prev.filter((a) => a.id !== agentToDelete.id));
+      setAgentToDelete(null);
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : t("delete.errorMessage"));
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -201,9 +220,24 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
         align: "center",
         render: (_value, row) =>
           canLink ? (
-            <Button size="sm" variant="outline" onClick={() => openLinkModal(row)}>
-              {t("link.button")}
-            </Button>
+            <div className="flex items-center justify-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => openLinkModal(row)}>
+                {t("link.button")}
+              </Button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteError(null);
+                  setAgentToDelete(row);
+                }}
+                title={t("delete.button")}
+                aria-label={t("delete.button")}
+                className="p-1.5 rounded-md transition-colors cursor-pointer hover:bg-[#FEE2E2]"
+                style={{ color: "#DC2626" }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
           ) : null,
       },
     ],
@@ -211,7 +245,11 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
     striped: true,
     evenRowColor: "#E2E2E2",
     oddRowColor: "#FFFFFF",
-    emptyState: { message: t("noAgents"), icon: <Bot className="w-8 h-8" /> },
+    emptyState: {
+      // Distingue "no hay agentes sin vincular" de "la busqueda no encontro".
+      message: search.trim() ? t("search.noResults", { term: search.trim() }) : t("noAgents"),
+      icon: <Bot className="w-8 h-8" />,
+    },
     styles: {
       table: {
         border: "1px solid #E2E2E2",
@@ -252,72 +290,6 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
     },
   };
 
-  const appsTableConfig: DataTableConfig<Application> = {
-    columns: [
-      {
-        key: "name",
-        title: t("appsTable.name"),
-        dataPath: "name",
-        type: "text",
-        minWidth: "200px",
-      },
-      {
-        key: "type",
-        title: t("appsTable.type"),
-        dataPath: "type",
-        type: "badge",
-        minWidth: "120px",
-      },
-      {
-        key: "category",
-        title: t("appsTable.category"),
-        dataPath: "category",
-        type: "text",
-        minWidth: "130px",
-      },
-      {
-        key: "weight",
-        title: t("appsTable.weight"),
-        dataPath: "weight",
-        type: "number",
-        minWidth: "80px",
-        align: "right",
-      },
-    ],
-    rowKey: "id",
-    striped: true,
-    evenRowColor: "#E2E2E2",
-    oddRowColor: "#FFFFFF",
-    emptyState: { message: t("noApps") },
-    styles: {
-      table: {
-        border: "1px solid #E2E2E2",
-        boxShadow: "0px 4px 4px rgba(166,166,166,0.25)",
-        borderRadius: "8px",
-      },
-      cell: { paddingTop: "12px", paddingBottom: "12px" },
-    },
-    mobileConfig: {
-      primaryFields: [
-        { key: "name", label: t("appsTable.name"), dataPath: "name" },
-        { key: "type", label: t("appsTable.type"), dataPath: "type" },
-      ],
-      expandedFields: [
-        {
-          key: "category",
-          label: t("appsTable.category"),
-          dataPath: "category",
-        },
-        {
-          key: "weight",
-          label: t("appsTable.weight"),
-          dataPath: "weight",
-        },
-      ],
-      expandable: true,
-    },
-  };
-
   const contractorSelectOptions = contractors.map((c) => ({
     value: c.id,
     label: c.name,
@@ -329,94 +301,28 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
         {t("title")}
       </h1>
 
-      {/* Tabs */}
-      <div className="flex gap-0 mb-6" style={{ borderBottom: "1px solid #E5E5E5" }}>
-        <button
-          className="px-5 py-2.5 text-sm font-medium transition-colors"
-          style={{
-            color: activeTab === "unlinked" ? "#0097B2" : "#6B7280",
-            borderBottom: activeTab === "unlinked" ? "2px solid #0097B2" : "2px solid transparent",
-          }}
-          onClick={() => setActiveTab("unlinked")}
-        >
-          {t("tabs.unlinked")}
-          {unlinkedAgents.length > 0 && (
-            <span
-              className="ml-2 text-xs rounded-full px-2 py-0.5 font-medium"
-              style={{ background: "#0097B2", color: "#FFFFFF" }}
-            >
-              {unlinkedAgents.length}
-            </span>
-          )}
-        </button>
-        <button
-          className="px-5 py-2.5 text-sm font-medium transition-colors"
-          style={{
-            color: activeTab === "applications" ? "#0097B2" : "#6B7280",
-            borderBottom:
-              activeTab === "applications" ? "2px solid #0097B2" : "2px solid transparent",
-          }}
-          onClick={() => setActiveTab("applications")}
-        >
-          {t("tabs.applications")}
-        </button>
-        <button
-          className="px-5 py-2.5 text-sm font-medium transition-colors"
-          style={{
-            color: activeTab === "assign" ? "#0097B2" : "#6B7280",
-            borderBottom: activeTab === "assign" ? "2px solid #0097B2" : "2px solid transparent",
-          }}
-          onClick={() => setActiveTab("assign")}
-        >
-          {t("tabs.assign")}
-        </button>
-        <button
-          className="px-5 py-2.5 text-sm font-medium transition-colors"
-          style={{
-            color: activeTab === "urls" ? "#0097B2" : "#6B7280",
-            borderBottom: activeTab === "urls" ? "2px solid #0097B2" : "2px solid transparent",
-          }}
-          onClick={() => setActiveTab("urls")}
-        >
-          {t("tabs.urls")}
-        </button>
-        <button
-          className="px-5 py-2.5 text-sm font-medium transition-colors"
-          style={{
-            color: activeTab === "domains" ? "#0097B2" : "#6B7280",
-            borderBottom: activeTab === "domains" ? "2px solid #0097B2" : "2px solid transparent",
-          }}
-          onClick={() => setActiveTab("domains")}
-        >
-          {t("tabs.domains")}
-        </button>
+      <div className="mb-4 max-w-[420px]">
+        <ContractorSearch
+          value={search}
+          onChange={setSearch}
+          label={t("search.label")}
+          placeholder={t("search.placeholder")}
+          aria-label={t("search.label")}
+        />
       </div>
 
-      {/* Table content */}
-      {activeTab === "unlinked" && (
-        <>
-          {agentsError && (
-            <div
-              className="flex items-center justify-between mb-4 px-4 py-3 rounded-lg text-sm"
-              style={{ background: "#FEE2E2", color: "#991B1B", border: "1px solid #FECACA" }}
-            >
-              <span>⚠️ {agentsError}</span>
-              <Button size="sm" variant="outline" onClick={loadUnlinkedAgents}>
-                {t("retry")}
-              </Button>
-            </div>
-          )}
-          <DataTable config={agentsTableConfig} data={unlinkedAgents} loading={loadingAgents} />
-        </>
+      {agentsError && (
+        <div
+          className="flex items-center justify-between mb-4 px-4 py-3 rounded-lg text-sm"
+          style={{ background: "#FEE2E2", color: "#991B1B", border: "1px solid #FECACA" }}
+        >
+          <span>⚠️ {agentsError}</span>
+          <Button size="sm" variant="outline" onClick={loadUnlinkedAgents}>
+            {t("retry")}
+          </Button>
+        </div>
       )}
-
-      {activeTab === "applications" && <AppManagementView role={role} />}
-
-      {activeTab === "assign" && <AppAssignmentView role={role} />}
-
-      {activeTab === "urls" && <UrlManagementView role={role} />}
-
-      {activeTab === "domains" && <DomainAssignmentView role={role} />}
+      <DataTable config={agentsTableConfig} data={visibleAgents} loading={loadingAgents} />
 
       {/* Link to Contractor Modal */}
       <Modal
@@ -467,6 +373,52 @@ export const AgentsManagementView = ({ role }: AgentsManagementViewProps) => {
               loading={linking}
             >
               {t("link.confirm")}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Confirmacion de borrado: la operacion es irreversible, asi que no se
+          dispara directo desde el icono. */}
+      <Modal
+        isOpen={agentToDelete !== null}
+        onClose={() => !deleting && setAgentToDelete(null)}
+        title={t("delete.title")}
+        size="sm"
+      >
+        <div className="space-y-4 p-1">
+          <p className="text-sm" style={{ color: "#334155" }}>
+            {t("delete.description", {
+              hostname: agentToDelete?.hostname ?? t("delete.unknownHostname"),
+            })}
+          </p>
+
+          {deleteError && (
+            <div
+              className="px-3 py-2 rounded-lg text-sm"
+              style={{ background: "#FEE2E2", color: "#991B1B", border: "1px solid #FECACA" }}
+            >
+              {deleteError}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAgentToDelete(null)}
+              disabled={deleting}
+            >
+              {t("delete.cancel")}
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleDelete}
+              disabled={deleting}
+              loading={deleting}
+              style={{ background: "#DC2626", borderColor: "#DC2626" }}
+            >
+              {t("delete.confirm")}
             </Button>
           </div>
         </div>

@@ -3,7 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Clock, CircleCheck } from "lucide-react";
-import { FormModal, Button, COUNTRY_OPTIONS } from "@/packages/design-system";
+import {
+  FormModal,
+  Button,
+  FormField,
+  HostnameInput,
+  COUNTRY_OPTIONS,
+} from "@/packages/design-system";
 import type { FormModalConfig } from "@/packages/types/FormModal.types";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
 import { clientsService } from "@/packages/api/clients/clients.service";
@@ -65,6 +71,7 @@ export function EditContractorModal({
           lunch_end:
             contractor.lunch_end ||
             (contractor.lunch_start ? addOneHour(contractor.lunch_start) : ""),
+          hostnames: contractor.hostnames ?? [],
         });
 
         setClients(
@@ -207,6 +214,29 @@ export function EditContractorModal({
           icon: <Clock className="w-6 h-6" />,
           disabled: true,
         },
+        {
+          // FormModal no soporta listas de valores, asi que el campo es custom.
+          // Va ultimo y a ancho completo: el layout arma filas de a dos y con un
+          // numero impar de campos este queda solo en la ultima fila.
+          key: "hostnames",
+          type: "custom",
+          label: t("hostnames") || "Computers",
+          width: "w-full",
+          render: (value, onChange) => (
+            <FormField label={t("hostnames") || "Computers"}>
+              <HostnameInput
+                value={Array.isArray(value) ? (value as string[]) : []}
+                onChange={(next) => onChange(next)}
+                placeholder={t("hostnamesPlaceholder")}
+                hint={t("hostnamesHint")}
+                duplicateMessage={t("hostnameDuplicate")}
+                invalidMessage={t("hostnameInvalid")}
+                tooLongMessage={t("hostnameTooLong")}
+                aria-label={t("hostnames") || "Computers"}
+              />
+            </FormField>
+          ),
+        },
       ],
       buttons: [
         {
@@ -243,6 +273,11 @@ export function EditContractorModal({
         if (typeof values.team_id === "string" && values.team_id.trim()) {
           payload.team_id = values.team_id.trim();
         }
+
+        // Se manda siempre, incluso vacía: para el backend `[]` significa
+        // "desasignar todos los equipos" y omitir la clave "dejarlos como
+        // están", y borrar el último equipo tiene que poder guardarse.
+        payload.hostnames = Array.isArray(values.hostnames) ? values.hostnames : [];
 
         return payload;
       },

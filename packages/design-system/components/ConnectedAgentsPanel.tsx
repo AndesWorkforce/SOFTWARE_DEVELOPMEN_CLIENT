@@ -22,7 +22,12 @@ export interface ConnectedAgentsPanelProps {
   compact?: boolean;
 }
 
-const STATUS_ORDER: DeviceStatus[] = ["ONLINE", "OFFLINE", "SUSPENDED", "UNKNOWN", "DISABLED"];
+/**
+ * DISABLED queda afuera a proposito: `findAll` en USER_MS ya no devuelve
+ * agentes deshabilitados, asi que ese contador marcaria siempre 0. Se mantiene
+ * en el Record de labels de abajo porque el tipo `DeviceStatus` lo incluye.
+ */
+const STATUS_ORDER: DeviceStatus[] = ["ONLINE", "OFFLINE", "SUSPENDED", "UNKNOWN"];
 
 const COMPACT_STATUS_LABEL_KEYS: Record<DeviceStatus, string> = {
   ONLINE: "statusShort.online",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
   TalentPercentageChart,
@@ -12,8 +12,7 @@ import { adtService } from "@/packages/api/adt/adt.service";
 import type { RealtimeMetrics } from "@/packages/api/adt/adt.service";
 import { AgentsService } from "@/packages/api/agents/agents.service";
 import type { Agent } from "@/packages/types/agents.types";
-
-type Period = "day" | "week" | "month";
+import { resolveDeviceStatus } from "@/packages/utils/device-status.utils";
 
 interface TalentPercentageData {
   active_percentage: number;
@@ -26,12 +25,6 @@ const AGENTS_REFRESH_MS = 60_000;
 export default function SuperAdminPage() {
   const t = useTranslations();
   const locale = useLocale();
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>("day");
-
-  const [talentData, setTalentData] = useState<TalentPercentageData>({
-    active_percentage: 0,
-    inactive_percentage: 0,
-  });
   const [topRankings, setTopRankings] = useState<RealtimeMetrics[]>([]);
   const [worstRankings, setWorstRankings] = useState<RealtimeMetrics[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,21 +54,16 @@ export default function SuperAdminPage() {
       try {
         setLoading(true);
 
-        const [talentPercentage, top5, worst5] = await Promise.all([
-          adtService.getActiveTalentPercentage(selectedPeriod),
-          adtService.getTopRanking(selectedPeriod, "best"),
-          adtService.getTopRanking(selectedPeriod, "worst"),
+        // Fijo en "day": el panel muestra solo el dia de hoy.
+        const [top5, worst5] = await Promise.all([
+          adtService.getTopRanking("day", "best"),
+          adtService.getTopRanking("day", "worst"),
         ]);
 
-        setTalentData({
-          active_percentage: talentPercentage.active_percentage,
-          inactive_percentage: talentPercentage.inactive_percentage,
-        });
         setTopRankings(top5);
         setWorstRankings(worst5);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
-        setTalentData({ active_percentage: 0, inactive_percentage: 100 });
         setTopRankings([]);
         setWorstRankings([]);
       } finally {
@@ -84,7 +72,7 @@ export default function SuperAdminPage() {
     };
 
     loadData();
-  }, [selectedPeriod]);
+  }, []);
 
   useEffect(() => {
     loadAgents();
@@ -92,9 +80,35 @@ export default function SuperAdminPage() {
     return () => clearInterval(interval);
   }, [loadAgents]);
 
-  const handlePeriodChange = (period: Period) => {
-    setSelectedPeriod(period);
-  };
+  /**
+   * Talento activo = agentes VINCULADOS que estan EN LINEA, sobre el total de
+   * vinculados.
+   *
+   * Antes venia de `adtService.getActiveTalentPercentage()`, que contaba
+   * CONTRATISTAS con beats en el periodo sobre el total de
+   * `contractor_info_raw`. Ese denominador incluye contratistas que ni siquiera
+   * tienen agente instalado, asi que el porcentaje medía cobertura de
+   * despliegue, no actividad: al instalar agentes nuevos el numero subia sin
+   * que nadie trabajara mas, y al dar de alta un contratista bajaba sin que
+   * nadie trabajara menos.
+   *
+   * Se calcula acá y no en el backend porque la pagina ya tiene los agentes
+   * cargados para el panel de conectividad, que aplica exactamente el mismo
+   * criterio. Tenerlo en un solo lugar evita que las dos tarjetas se
+   * contradigan.
+   */
+  const talentData: TalentPercentageData = useMemo(() => {
+    const linked = agents.filter((agent) => agent.contractor_id != null);
+    if (linked.length === 0) {
+      return { active_percentage: 0, inactive_percentage: 100 };
+    }
+    const online = linked.filter((agent) => resolveDeviceStatus(agent) === "ONLINE").length;
+    const active = Math.round((online / linked.length) * 100 * 100) / 100;
+    return {
+      active_percentage: active,
+      inactive_percentage: Math.round((100 - active) * 100) / 100,
+    };
+  }, [agents]);
 
   return (
     <div className="p-6 md:p-8 min-h-screen overflow-x-hidden" style={{ background: "#FFFFFF" }}>
@@ -108,9 +122,7 @@ export default function SuperAdminPage() {
             <TalentPercentageChart
               activePercentage={talentData.active_percentage}
               inactivePercentage={talentData.inactive_percentage}
-              loading={loading}
-              period={selectedPeriod}
-              onPeriodChange={handlePeriodChange}
+              loading={agentsLoading}
             />
             <ConnectedAgentsPanel
               agents={agents}
