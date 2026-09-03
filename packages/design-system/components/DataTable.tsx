@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { Fragment, useMemo, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { ColumnConfig, DataTableProps, MobileCardConfig } from "../../types/DataTable.types";
@@ -270,40 +270,88 @@ export function DataTable<T = Record<string, unknown>>({
                     : ((row as Record<string, unknown>)[config.rowKey || "id"] as string) ||
                       String(index);
                 const isEvenRow = config.striped && index % 2 === 1;
+                const expandCfg = config.expandableRows;
+                const canExpand = expandCfg ? (expandCfg.isExpandable?.(row) ?? true) : false;
+                const isRowExpanded = canExpand && expandedRows.has(rowKey);
+
+                const toggleExpanded = () => {
+                  const next = new Set(expandedRows);
+                  if (next.has(rowKey)) next.delete(rowKey);
+                  else next.add(rowKey);
+                  setExpandedRows(next);
+                };
+
+                const rowBackground = isEvenRow
+                  ? config.evenRowColor || "#E2E2E2"
+                  : config.oddRowColor || "#FFFFFF";
 
                 return (
-                  <tr
-                    key={rowKey}
-                    style={{
-                      background: isEvenRow
-                        ? config.evenRowColor || "#E2E2E2"
-                        : config.oddRowColor || "#FFFFFF",
-                      ...config.styles?.row,
-                    }}
-                    onClick={() => onRowClick?.(row)}
-                    className={onRowClick ? "cursor-pointer" : ""}
-                  >
-                    {visibleColumns.map((column) => (
-                      <td
-                        key={column.key}
-                        className={`px-6 py-4 whitespace-nowrap text-base text-black ${
-                          column.align === "left"
-                            ? "text-left"
-                            : column.align === "right"
-                              ? "text-right"
-                              : "text-center"
-                        }`}
-                        style={{
-                          width: column.width,
-                          minWidth: column.minWidth,
-                          textAlign: column.align || "center",
-                          ...config.styles?.cell,
-                        }}
-                      >
-                        {renderCell(column, row, index)}
-                      </td>
-                    ))}
-                  </tr>
+                  <Fragment key={rowKey}>
+                    <tr
+                      style={{ background: rowBackground, ...config.styles?.row }}
+                      onClick={() => {
+                        if (canExpand) toggleExpanded();
+                        onRowClick?.(row);
+                      }}
+                      className={onRowClick || canExpand ? "cursor-pointer" : ""}
+                    >
+                      {visibleColumns.map((column, colIndex) => (
+                        <td
+                          key={column.key}
+                          className={`px-6 py-4 whitespace-nowrap text-base text-black ${
+                            column.align === "left"
+                              ? "text-left"
+                              : column.align === "right"
+                                ? "text-right"
+                                : "text-center"
+                          }`}
+                          style={{
+                            width: column.width,
+                            minWidth: column.minWidth,
+                            textAlign: column.align || "center",
+                            ...config.styles?.cell,
+                          }}
+                        >
+                          {/* El control va en la primera celda para no agregar una
+                              columna, que descuadraria el header de las tablas
+                              que no usan expansion. */}
+                          {colIndex === 0 && expandCfg ? (
+                            <span className="inline-flex items-center gap-2">
+                              <span
+                                className="inline-flex w-4 justify-center shrink-0"
+                                aria-label={
+                                  canExpand
+                                    ? expandCfg.toggleLabel?.(row, isRowExpanded)
+                                    : undefined
+                                }
+                              >
+                                {canExpand ? (
+                                  isRowExpanded ? (
+                                    <ChevronDown className="w-4 h-4" style={{ color: "#0097B2" }} />
+                                  ) : (
+                                    <ChevronRight
+                                      className="w-4 h-4"
+                                      style={{ color: "#0097B2" }}
+                                    />
+                                  )
+                                ) : null}
+                              </span>
+                              {renderCell(column, row, index)}
+                            </span>
+                          ) : (
+                            renderCell(column, row, index)
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                    {isRowExpanded && expandCfg && (
+                      <tr style={{ background: rowBackground }}>
+                        <td colSpan={visibleColumns.length} className="p-0">
+                          {expandCfg.render(row)}
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>

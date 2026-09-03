@@ -3,17 +3,19 @@
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 
-type Period = "day" | "week" | "month";
-
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
+/**
+ * El selector Hoy/Semana/Mes se quito: la metrica que muestra esta tarjeta pasó
+ * a ser instantanea —agentes vinculados EN LINEA sobre el total de vinculados—
+ * asi que un rango de fechas no la afectaba. Un control que no cambia nada de
+ * lo que tiene al lado confunde mas de lo que aporta.
+ */
 export interface TalentPercentageChartProps {
   className?: string;
   activePercentage: number;
   inactivePercentage: number;
   loading?: boolean;
-  period: Period;
-  onPeriodChange: (period: Period) => void;
 }
 
 export function TalentPercentageChart({
@@ -21,16 +23,8 @@ export function TalentPercentageChart({
   activePercentage,
   inactivePercentage,
   loading = false,
-  period,
-  onPeriodChange,
 }: TalentPercentageChartProps) {
   const t = useTranslations("dashboard");
-
-  const periods: { key: Period; label: string }[] = [
-    { key: "day", label: t("periods.today") },
-    { key: "week", label: t("periods.week") },
-    { key: "month", label: t("periods.month") },
-  ];
 
   const buildSemiGaugeOption = (value: number, color: string) => {
     const safe = Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
@@ -80,28 +74,6 @@ export function TalentPercentageChart({
       className={`bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] px-[2.5vw] lg:px-[36px] pt-[20px] lg:pt-[24px] pb-0 ${className}`}
     >
       <div className="flex flex-col gap-[20px] lg:gap-x-[24px] items-center w-full pb-0">
-        {/* Selector de período */}
-        <div
-          className="bg-[#f8f8f8] flex flex-col h-[35px] items-center justify-center p-[5px] rounded-[10px] w-full mb-6 mx-auto"
-          style={{ maxWidth: "min(336px, 90vw)" }}
-        >
-          <div className="flex items-center justify-center gap-1 w-full">
-            {periods.map((p) => (
-              <button
-                key={p.key}
-                onClick={() => onPeriodChange(p.key)}
-                className={`flex h-[25px] items-center justify-center px-3 lg:px-[24px] py-[6px] rounded-[10px] text-[14px] lg:text-[16px] flex-1 cursor-pointer ${
-                  period === p.key
-                    ? "bg-[#e2e2e2] font-medium text-black"
-                    : "font-normal text-black text-center"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Gráficos de porcentaje */}
         <div className="flex flex-col lg:flex-row gap-y-[85px] lg:gap-y-0 gap-x-0 lg:gap-x-[5%] items-center lg:items-end justify-center w-full pb-0">
           {/* Active Talent */}

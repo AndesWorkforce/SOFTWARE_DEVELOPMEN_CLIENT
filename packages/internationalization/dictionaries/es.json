@@ -336,7 +336,11 @@
       "applications": "Aplicaciones",
       "sites": "Sitios",
       "usageTime": "Tiempo de uso",
-      "monitoredTime": "Tiempo monitoreado"
+      "monitoredTime": "Tiempo monitoreado",
+      "productive": "Productiva",
+      "neutral": "Neutral",
+      "nonProductive": "No productiva",
+      "unclassified": "Sin clasificar"
     }
   },
   "sidebar": {
@@ -391,7 +395,21 @@
     "noAgents": "No se encontraron agentes sin vincular",
     "noApps": "No se encontraron aplicaciones",
     "fetchError": "Error al cargar los agentes. Intenta de nuevo.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "delete": {
+      "button": "Eliminar agente",
+      "title": "Eliminar agente",
+      "description": "Se va a eliminar definitivamente el agente del equipo \"{hostname}\". Esta accion no se puede deshacer.",
+      "unknownHostname": "sin nombre",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar",
+      "errorMessage": "No se pudo eliminar el agente."
+    },
+    "search": {
+      "label": "Agente",
+      "placeholder": "Buscar por equipo o clave...",
+      "noResults": "No se encontraron agentes para \"{term}\""
+    }
   },
   "appAssignment": {
     "title": "Asignación de Aplicaciones",
@@ -606,7 +624,13 @@
       "errorDeleting": "Error al eliminar el contratista. Por favor, intenta de nuevo.",
       "deleteSuccessTitle": "Contratista eliminado correctamente",
       "deleteSuccessContinue": "Continuar",
-      "successMessage": "La ausencia ha sido agregada al calendario."
+      "successMessage": "La ausencia ha sido agregada al calendario.",
+      "hostnames": "Equipos (nombre de la máquina)",
+      "hostnamesPlaceholder": "Escribí el nombre del equipo y presioná Enter...",
+      "hostnamesHint": "El agente se vincula solo al contratista cuyo equipo coincide con el nombre de la máquina.",
+      "hostnameDuplicate": "Ese equipo ya está en la lista",
+      "hostnameInvalid": "Ese nombre es demasiado genérico para identificar un equipo",
+      "hostnameTooLong": "Tiene más de 15 caracteres: el agente reporta el nombre truncado, así que este no va a coincidir"
     }
   },
   "calendar": {
@@ -828,6 +852,17 @@
       "power": "Energía",
       "action": "Acción",
       "viewReport": "Ver reporte"
+    },
+    "group": {
+      "expand": "Mostrar equipos anteriores",
+      "collapse": "Ocultar equipos anteriores",
+      "previousAgents": "{count, plural, one {# equipo anterior} other {# equipos anteriores}}",
+      "othersTooltip": "{count, plural, one {# equipo mas de este contratista} other {# equipos mas de este contratista}}"
+    },
+    "search": {
+      "label": "Contratista o equipo",
+      "placeholder": "Buscar por nombre o equipo...",
+      "noResults": "No se encontraron resultados para \"{term}\""
     }
   },
   "teams": {

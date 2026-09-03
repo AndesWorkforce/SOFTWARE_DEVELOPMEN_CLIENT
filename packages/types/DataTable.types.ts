@@ -81,9 +81,30 @@ export interface MobileCardConfig<T = Record<string, unknown>> {
 /**
  * Configuración completa de la tabla
  */
+/**
+ * Filas expandibles en la vista de escritorio.
+ *
+ * En mobile la expansión ya existía vía `MobileCardConfig.expandable`; esto es
+ * su equivalente para la tabla. Es opcional: sin `expandableRows` la tabla se
+ * comporta exactamente igual que antes, que importa porque `DataTable` tiene
+ * ~15 consumidores.
+ */
+export interface ExpandableRowsConfig<T = Record<string, unknown>> {
+  /** Contenido a mostrar debajo de la fila cuando está expandida. */
+  render: (row: T) => React.ReactNode;
+  /**
+   * Si devuelve false, la fila no muestra el control ni se puede expandir.
+   * Sirve para grupos de un solo elemento, que no tienen nada que revelar.
+   */
+  isExpandable?: (row: T) => boolean;
+  /** Texto accesible del botón. */
+  toggleLabel?: (row: T, isExpanded: boolean) => string;
+}
+
 export interface DataTableConfig<T = Record<string, unknown>> {
   columns: ColumnConfig<T>[];
   mobileConfig?: MobileCardConfig<T>;
+  expandableRows?: ExpandableRowsConfig<T>;
   rowKey?: string | ((row: T) => string);
   showRowNumbers?: boolean;
   striped?: boolean;
