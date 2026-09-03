@@ -43,14 +43,24 @@ export function FormModalLayout({
       containerClassName="rounded-none shadow-none"
       containerStyle={{ background: "transparent", border: "none", boxShadow: "none" }}
       contentClassName="p-0"
+      // Acá el contenedor de Modal es transparente y la tarjeta blanca de abajo
+      // es lo único que se ve. Si el scroll quedara en Modal, la barra caería
+      // sobre el fondo de la página, separada de la tarjeta por el padding del
+      // contenedor. Se cede el scroll a la tarjeta para que la barra quede
+      // adentro del modal, que es donde el usuario espera encontrarla.
+      contentStyle={{ overflow: "hidden", display: "flex", flexDirection: "column" }}
     >
       <div
-        className={`bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] px-[40px] py-[30px] md:max-w-none ${className}`}
+        className={`modal-scroll bg-white border border-[rgba(166,166,166,0.5)] rounded-[10px] shadow-[0px_4px_4px_0px_rgba(166,166,166,0.25)] px-[40px] py-[30px] md:max-w-none ${className}`}
         style={{
           width: "100%",
           maxWidth: "338px",
           marginLeft: "auto",
           marginRight: "auto",
+          overflowY: "auto",
+          // Igual que en Modal: sin esto el hijo flex no se encoge por debajo de
+          // su contenido y desborda en vez de scrollear.
+          minHeight: 0,
           ...(contentPadding && { padding: contentPadding }),
           ...modalStyle,
         }}

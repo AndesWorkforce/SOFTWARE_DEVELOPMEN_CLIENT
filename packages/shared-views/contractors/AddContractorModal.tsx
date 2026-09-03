@@ -11,6 +11,7 @@ import {
   FormModalLayout,
   Input,
   Select,
+  HostnameInput,
   COUNTRY_OPTIONS,
 } from "@/packages/design-system";
 import { contractorsService } from "@/packages/api/contractors/contractors.service";
@@ -71,6 +72,9 @@ export function AddContractorModal({
   const [showSuccess, setShowSuccess] = useState(false);
   const [pendingPayload, setPendingPayload] = useState<AddContractorFormValues | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Los equipos se manejan fuera de react-hook-form: son una lista, no el valor
+  // de un input, y el schema de zod solo valida campos de texto del formulario.
+  const [hostnames, setHostnames] = useState<string[]>([]);
 
   const [clients, setClients] = useState<SelectOption[]>([]);
   const [teams, setTeams] = useState<(SelectOption & { clientId: string })[]>([]);
@@ -253,6 +257,8 @@ export function AddContractorModal({
           if (pendingPayload.job_schedule && pendingPayload.job_schedule.trim()) {
             payload.job_schedule = pendingPayload.job_schedule.trim();
           }
+
+          payload.hostnames = hostnames;
 
           await contractorsService.create(payload);
           setShowConfirm(false);
@@ -569,6 +575,22 @@ export function AddContractorModal({
                 </div>
               </>
             )}
+
+            <div className="flex flex-col items-start w-full">
+              <FormField label={t("hostnames") || "Computers"}>
+                <HostnameInput
+                  value={hostnames}
+                  onChange={setHostnames}
+                  disabled={isLoadingData || isPending}
+                  placeholder={t("hostnamesPlaceholder")}
+                  hint={t("hostnamesHint")}
+                  duplicateMessage={t("hostnameDuplicate")}
+                  invalidMessage={t("hostnameInvalid")}
+                  tooLongMessage={t("hostnameTooLong")}
+                  aria-label={t("hostnames") || "Computers"}
+                />
+              </FormField>
+            </div>
           </div>
 
           <div className="flex flex-col md:flex-row gap-[10px] items-start w-full mt-[30px]">

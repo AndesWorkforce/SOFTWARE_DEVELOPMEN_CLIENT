@@ -336,7 +336,11 @@
       "applications": "Applications",
       "sites": "Sites",
       "usageTime": "Usage time",
-      "monitoredTime": "Monitored time"
+      "monitoredTime": "Monitored time",
+      "productive": "Productive",
+      "neutral": "Neutral",
+      "nonProductive": "Non-productive",
+      "unclassified": "Unclassified"
     }
   },
   "sidebar": {
@@ -391,7 +395,21 @@
     "noAgents": "No unlinked agents found",
     "noApps": "No applications found",
     "fetchError": "Failed to load agents. Please retry.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "delete": {
+      "button": "Delete agent",
+      "title": "Delete agent",
+      "description": "The agent for device \"{hostname}\" will be permanently deleted. This action cannot be undone.",
+      "unknownHostname": "unnamed",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "errorMessage": "Could not delete the agent."
+    },
+    "search": {
+      "label": "Agent",
+      "placeholder": "Search by device or key...",
+      "noResults": "No agents found for \"{term}\""
+    }
   },
   "appAssignment": {
     "title": "Application Assignment",
@@ -606,7 +624,13 @@
       "deleteConfirmCancel": "Cancel",
       "errorDeleting": "Error deleting contractor. Please try again.",
       "deleteSuccessTitle": "Contractor deleted successfully",
-      "deleteSuccessContinue": "Continue"
+      "deleteSuccessContinue": "Continue",
+      "hostnames": "Computers",
+      "hostnamesPlaceholder": "Type the computer name and press Enter...",
+      "hostnamesHint": "The agent links itself to the contractor whose computer matches the machine name.",
+      "hostnameDuplicate": "That computer is already on the list",
+      "hostnameInvalid": "That name is too generic to identify a computer",
+      "hostnameTooLong": "Longer than 15 characters: the agent reports a truncated name, so this one will not match"
     }
   },
   "calendar": {
@@ -828,6 +852,17 @@
       "power": "Power",
       "action": "Action",
       "viewReport": "View report"
+    },
+    "group": {
+      "expand": "Show previous devices",
+      "collapse": "Hide previous devices",
+      "previousAgents": "{count, plural, one {# previous device} other {# previous devices}}",
+      "othersTooltip": "{count, plural, one {# more device for this contractor} other {# more devices for this contractor}}"
+    },
+    "search": {
+      "label": "Contractor or device",
+      "placeholder": "Search by name or device...",
+      "noResults": "No results found for \"{term}\""
     }
   },
   "teams": {

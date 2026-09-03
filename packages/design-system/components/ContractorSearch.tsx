@@ -7,6 +7,12 @@ export interface ContractorSearchProps {
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
+  /**
+   * Rotulo sobre el input. Configurable porque el mismo buscador se usa para
+   * contratistas, equipos y agentes; antes decia "Contractor" fijo y en las
+   * otras vistas mentia sobre lo que filtra.
+   */
+  label?: string;
   className?: string;
   "aria-label"?: string;
 }
@@ -15,6 +21,7 @@ export function ContractorSearch({
   value = "",
   onChange,
   placeholder = "Search here...",
+  label = "Contractor",
   className = "",
   "aria-label": ariaLabel = "Buscar contractor",
 }: ContractorSearchProps) {
@@ -26,7 +33,7 @@ export function ContractorSearch({
     >
       <div className="flex min-w-0 flex-1 flex-col justify-center">
         <label htmlFor={id} className="text-[10px] font-normal leading-normal text-[#6d6d6d]">
-          Contractor
+          {label}
         </label>
         <input
           id={id}

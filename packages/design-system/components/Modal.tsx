@@ -106,8 +106,22 @@ export const Modal = ({
 
         {/* Content */}
         <div
-          className={`px-6 py-4 flex-1 ${contentClassName}`}
-          style={{ overflow: "hidden", ...contentStyle }}
+          className={`px-6 py-4 flex-1 modal-scroll ${contentClassName}`}
+          style={{
+            // El contenedor está topeado a 90vh: con `overflow: hidden` un modal
+            // más alto que la pantalla se recortaba en silencio y dejaba los
+            // botones de acción fuera de alcance, sin forma de llegar a ellos.
+            // `auto` solo muestra la barra cuando hace falta, así que los
+            // modales que entran en pantalla se ven igual que antes.
+            overflowY: "auto",
+            overflowX: "hidden",
+            // Imprescindible: un hijo flex arranca con `min-height: auto`, que
+            // le impide encogerse por debajo de su contenido. Sin esto el div
+            // crece hasta el alto del contenido, se desborda del contenedor y
+            // nunca llega a scrollear.
+            minHeight: 0,
+            ...contentStyle,
+          }}
         >
           {children}
         </div>

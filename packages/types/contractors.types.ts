@@ -20,6 +20,12 @@ export interface Contractor {
   job_schedule?: "full_time" | "part_time" | "no_schedule" | null;
   client_name?: string;
   team_name?: string;
+  /**
+   * Equipos (COMPUTERNAME) del contratista, normalizados en mayúsculas. Son la
+   * llave del auto-vínculo: al instalarse, el agente reporta el nombre de su
+   * máquina y se asocia al contratista que la tenga cargada.
+   */
+  hostnames?: string[];
 }
 
 /**

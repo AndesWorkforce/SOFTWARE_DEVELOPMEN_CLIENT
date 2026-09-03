@@ -4,6 +4,24 @@ import { useMemo, useState, useEffect } from "react";
 
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
+/**
+ * Rango que abarca un bucket horario, para el tooltip.
+ *
+ * Una etiqueta "08:00" no significa "a las 8 en punto" sino "entre 08:00 y
+ * 09:00". Mostrar el rango completo evita la lectura de que la actividad
+ * ocurrio en ese instante. Devuelve null si la etiqueta no es una hora: este
+ * componente tambien sirve a la vista de grupo, donde las etiquetas son nombres
+ * de equipo.
+ */
+function bucketRangeLabel(label: string): string | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(label.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  if (!Number.isInteger(h) || h < 0 || h > 23) return null;
+  const next = (h + 1) % 24;
+  return `${String(h).padStart(2, "0")}:${m[2]} - ${String(next).padStart(2, "0")}:${m[2]}`;
+}
+
 export interface HourlyProductivityChartProps {
   hourlyData: Array<{
     hour_label: string;
@@ -39,7 +57,8 @@ export const HourlyProductivityChart = ({ hourlyData }: HourlyProductivityChartP
             "seriesName" in param &&
             "value" in param
           ) {
-            return `${String(param.name)}<br/>${String(param.seriesName)}: ${String(param.value)}%`;
+            const label = bucketRangeLabel(String(param.name)) ?? String(param.name);
+            return `${label}<br/>${String(param.seriesName)}: ${String(param.value)}%`;
           }
           return "";
         },
@@ -58,7 +77,7 @@ export const HourlyProductivityChart = ({ hourlyData }: HourlyProductivityChartP
       },
       xAxis: {
         type: "category",
-        boundaryGap: false,
+        boundaryGap: true,
         data: hourlyData.map((d) => d.hour_label),
         axisLine: { lineStyle: { color: "#E5E5E5" } },
         axisLabel: {
@@ -88,15 +107,14 @@ export const HourlyProductivityChart = ({ hourlyData }: HourlyProductivityChartP
       series: [
         {
           name: "Avg. Productivity",
-          type: "line",
-          smooth: true,
-          showSymbol: true,
-          symbol: "circle",
-          symbolSize: 8,
+          // Mismo criterio que el grafico de duracion: el score es por hora,
+          // no una serie continua, y la curva suave lo desplazaba visualmente
+          // hacia horas sin actividad.
+          type: "bar",
+          barMaxWidth: 28,
           data: hourlyData.map((d) => Math.round(d.avg_productivity_score || 0)),
-          itemStyle: { color: "#7DA40A" },
-          lineStyle: { width: 2, color: "#7DA40A" },
-          areaStyle: {
+          itemStyle: {
+            borderRadius: [3, 3, 0, 0],
             color: {
               type: "linear",
               x: 0,
@@ -104,8 +122,8 @@ export const HourlyProductivityChart = ({ hourlyData }: HourlyProductivityChartP
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: "rgba(125, 164, 10, 0.35)" },
-                { offset: 1, color: "rgba(125, 164, 10, 0.05)" },
+                { offset: 0, color: "#7DA40A" },
+                { offset: 1, color: "rgba(125, 164, 10, 0.45)" },
               ],
             },
           },
