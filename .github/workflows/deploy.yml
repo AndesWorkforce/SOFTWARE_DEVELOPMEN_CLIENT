@@ -75,14 +75,29 @@ jobs:
           #cache-to: type=gha,mode=max
 
       # ── 6. Webhook → Portainer redeploy ─────────────────────────────────────
-      # TEMPORAL: Webhook deshabilitado por error 500 - hacer deploy manual en Portainer
-      # - name: Trigger Portainer stack redeploy
-      #   run: |
-      #     if [ -z "${{ secrets.PORTAINER_WEBHOOK_URL }}" ]; then
-      #       echo "::error::PORTAINER_WEBHOOK_URL no está configurado. Ve a Settings → Secrets and variables → Actions y añade el secret con la URL del webhook del stack en Portainer."
-      #       exit 1
-      #     fi
-      #     curl -f -v -4 -X POST \
-      #       -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
-      #       --connect-timeout 10 \
-      #       "${{ secrets.PORTAINER_WEBHOOK_URL }}"
+      # El webhook estuvo deshabilitado por un error 500 de Portainer y se
+      # desplegaba a mano. El costo termino siendo peor que el 500: el Action
+      # quedaba en verde habiendo subido la imagen a GHCR sin redesplegar nada,
+      # asi que produccion seguia sirviendo el build anterior y nada lo
+      # indicaba. Se reactiva y se deja fallar fuerte: si Portainer vuelve a
+      # responder 500 el Action se pone en rojo y se sabe en el momento, en vez
+      # de descubrirlo mirando una UI desactualizada.
+      - name: Trigger Portainer stack redeploy
+        run: |
+          if [ -z "${{ secrets.PORTAINER_WEBHOOK_URL }}" ]; then
+            echo "::error::PORTAINER_WEBHOOK_URL no esta configurado. Ve a Settings -> Secrets and variables -> Actions y anade el secret con la URL del webhook del stack en Portainer."
+            exit 1
+          fi
+
+          # Se captura el codigo y el cuerpo en vez de usar `curl -f` a secas:
+          # ante un fallo `-f` solo reporta "error 22", mientras que Portainer
+          # manda el motivo real en el cuerpo de la respuesta.
+          HTTP_CODE=$(curl -sS -4 -X POST -o /tmp/portainer_response.txt -w '%{http_code}' -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" --connect-timeout 10 --max-time 120 "${{ secrets.PORTAINER_WEBHOOK_URL }}")
+
+          echo "Portainer respondio HTTP $HTTP_CODE"
+          echo "Respuesta: $(cat /tmp/portainer_response.txt 2>/dev/null)"
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "::error::Portainer devolvio HTTP $HTTP_CODE. La imagen quedo publicada en GHCR pero el stack NO se redesplego: hay que actualizarlo a mano en Portainer (Update the stack con re-pull image)."
+            exit 1
+          fi
